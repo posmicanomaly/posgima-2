@@ -67,12 +67,12 @@ public class RenderPanel extends JPanel {
         drawMap(rowStart, currentState.getMap().length, colStart, currentState.getMap()[0].length, g);
     }
 
-    private void drawMonsters(int rowStart, int rowEnd, int colStart, int colEnd, Graphics g) {
-        for(Monster m : currentState.getDungeon().getMonsters()) {
-            g.setColor(getGlyphColor(m.getGlyph()));
-            g.drawChars(new char[]{m.getGlyph()}, 0, 1, m.getX() * fontSize, m.getY() * fontSize);
-        }
-    }
+//    private void drawMonsters(int rowStart, int rowEnd, int colStart, int colEnd, Graphics g) {
+//        for(Monster m : currentState.getDungeon().getMonsters()) {
+//            g.setColor(getGlyphColor(m.getGlyph()));
+//            g.drawChars(new char[]{m.getGlyph()}, 0, 1, m.getX() * fontSize, m.getY() * fontSize);
+//        }
+//    }
 
     private boolean hasPlayer(int y, int x) {
         return y == currentState.getPlayer().getY() && x == currentState.getPlayer().getX();
@@ -90,18 +90,21 @@ public class RenderPanel extends JPanel {
 
     private void drawMap(int rowStart, int rowEnd, int colStart, int colEnd, Graphics g) {
         int y = fontSize;
-        for(int i = rowStart; i < currentState.getMap().length; i++) {
+        for(int i = rowStart; i < currentState.getDungeon().getTileMap().length; i++) {
             int x = fontSize;
-            for(int j = colStart; j < currentState.getMap()[i].length; j++) {
+            for(int j = colStart; j < currentState.getDungeon().getTileMap()[i].length; j++) {
                 if(hasPlayer(i, j)) {
-                    drawPlayer(y, x, g);
+                    drawPlayer(y, x, g, currentState.getPlayer());
                 } else {
-                    g.setColor(getGlyphColor(currentState.getMap()[i][j]));
+                    g.setColor(getGlyphColor(currentState.getDungeon().getTileMap()[i][j].getGlyph()));
                     if (currentState.getVisibleMap()[i][j]) {
                         if(hasMonster(i, j)) {
                             drawMonster(currentState.getDungeon().getMonsterAt(i, j), y, x, g);
+                        } else if(currentState.getDungeon().hasItems(i, j)) {
+                            drawItem(currentState.getDungeon().getTileMap()[i][j], y, x, g);
                         } else {
-                            g.drawChars(currentState.getMap()[i], j, 1, x, y);
+                            g.drawChars(new char[]{currentState.getDungeon().getTileMap()[i][j].getGlyph()}, 0, 1, x,
+                                    y);
                         }
                     }
                     else if (currentState.getDungeon().getExploredMap()[i][j]) {
@@ -110,7 +113,7 @@ public class RenderPanel extends JPanel {
                         int B = g.getColor().getGreen() / DIM_DIVISOR;
 
                         g.setColor(new Color(R, G, B));
-                        g.drawChars(currentState.getMap()[i], j, 1, x, y);
+                        g.drawChars(new char[]{currentState.getDungeon().getTileMap()[i][j].getGlyph()}, 0, 1, x, y);
                     }
                 }
 
@@ -120,9 +123,16 @@ public class RenderPanel extends JPanel {
         }
     }
 
-    private void drawPlayer(int y, int x, Graphics g) {
-        g.setColor(getGlyphColor('@'));
-        g.drawChars(new char[]{'@'}, 0, 1, x, y);
+    private void drawItem(Tile tile, int y, int x, Graphics g) {
+        char glyph = tile.getItems().get(tile.getItems().size() - 1).getGlyph();
+        g.setColor(getGlyphColor(glyph));
+        g.drawChars(new char[]{glyph}, 0, 1, x, y);
+    }
+
+    private void drawPlayer(int y, int x, Graphics g, Player player) {
+        char glyph = player.getGlyph();
+        g.setColor(getGlyphColor(glyph));
+        g.drawChars(new char[]{glyph}, 0, 1, x, y);
     }
 
     private void drawMonster(Monster monster, int renderY, int renderX, Graphics g) {

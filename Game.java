@@ -14,13 +14,17 @@ public class Game {
     private Player player;
     private char[][] charMap;
     private boolean[][] visibleMap;
+    private Tile[][] tileMap;
     private Dungeon dungeon;
 
     public Game() {
         initMap();
         Room startingRoom = dungeon.getRandomRoom();
-        player = new Player(startingRoom.getCenter().getY(), startingRoom.getCenter().getX());
+        player = new Player('@');
+        Vector2i center = startingRoom.getCenter();
+        dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
+        System.out.println("player " + player.getY() + " " + player.getX());
     }
 
     public GameState Update(KeyEvent e) {
@@ -77,9 +81,18 @@ public class Game {
                 } else if(nextX > player.getX()) {
                     direction = Game.RIGHT;
                 }
-                player.move(direction);
+                //player.move(direction);
+                player.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
+                System.out.println("passable");
             } else if(dungeon.hasMonster(nextY, nextX)) {
-                dungeon.getMonsterAt(nextY, nextX).die();
+                Monster monster = dungeon.getMonsterAt(nextY, nextX);
+                if(monster.die())
+                {
+                    dungeon.getMonsters().remove(monster);
+                }
+                System.out.println("has entity");
+            } else {
+                System.out.println("not passable, no entity");
             }
         }
         String playerEvaluation = evaluatePlayer(player);
@@ -139,8 +152,10 @@ public class Game {
                         nextX++;
                         break;
                 }
-                if (dungeon.isPassable(nextX, nextY))
-                    m.move(direction);
+                if (dungeon.isPassable(nextX, nextY)) {
+                    //m.move(direction);
+                    m.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
+                }
             } else {
                 Vector2i next = m.getMoveQueue().remove();
                 int direction = 0;
@@ -162,7 +177,8 @@ public class Game {
                 if(hasPlayer(next.getY(), next.getX())) {
                     System.out.println(m + " hits you");
                 } else if(dungeon.isPassable(next.getX(), next.getY())) {
-                    m.move(direction);
+                    //m.move(direction);
+                    m.moveToTileImmediately(dungeon.getTileMap()[next.getY()][next.getX()]);
                 }
                 System.out.println("move " + direction);
             }
@@ -185,6 +201,7 @@ public class Game {
         dungeon = new Dungeon(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);
         charMap = dungeon.getMap();
         visibleMap = dungeon.getVisibleMap();
+
     }
 
     public GameState getGameState() {

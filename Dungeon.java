@@ -6,16 +6,12 @@ import java.util.ArrayList;
 public class Dungeon {
     public static final char TEMP_CORRIDOR = 'C';
     public static final char VOID = ' ';
-    public static final int ANCHOR_CENTER = 4;
-    public static final int ANCHOR_UPPER_LEFT = 0;
-    public static final int ANCHOR_LOWER_LEFT = 1;
-    public static final int ANCHOR_LOWER_RIGHT = 2;
-    public static final int ANCHOR_UPPER_RIGHT = 3;
 
     private ArrayList<Room> rooms;
 
 
     char[][] charMap;
+    Tile[][] tileMap;
     int MAP_ROWS;
     int MAP_COLS;
     private boolean[][] visibleMap;
@@ -26,6 +22,7 @@ public class Dungeon {
         this.MAP_ROWS = rows;
         this.MAP_COLS = cols;
         charMap = new char[rows][cols];
+        tileMap = new Tile[rows][cols];
         visibleMap = new boolean[rows][cols];
         exploredMap = new boolean[rows][cols];
         monsters = new ArrayList<Monster>();
@@ -33,7 +30,7 @@ public class Dungeon {
 
         rooms = new ArrayList<Room>();
 
-        for(int i = 0; i < 100; i++) {
+        for(int i = 0; i < 5; i++) {
             addRandomRoom();
         }
         int[][] roomConnections = new int[rooms.size()][rooms.size()];
@@ -52,6 +49,12 @@ public class Dungeon {
         }
         System.out.println("connections made: " + connections);
         finishMap();
+        for(int y = 0; y < MAP_ROWS; y++) {
+            for(int x = 0; x < MAP_COLS; x++) {
+                Tile tile = new Tile(charMap[y][x], y, x);
+                tileMap[y][x] = tile;
+            }
+        }
         sprinkleItems();
         sprinkleMonsters();
     }
@@ -59,35 +62,48 @@ public class Dungeon {
     public boolean isPassable(int x, int y) {
         if(y < 0 || y >= MAP_ROWS || x < 0 || x >= MAP_COLS)
             return false;
-        if(charMap[y][x] == RenderPanel.WALL)
+        if(tileMap[y][x].getGlyph() == RenderPanel.WALL)
             return false;
-        if(hasMonster(y, x))
+        if(hasMonster(y, x) && getMonsterAt(y, x).isAlive())
             return false;
         return true;
     }
 
     public boolean hasMonster(int y, int x) {
-        for(Monster m : monsters) {
-            if(m.getY() == y && m.getX() == x)
-                return true;
+        // todo: refactor to only check for monster, not any entity
+        if(tileMap[y][x].getEntity() != null)
+        {
+            return true;
         }
+
         return false;
+        //return tileMap[y][x].hasEntity() && tileMap[y][x].getEntity() instanceof Monster;
+//        for(Monster m : monsters) {
+//            if(m.getY() == y && m.getX() == x)
+//                return true;
+//        }
+//        return false;
     }
 
-    private Vector2i getRandomSpaceOf(char glyph) {
+    private Tile getRandomTileOf(char glyph) {
         int y = 0;
         int x = 0;
         do {
             y = (int) (Math.random() * MAP_ROWS);
             x = (int) (Math.random() * MAP_COLS);
-        } while(charMap[y][x] != glyph);
-        return new Vector2i(y, x);
+        } while(tileMap[y][x].getGlyph() != glyph);
+        return tileMap[y][x];
     }
 
     private void sprinkleMonsters() {
         for(int i = 0; i < 50; i++) {
-            Vector2i loc = getRandomSpaceOf(RenderPanel.FLOOR);
-            monsters.add(new Monster(loc.getY(), loc.getX()));
+            Tile tile = null;
+            do {
+                tile = getRandomTileOf(RenderPanel.FLOOR);
+            } while(tile.hasEntity());
+            Monster monster = new Monster('r');
+            monsters.add(monster);
+            tile.addEntity(monster);
         }
     }
 
@@ -105,15 +121,18 @@ public class Dungeon {
 
     private void sprinkleItems() {
         for(int i = 0; i < 25; i++) {
-            getRandomRoom().addItem(charMap, RenderPanel.SCROLL);
+            Item item = new Item(RenderPanel.SCROLL);
+            getRandomTileOf(RenderPanel.FLOOR).addItem(item);
         }
 
         for(int i = 0; i < 25; i++) {
-            getRandomRoom().addItem(charMap, RenderPanel.ITEM);
+            Item item = new Item(RenderPanel.ITEM);
+            getRandomRoom().addItem(tileMap, item);
         }
 
         for(int i = 0; i < 10; i++) {
-            getRandomRoom().addItem(charMap, RenderPanel.WEAPON);
+            Item item = new Item(RenderPanel.WEAPON);
+            getRandomRoom().addItem(tileMap, item);
         }
     }
 
@@ -241,88 +260,6 @@ public class Dungeon {
             }
         }
         return true;
-    }
-
-    /**
-     * Carve a room with the locY and locX as the center, with amount of MAP_ROWS and columns to cover.
-     * @param rows
-     * @param cols
-     * @param locY
-     * @param locX
-     */
-    public void carveRoom(int rows, int cols, int locY, int locX, int anchor) {
-        switch(anchor) {
-            case ANCHOR_UPPER_LEFT:
-                for(int y = locY; y < rows + locY; y++) {
-                    for(int x = locX; x < cols + locX; x++) {
-                        if(y == locY || y == locY + rows) {
-                            charMap[y][x] = RenderPanel.WALL;
-                        } else if(x == locX || x == locX + rows) {
-                            charMap[y][x] = RenderPanel.WALL;
-                        }
-                        charMap[y][x] = RenderPanel.FLOOR;
-                    }
-                }
-                break;
-            case ANCHOR_LOWER_LEFT:
-                for(int y = locY; y > locY - rows; y--) {
-                    for(int x = locX; x < cols + locX; x++) {
-                        charMap[y][x] = RenderPanel.FLOOR;
-                    }
-                }
-                break;
-            case ANCHOR_LOWER_RIGHT:
-                for(int y = locY; y > locY - rows; y--) {
-                    for(int x = locX; x > locX - rows; x--) {
-                        charMap[y][x] = RenderPanel.FLOOR;
-                    }
-                }
-                break;
-            case ANCHOR_UPPER_RIGHT:
-                for(int y = locY; y < locY + rows; y++) {
-                    for(int x = locX; x > locX - rows; x--) {
-                        charMap[y][x] = RenderPanel.FLOOR;
-                    }
-                }
-                break;
-            case ANCHOR_CENTER:
-                for(int y = locY - rows / 2; y < locY + rows / 2; y++) {
-                    for(int x = locX - cols / 2; x < locX + cols / 2; x++) {
-                        charMap[y][x] = RenderPanel.FLOOR;
-                    }
-                }
-                break;
-        }
-    }
-
-    /**
-     * Carve a corridor starting at locY locX, in a direction, with a length
-     * dir: 0 up, 1 down, 2 left, 3 right
-     * @param locY
-     * @param locX
-     * @param dir
-     * @param length
-     */
-    public void carveCorridor(int locY, int locX, int dir, int length) {
-        if(dir == 0) {
-            for(int y = locY; y > locY - length; y--) {
-                charMap[y][locX] = RenderPanel.FLOOR;
-            }
-        }
-        else if(dir == 1) {
-            for(int y = locY; y < locY + length; y++) {
-                charMap[y][locX] = RenderPanel.FLOOR;
-            }
-        }
-        else if(dir == 2)
-            for(int x = locX; x > locX - length; x--) {
-                charMap[locY][x] = RenderPanel.FLOOR;
-            }
-        else if(dir == 3)
-            for(int x = locX; x < locX + length; x++) {
-                charMap[locY][x] = RenderPanel.FLOOR;
-            }
-
     }
 
     /**
@@ -493,10 +430,14 @@ public class Dungeon {
     }
 
     public Monster getMonsterAt(int row, int col) {
-        for(Monster m : monsters) {
-            if(m.getY() == row && m.getX() == col)
-                return m;
-        }
-        return null;
+        return (Monster) tileMap[row][col].getEntity();
+    }
+
+    public Tile[][] getTileMap() {
+        return tileMap;
+    }
+
+    public boolean hasItems(int i, int j) {
+        return tileMap[i][j].hasItems();
     }
 }

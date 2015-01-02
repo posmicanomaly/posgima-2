@@ -88,11 +88,11 @@ public class Room {
         }
     }
 
-    public void addItem(char[][] charMap, char glyph) {
+    public void addItem(Tile[][] tileMap, Item item) {
         int y = center.getY();
         int x = center.getX();
 
-        charMap[y][x] = glyph;
+        tileMap[y][x].addItem(item);
     }
 
     public Vector2i getEntrance() {

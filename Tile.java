@@ -75,4 +75,8 @@ public class Tile {
     public ArrayList<Item> getItems() {
         return items;
     }
+
+    public void setGlyph(char glyph) {
+        this.glyph = glyph;
+    }
 }

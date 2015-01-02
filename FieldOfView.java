@@ -9,7 +9,7 @@ public class FieldOfView {
         int slope;
     }
 
-    public static ArrayList<Vector2i> bresenhamFov(char[][] grid, int y0, int x0, int radius) {
+    public static ArrayList<Vector2i> bresenhamFov(Tile[][] grid, int y0, int x0, int radius) {
         ArrayList<Vector2i> fov = new ArrayList<Vector2i>();
         int yTop = y0 - radius;
         int yBottom = y0 + radius;
@@ -43,7 +43,7 @@ public class FieldOfView {
      * @param y1 the finishing point y
      * @return the line as a list of array elements
      */
-    public static ArrayList<Vector2i> findLine(char[][] grid, int y0, int x0, int y1, int x1) {
+    public static ArrayList<Vector2i> findLine(Tile[][] grid, int y0, int x0, int y1, int x1) {
         ArrayList<Vector2i> line = new ArrayList<Vector2i>();
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
@@ -77,8 +77,8 @@ public class FieldOfView {
         return line;
     }
 
-    private static boolean isBlocked(char[][] grid, int currentY, int currentX) {
-        switch(grid[currentY][currentX]) {
+    private static boolean isBlocked(Tile[][] grid, int currentY, int currentX) {
+        switch(grid[currentY][currentX].getGlyph()) {
             case RenderPanel.WALL: return true;
             case RenderPanel.DOOR_CLOSED: return true;
         }

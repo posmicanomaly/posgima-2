@@ -141,8 +141,8 @@ public class Dungeon {
     }
 
     public void carvePath(Vector2i start, Vector2i end) {
-        AStar aStar = new AStar(charMap);
-        ArrayList<Vector2i> path = aStar.getPath(start, end);
+        AStar aStar = new AStar(this);
+        ArrayList<Vector2i> path = aStar.getPath(start, end, true);
         for(int i = 0; i < path.size(); i++) {
             Vector2i v = path.get(i);
             if(i == 0 || i == path.size()) {
@@ -154,8 +154,8 @@ public class Dungeon {
     }
 
     public void carvePath(Room start, Room end) {
-        AStar aStar = new AStar(charMap);
-        ArrayList<Vector2i> path = aStar.getPath(start.getEntrance(), end.getEntrance());
+        AStar aStar = new AStar(this);
+        ArrayList<Vector2i> path = aStar.getPath(start.getEntrance(), end.getEntrance(), true);
         for(int i = 1; i < path.size() - 1; i++) {
             Vector2i v = path.get(i);
             if(i == 0 || i == path.size() - 1) {
@@ -403,7 +403,7 @@ public class Dungeon {
 
     public void recalculateVisibility(Vector2i center) {
         resetVisibility();
-        for(Vector2i v : FieldOfView.bresenhamFov(charMap, center.getY(), center.getX(), 0)) {
+        for(Vector2i v : FieldOfView.bresenhamFov(tileMap, center.getY(), center.getX(), 0)) {
             visibleMap[v.getY()][v.getX()] = true;
             exploredMap[v.getY()][v.getX()] = true;
         }

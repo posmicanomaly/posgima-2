@@ -23,7 +23,7 @@ public class Monster extends Entity{
 
     public void calculateVisibility(Dungeon dungeon) {
         visibility = new boolean[dungeon.MAP_ROWS][dungeon.MAP_COLS];
-        for(Vector2i v : FieldOfView.bresenhamFov(dungeon.getMap(), y, x, 0)) {
+        for(Vector2i v : FieldOfView.bresenhamFov(dungeon.getTileMap(), y, x, 0)) {
             visibility[v.getY()][v.getX()] = true;
         }
     }

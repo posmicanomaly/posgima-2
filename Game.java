@@ -12,7 +12,7 @@ public class Game {
     public static final int LEFT = 2;
     public static final int RIGHT = 3;
     private Player player;
-    private char[][] charMap;
+    //private char[][] charMap;
     private boolean[][] visibleMap;
     private Tile[][] tileMap;
     private Dungeon dungeon;
@@ -123,9 +123,9 @@ public class Game {
                 System.out.println(m + " sees you");
                 System.out.println("monster: " + m.getY() + ", " + m.getX());
                 System.out.println("player: " + player.getY() + ", " + player.getX());
-                AStar astar = new AStar(dungeon.getMap());
+                AStar astar = new AStar(dungeon);
                 ArrayList<Vector2i> shortestPath = astar.getPath(new Vector2i(m.getY(), m.getX()), new Vector2i
-                        (player.getY(), player.getX()));
+                        (player.getY(), player.getX()), false);
                 m.getMoveQueue().clear();
                 // i = size - 2 because we throw away the first move, because its the current location.
                 for(int i = shortestPath.size() - 2; i >= 0; i--) {
@@ -154,7 +154,9 @@ public class Game {
                 }
                 if (dungeon.isPassable(nextX, nextY)) {
                     //m.move(direction);
-                    m.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
+                    // Monsters can't open doors (yet)
+                    if(dungeon.getTileMap()[nextY][nextX].getGlyph() != RenderPanel.DOOR_CLOSED)
+                        m.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
                 }
             } else {
                 Vector2i next = m.getMoveQueue().remove();
@@ -178,7 +180,12 @@ public class Game {
                     System.out.println(m + " hits you");
                 } else if(dungeon.isPassable(next.getX(), next.getY())) {
                     //m.move(direction);
-                    m.moveToTileImmediately(dungeon.getTileMap()[next.getY()][next.getX()]);
+                    if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() != RenderPanel.DOOR_CLOSED)
+                        m.moveToTileImmediately(dungeon.getTileMap()[next.getY()][next.getX()]);
+                    else {
+                        // re add it for now
+                        m.getMoveQueue().addFirst(next);
+                    }
                 }
                 System.out.println("move " + direction);
             }
@@ -190,8 +197,9 @@ public class Game {
     }
 
     private String evaluatePlayer(Player player) {
-        if(charMap[player.getY()][player.getX()] == RenderPanel.DOOR_CLOSED) {
-            charMap[player.getY()][player.getX()] = RenderPanel.DOOR_OPEN;
+        Tile tile = player.getTile();
+        if(tile.getGlyph() == RenderPanel.DOOR_CLOSED) {
+            tile.setGlyph(RenderPanel.DOOR_OPEN);
             return "opened door";
         }
         return null;
@@ -199,7 +207,7 @@ public class Game {
 
     public void initMap() {
         dungeon = new Dungeon(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);
-        charMap = dungeon.getMap();
+        //charMap = dungeon.getMap();
         visibleMap = dungeon.getVisibleMap();
 
     }

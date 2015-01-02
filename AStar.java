@@ -4,14 +4,14 @@ import java.util.ArrayList;
  * Created by Jesse Pospisil on 12/31/2014.
  */
 public class AStar {
-    char[][] theMap;
+    Dungeon dungeon;
     ArrayList<AStarNode> open;
     ArrayList<AStarNode> closed;
 
-    public AStar(char[][] theMap) {
-        this.theMap = theMap;
+    public AStar(Dungeon dungeon) {
+        this.dungeon = dungeon;
     }
-    public ArrayList<Vector2i> getPath(Vector2i start, Vector2i end) {
+    public ArrayList<Vector2i> getPath(Vector2i start, Vector2i end, boolean build) {
         open = new ArrayList<AStarNode>();
         closed = new ArrayList<AStarNode>();
 
@@ -34,7 +34,11 @@ public class AStar {
                 if(hasSameNode(open, node) == null) {
                     open.add(node);
                     node.setParent(current);
-                    node.setgCost(getCostOfGlyph(theMap[node.y][node.x]));
+                    if(build) {
+                        node.setgCost(getCostOfGlyph(dungeon.getMap()[node.y][node.x]));
+                    } else {
+                        node.setgCost(getCostOfGlyph(dungeon.getTileMap()[node.y][node.x]));
+                    }
                     node.calcHCost(end.getY(), end.getX());
                     node.calcFCost();
                 } else {
@@ -78,19 +82,25 @@ public class AStar {
         }
     }
 
+    public int getCostOfGlyph(Tile tile) {
+        if(tile.hasEntity())
+            return 10;
+        return getCostOfGlyph(tile.getGlyph());
+    }
+
     public ArrayList<AStarNode> getSurroundingNodes(AStarNode current) {
         ArrayList<AStarNode> nodes = new ArrayList<AStarNode>();
         //up
         if(current.y - 1 > 0)
             nodes.add(new AStarNode(current.y - 1, current.x));
         //down
-        if(current.y + 1 < theMap.length)
+        if(current.y + 1 < dungeon.getMap().length)
             nodes.add(new AStarNode(current.y + 1, current.x));
         //left
         if(current.x - 1 > 0)
             nodes.add(new AStarNode(current.y, current.x - 1));
         //right
-        if(current.x + 1 < theMap[0].length)
+        if(current.x + 1 < dungeon.getMap()[0].length)
             nodes.add(new AStarNode(current.y, current.x + 1));
 
         return nodes;

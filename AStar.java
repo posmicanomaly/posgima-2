@@ -35,7 +35,7 @@ public class AStar {
                     open.add(node);
                     node.setParent(current);
                     if(build) {
-                        node.setgCost(getCostOfGlyph(dungeon.getMap()[node.y][node.x]));
+                        node.setgCost(getBuildCostOfGlyph(dungeon.getMap()[node.y][node.x]));
                     } else {
                         node.setgCost(getCostOfGlyph(dungeon.getTileMap()[node.y][node.x]));
                     }
@@ -72,6 +72,16 @@ public class AStar {
         return null;
     }
 
+    public int getBuildCostOfGlyph(char glyph) {
+        switch(glyph) {
+            case RenderPanel.WALL: return 3;
+            case Dungeon.VOID: return 2;
+            case Dungeon.TEMP_CORRIDOR: return 1;
+            case RenderPanel.FLOOR: return 1000;
+            case RenderPanel.DOOR_CLOSED: return 1000;
+            default: return 2;
+        }
+    }
 
     public int getCostOfGlyph(char glyph) {
         switch(glyph) {

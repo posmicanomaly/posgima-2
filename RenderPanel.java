@@ -1,12 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by Jesse Pospisil on 12/26/2014.
  */
 public class RenderPanel extends JPanel {
     public static final char WALL = '#';
-    public static final char FLOOR = '\u00b7'; // middle dot
+    public static final char FLOOR = '.';//'\u00b7'; // middle dot
     public static final char WATER = '~';
     public static final char WEAPON = ')';
     public static final char SCROLL = '?';
@@ -16,10 +18,10 @@ public class RenderPanel extends JPanel {
     public static final char DOOR_CLOSED = '+';
 
     // Used to dim colors "explored" but not "visible"
-    private static final int DIM_DIVISOR = 8;
+    private static final int DIM_DIVISOR = 2;
 
-    private static final int visibleY = 43;
-    private static final int visibleX = 128;
+    private static final int visibleY = 31;//43;
+    private static final int visibleX = 99;//128;
     private static final Color COLOR_EXPLORED = new Color(52, 52, 72);
     Color tileGray = new Color(54, 54, 54);
     private GameState currentState;
@@ -30,17 +32,24 @@ public class RenderPanel extends JPanel {
     public RenderPanel() {
         setDoubleBuffered(true);
         setBackground(Color.black);
+        try {
+            GraphicsEnvironment ge =
+                    GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("fonts/square.ttf")));
+        } catch (IOException |FontFormatException e) {
+            //Handle exception
+        }
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         // Changed from getWidth() / 64 because it was causing the characters to overlap during certain resizes.
-        fontSize = getHeight() / 32;
+        fontSize = getHeight() / 24;
         yIncrement = fontSize - (fontSize / 4);
         xIncrement = fontSize - (fontSize / 2);
         g.setColor(tileGray);
-        g.setFont(new Font("Courier New", Font.BOLD, fontSize));
+        g.setFont(new Font("courier new", Font.PLAIN, fontSize));
 
 
 
@@ -98,6 +107,7 @@ public class RenderPanel extends JPanel {
                 } else {
                     g.setColor(getGlyphColor(currentState.getDungeon().getTileMap()[i][j].getGlyph()));
                     if (currentState.getVisibleMap()[i][j]) {
+                        g.setColor(addYellow(g.getColor()));
                         if(hasMonster(i, j)) {
                             drawMonster(currentState.getDungeon().getMonsterAt(i, j), y, x, g);
                         } else if(currentState.getDungeon().hasItems(i, j)) {
@@ -121,6 +131,20 @@ public class RenderPanel extends JPanel {
             }
             y += yIncrement;
         }
+    }
+
+    private Color addYellow(Color color) {
+        int r = color.getRed();
+        int g = color.getGreen();
+        int b = color.getBlue();
+        r += r / 2;
+        g += g / 2;
+        if(r > 255)
+            r = 255;
+        if(g > 255)
+            g = 255;
+        color = new Color(r,g,b);
+        return color;
     }
 
     private void drawItem(Tile tile, int y, int x, Graphics g) {
@@ -148,7 +172,7 @@ public class RenderPanel extends JPanel {
         switch(c) {
             case '@' : return Color.cyan;
             case 'M' : return Color.red;
-            case WALL : return Color.lightGray;
+            case WALL : return Color.darkGray;
             case ITEM :
             case SCROLL :
             case WEAPON : return Color.pink;

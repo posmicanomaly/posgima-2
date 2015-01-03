@@ -83,16 +83,16 @@ public class Game {
                 }
                 //player.move(direction);
                 player.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
-                System.out.println("passable");
+                //System.out.println("passable");
             } else if(dungeon.hasMonster(nextY, nextX)) {
                 Monster monster = dungeon.getMonsterAt(nextY, nextX);
                 if(monster.die())
                 {
                     dungeon.getMonsters().remove(monster);
                 }
-                System.out.println("has entity");
+                //System.out.println("has entity");
             } else {
-                System.out.println("not passable, no entity");
+                //System.out.println("not passable, no entity");
             }
         }
         String playerEvaluation = evaluatePlayer(player);
@@ -120,19 +120,18 @@ public class Game {
             }
             m.calculateVisibility(dungeon);
             if(monsterCanSeePlayer(m)) {
-                System.out.println(m + " sees you");
-                System.out.println("monster: " + m.getY() + ", " + m.getX());
-                System.out.println("player: " + player.getY() + ", " + player.getX());
+                //System.out.println(m + " sees you");
+                //System.out.println("monster: " + m.getY() + ", " + m.getX());
+                //System.out.println("player: " + player.getY() + ", " + player.getX());
                 AStar astar = new AStar(dungeon);
                 ArrayList<Vector2i> shortestPath = astar.getPath(new Vector2i(m.getY(), m.getX()), new Vector2i
                         (player.getY(), player.getX()), false);
                 m.getMoveQueue().clear();
                 // i = size - 2 because we throw away the first move, because its the current location.
                 for(int i = shortestPath.size() - 2; i >= 0; i--) {
-                    System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
+                   // System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
                     m.getMoveQueue().add(shortestPath.get(i));
                 }
-                System.out.println();
             }
             if(m.getMoveQueue().size() == 0) {
                 int direction = (int) (Math.random() * 4);
@@ -160,22 +159,6 @@ public class Game {
                 }
             } else {
                 Vector2i next = m.getMoveQueue().remove();
-                int direction = 0;
-                int yDiff = next.getY() - m.getY();
-                int xDiff = next.getX() - m.getX();
-
-                if(yDiff < 0) {
-                    direction = Game.UP;
-                } else if(yDiff > 0) {
-                    direction = Game.DOWN;
-                }
-
-                if(xDiff < 0) {
-                    direction = Game.LEFT;
-                } else if(xDiff > 0) {
-                    direction = Game.RIGHT;
-                }
-
                 if(hasPlayer(next.getY(), next.getX())) {
                     System.out.println(m + " hits you");
                 } else if(dungeon.isPassable(next.getX(), next.getY())) {
@@ -187,8 +170,11 @@ public class Game {
                         m.getMoveQueue().addFirst(next);
                     }
                 }
-                System.out.println("move " + direction);
+                //System.out.println("move " + direction);
             }
+        }
+        if(dungeon.getMonsters().size() < 15) {
+            dungeon.spawnMonster('r', dungeon.getVisibleMap());
         }
     }
 

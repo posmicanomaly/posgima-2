@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -11,7 +12,8 @@ public class AStar {
     public AStar(Dungeon dungeon) {
         this.dungeon = dungeon;
     }
-    public ArrayList<Vector2i> getPath(Vector2i start, Vector2i end, boolean build) {
+    public ArrayList<Vector2i> getPath(Vector2i start, Vector2i end, boolean build, boolean withinRange) {
+
         open = new ArrayList<AStarNode>();
         closed = new ArrayList<AStarNode>();
 
@@ -26,7 +28,13 @@ public class AStar {
             if(current.x ==end.getX() && current.y == end.getY())
                 break;
             open.remove(current);
-            for(AStarNode node : getSurroundingNodes(current)) {
+            ArrayList<AStarNode> surroundingNodes = null;
+            if(!withinRange) {
+                surroundingNodes = getSurroundingNodes(current);
+            } else {
+                surroundingNodes = getSurroundingNodesWithinRange(current, start, end);
+            }
+            for(AStarNode node : surroundingNodes) {
                 if(hasSameNode(closed, node) != null) {
                     continue;
                 }
@@ -62,6 +70,8 @@ public class AStar {
         return null;
     }
 
+
+
     public AStarNode hasSameNode(ArrayList<AStarNode> nodes, AStarNode node) {
         int y = node.y;
         int x = node.x;
@@ -96,6 +106,34 @@ public class AStar {
         if(tile.hasEntity())
             return 10;
         return getCostOfGlyph(tile.getGlyph());
+    }
+
+    private ArrayList<AStarNode> getSurroundingNodesWithinRange(AStarNode current, Vector2i start, Vector2i end) {
+        ArrayList<AStarNode> nodes = new ArrayList<>();
+
+        //for range
+        int xd = Math.abs(start.getX() - end.getX());
+        int yd = Math.abs(start.getY() - end.getY());
+
+        int minY = start.y - yd * 8;
+        int maxY = start.y + yd * 8;
+
+        int minX = start.x - xd * 8;
+        int maxX = start.x + xd * 8;
+
+        if(current.y - 1 > 0 && current.y - 1 > minY)
+            nodes.add(new AStarNode(current.y - 1, current.x));
+        //down
+        if(current.y + 1 < dungeon.getMap().length && current.y + 1 < maxY)
+            nodes.add(new AStarNode(current.y + 1, current.x));
+        //left
+        if(current.x - 1 > 0 && current.x - 1 > minX)
+            nodes.add(new AStarNode(current.y, current.x - 1));
+        //right
+        if(current.x + 1 < dungeon.getMap()[0].length && current.x + 1 < maxX)
+            nodes.add(new AStarNode(current.y, current.x + 1));
+
+        return nodes;
     }
 
     public ArrayList<AStarNode> getSurroundingNodes(AStarNode current) {

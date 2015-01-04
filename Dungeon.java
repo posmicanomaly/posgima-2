@@ -33,7 +33,7 @@ public class Dungeon {
         rooms = new ArrayList<Room>();
 
         System.out.println("Creating and connecting rooms");
-        createAndConnectRooms(40);
+        createAndConnectRooms(5);
         System.out.println("total rooms: " + rooms.size());
 
         System.out.println("blasting rooms");
@@ -186,7 +186,7 @@ public class Dungeon {
 
     private void carvePath(Vector2i start, Vector2i end, char fillglyph) {
         AStar aStar = new AStar(this);
-        ArrayList<Vector2i> path = aStar.getPath(start, end, true);
+        ArrayList<Vector2i> path = aStar.getPath(start, end, true, false);
         for(int i = 0; i < path.size(); i++) {
             Vector2i v = path.get(i);
             if(i == 0 || i == path.size() - 1) {

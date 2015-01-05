@@ -109,6 +109,10 @@ public abstract class Entity {
         }
     }
 
+    private void sendCombatMessage(Entity attacker, Entity defender) {
+        WindowFrame.writeConsole("/combat/" + attacker + " hit " + defender + " for " + attacker.strength + ".");
+    }
+
     public void meleeAttack(Entity entity, boolean defenderCanAttack) {
         if(canAttack()) {
             if(entity.canAttack() && defenderCanAttack) {
@@ -117,29 +121,30 @@ public abstract class Entity {
                     case 0:
                         entity.applyDamage(this.strength);
                         this.attackedThisTurn = true;
-                        WindowFrame.writeConsole("/combat/" + this + " hit " + entity + " for " + this.strength);
+                        sendCombatMessage(this, entity);
                         if(entity.isAlive()) {
                             this.applyDamage(entity.strength);
                             entity.attackedThisTurn = true;
-                            WindowFrame.writeConsole("/combat/" + entity + " hit " + this + " for " + entity.strength);
+                            sendCombatMessage(entity, this);
                         }
                         break;
                     case 1:
                         this.applyDamage(entity.strength);
                         entity.attackedThisTurn = true;
-                        WindowFrame.writeConsole("/combat/" + entity + " hit " + this + " for " + entity.strength);
+                        sendCombatMessage(entity, this);
                         if(isAlive()) {
                             entity.applyDamage(this.strength);
                             this.attackedThisTurn = true;
-                            WindowFrame.writeConsole("/combat/" + this + " hit " + entity + " for " + this.strength);
+                            sendCombatMessage(this, entity);
                         }
                         break;
                 }
+
             } else {
                 //WindowFrame.writeConsole("/info/" + entity + " could not defend.");
                 entity.applyDamage(this.strength);
                 attackedThisTurn = true;
-                WindowFrame.writeConsole("/combat/" + this + " hit " + entity + " for " + this.strength);
+                sendCombatMessage(this, entity);
             }
         } else {
             //WindowFrame.writeConsole("/info/" + this + " could not attack.");

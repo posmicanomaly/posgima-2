@@ -173,7 +173,7 @@ public class RenderPanel extends JPanel {
     private Color getGlyphColor(char c) {
         switch(c) {
             case '@' : return Color.cyan;
-            case 'M' : return Color.red;
+            case 'r' : return Color.red;
             case WALL : return Color.darkGray;
             case ITEM :
             case SCROLL :

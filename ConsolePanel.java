@@ -1,4 +1,3 @@
-import javax.naming.Context;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;

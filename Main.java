@@ -3,7 +3,7 @@
  */
 public class Main {
     public static void main(String[] args) {
-        WindowFrame windowFrame = new WindowFrame("Posgima-2");
+        WindowFrame windowFrame = new WindowFrame("Posgima-2 - " + Game.STAGE + " " + Game.VERSION);
 //        while(true) {
 //            windowFrame.Update();
 //            try {

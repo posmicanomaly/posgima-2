@@ -5,7 +5,9 @@ import java.util.ArrayList;
  * Created by Jesse Pospisil on 12/27/2014.
  */
 public class Game {
-
+    //major minor release build
+    public static final String VERSION = "0.0.1.0";
+    public static final String STAGE = "Alpha";
 
     private static final int TEST_MAP_HEIGHT = 64;
     private static final int TEST_MAP_WIDTH = 128;

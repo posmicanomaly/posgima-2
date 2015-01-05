@@ -7,6 +7,11 @@ public class Player extends Entity{
 
     public Player(char glyph) {
         super(glyph);
+        alive = true;
+        strength = 4;
+        maxHP = 16;
+        currentHP = maxHP;
+
         state = Game.STATE_READY;
     }
 

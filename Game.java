@@ -21,6 +21,7 @@ public class Game {
     private static final int PLAYER_HIT_CLOSED_DOOR = 3;
     private static final int ERROR_PLAYER_MOVE = 4;
     private static final int ERROR_OUT_OF_MAP_RANGE = 5;
+    private static final int STATE_GAME_OVER = 2;
     //reassign
     private static int MAX_MONSTERS = 0;
     private Player player;
@@ -29,6 +30,7 @@ public class Game {
     private Tile[][] tileMap;
     private Dungeon dungeon;
     private boolean turnTickActionOccurred;
+    private int turns;
 
     public Game() {
         WindowFrame.setupWindow.println("Setting up game");
@@ -40,10 +42,20 @@ public class Game {
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
         WindowFrame.setupWindow.println("player " + player.getY() + " " + player.getX());
         MAX_MONSTERS = dungeon.getMonsters().size() * 2;
+        turns = 0;
     }
 
+    /**
+     * process regen, ailments, etc for all entities
+     * get and process desired action based on key input
+     * if action expended the turn
+     *          - process monsters
+     *          - recalc player visibility
+     *          - reset attack states
+     * @param e
+     * @return
+     */
     public GameState Update(KeyEvent e) {
-
         turnTickActionOccurred = false;
         switch(player.getState()) {
             case STATE_READY:
@@ -52,20 +64,48 @@ public class Game {
             case STATE_DOOR_CLOSED:
                 processStateDoorClosedKeys(e);
                 break;
+            case STATE_GAME_OVER:
+                break;
         }
         if(turnTickActionOccurred) {
-            evaluatePlayer(player);
+            //evaluatePlayer(player);
 
             processMonsters();
 
 
             //gameState.setMap(charMap);
             dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
+            resetAttackStates();
+            endTurn();
+            turns++;
         }
         GameState gameState = new GameState();
         gameState.setPlayer(player);
         gameState.setDungeon(dungeon);
+        gameState.setTurns(turns);
         return gameState;
+    }
+
+    private void resetAttackStates() {
+        player.resetTurnTick();
+        for(Monster m : dungeon.getMonsters()) {
+            m.resetTurnTick();
+        }
+    }
+
+    /**
+     * Process regen, etc
+     */
+    private void endTurn() {
+        if(turns > 1 && turns % 30 == 0) {
+            player.regen();
+        }
+        for(Monster m : dungeon.getMonsters()) {
+            m.addAge(1);
+            if(m.getAge() % 30 == 0) {
+                m.regen();
+            }
+        }
     }
 
     private void processStateDoorClosedKeys(KeyEvent e) {
@@ -161,9 +201,17 @@ public class Game {
                 //System.out.println("passable");
             } else if (dungeon.hasMonster(nextY, nextX)) {
                 Monster monster = dungeon.getMonsterAt(nextY, nextX);
-                if (monster.die()) {
-                    WindowFrame.writeConsole("/combat//atk/You crush " + monster + ".");
+                player.meleeAttack(monster, true);
+
+                if (!monster.isAlive()) {
+                    WindowFrame.writeConsole("/combat//atk/You killed " + monster + ".");
+                    monster.die();
                     dungeon.getMonsters().remove(monster);
+                }
+
+                if(!player.isAlive()) {
+                    WindowFrame.writeConsole("/warning/You died.");
+                    player.setState(STATE_GAME_OVER);
                 }
                 return PLAYER_COMBAT;
                 //System.out.println("has entity");
@@ -244,7 +292,12 @@ public class Game {
     private void processMonsterMoveQueue(Monster m) {
         Vector2i next = m.getMoveQueue().remove();
         if(hasPlayer(next.getY(), next.getX())) {
-            WindowFrame.writeConsole("/combat//def/" + m + " hits you");
+            //WindowFrame.writeConsole("/combat//def/" + m + " hits you");
+            m.meleeAttack(player, false);
+            if(!player.isAlive()) {
+                WindowFrame.writeConsole("/warning/You died.");
+                player.setState(STATE_GAME_OVER);
+            }
         } else if(dungeon.isPassable(next.getX(), next.getY())) {
             //m.move(direction);
             if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() != RenderPanel.DOOR_CLOSED)
@@ -261,13 +314,13 @@ public class Game {
         return y == player.getY() && x == player.getX();
     }
 
-    private void evaluatePlayer(Player player) {
-        Tile tile = player.getTile();
-        if(tile.getGlyph() == RenderPanel.DOOR_CLOSED) {
-            tile.setGlyph(RenderPanel.DOOR_OPEN);
-            WindowFrame.writeConsole("You open the door.");
-        }
-    }
+//    private void evaluatePlayer(Player player) {
+//        Tile tile = player.getTile();
+//        if(tile.getGlyph() == RenderPanel.DOOR_CLOSED) {
+//            tile.setGlyph(RenderPanel.DOOR_OPEN);
+//            WindowFrame.writeConsole("You open the door.");
+//        }
+//    }
 
     public void initMap() {
         dungeon = new Dungeon(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);

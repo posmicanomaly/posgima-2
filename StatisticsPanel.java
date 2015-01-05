@@ -37,7 +37,7 @@ public class StatisticsPanel extends JPanel{
     private String getStatsDisplayString(GameState gameState) {
         StringBuilder result = new StringBuilder();
         Player p = gameState.getPlayer();
-        result.append("HP:  ").append(p.getCurentHP()).append(" / ").append(p.getMaxHP()).append("\n");
+        result.append("HP:  ").append(p.getCurrentHP()).append(" / ").append(p.getMaxHP()).append("\n");
         result.append("STR: ").append(p.getStrength()).append("\n");
         result.append("AGI: ").append(p.getAgility()).append("\n");
         result.append("DEX: ").append(p.getDexterity()).append("\n");
@@ -49,6 +49,7 @@ public class StatisticsPanel extends JPanel{
             result.append("\n");
         }
         result.append("\n");
+        result.append("turn: ").append(gameState.getTurns()).append("\n");
         if(gameState.monstersInView() > 0) {
             result.append(gameState.monstersInView() + " monsters in view").append("\n");
         } else {

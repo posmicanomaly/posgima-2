@@ -5,7 +5,7 @@ import java.util.ArrayList;
  */
 public class Corpse extends Item {
     private ArrayList<Item> items;
-    public Corpse(char c, Monster monster) {
+    public Corpse(char c, Entity monster) {
         super(c);
         items = new ArrayList<Item>();
         // todo: monster inventory to corpse + bare corpse

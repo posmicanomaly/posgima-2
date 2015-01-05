@@ -9,6 +9,7 @@ public class GameState {
     private Dungeon dungeon;
     private int monstersInView;
     private int playerState;
+    private int turns;
 
     public void setMessage(String message) {
         this.message = message;
@@ -61,5 +62,13 @@ public class GameState {
 
     public void setPlayerState(int newState) {
         playerState = newState;
+    }
+
+    public void setTurns(int turns) {
+        this.turns = turns;
+    }
+
+    public int getTurns() {
+        return turns;
     }
 }

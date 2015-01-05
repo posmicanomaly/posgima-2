@@ -6,18 +6,22 @@ public abstract class Entity {
     protected char glyph;
     protected int y;
     protected int x;
-    private int curentHP;
-    private int maxHP;
-    private int strength;
+    protected int currentHP;
+    protected int maxHP;
+    protected int strength;
     private int agility;
     private int dexterity;
     private Tile targetTile;
+    protected boolean alive;
+
+    protected boolean attackedThisTurn;
 
     public Entity(char glyph) {
         this.glyph = glyph;
         tile = null;
         y = 0;
         x = 0;
+        attackedThisTurn = false;
     }
 
     public boolean move(int dir) {
@@ -70,8 +74,8 @@ public abstract class Entity {
         this.tile = tile;
     }
 
-    public int getCurentHP() {
-        return curentHP;
+    public int getCurrentHP() {
+        return currentHP;
     }
 
     public int getMaxHP() {
@@ -96,5 +100,68 @@ public abstract class Entity {
 
     public Tile getTargetTile() {
         return targetTile;
+    }
+
+    private void applyDamage(int damage) {
+        currentHP -= damage;
+        if(currentHP < 1) {
+            alive = false;
+        }
+    }
+
+    public void meleeAttack(Entity entity, boolean defenderCanAttack) {
+        if(canAttack()) {
+            if(entity.canAttack() && defenderCanAttack) {
+                int goesFirst = (int)(Math.random() * 2);
+                switch (goesFirst) {
+                    case 0:
+                        entity.applyDamage(this.strength);
+                        this.attackedThisTurn = true;
+                        WindowFrame.writeConsole("/combat/" + this + " hit " + entity + " for " + this.strength);
+                        if(entity.isAlive()) {
+                            this.applyDamage(entity.strength);
+                            entity.attackedThisTurn = true;
+                            WindowFrame.writeConsole("/combat/" + entity + " hit " + this + " for " + entity.strength);
+                        }
+                        break;
+                    case 1:
+                        this.applyDamage(entity.strength);
+                        entity.attackedThisTurn = true;
+                        WindowFrame.writeConsole("/combat/" + entity + " hit " + this + " for " + entity.strength);
+                        if(isAlive()) {
+                            entity.applyDamage(this.strength);
+                            this.attackedThisTurn = true;
+                            WindowFrame.writeConsole("/combat/" + this + " hit " + entity + " for " + this.strength);
+                        }
+                        break;
+                }
+            } else {
+                //WindowFrame.writeConsole("/info/" + entity + " could not defend.");
+                entity.applyDamage(this.strength);
+                attackedThisTurn = true;
+                WindowFrame.writeConsole("/combat/" + this + " hit " + entity + " for " + this.strength);
+            }
+        } else {
+            //WindowFrame.writeConsole("/info/" + this + " could not attack.");
+        }
+    }
+
+    private boolean canAttack() {
+        return !attackedThisTurn;
+    }
+
+
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void resetTurnTick() {
+        attackedThisTurn = false;
+    }
+
+    public void regen() {
+        if(currentHP < maxHP) {
+            currentHP++;
+        }
     }
 }

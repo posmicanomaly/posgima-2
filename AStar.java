@@ -67,7 +67,7 @@ public class AStar {
                 path.add(new Vector2i(parent.y, parent.x));
                 parent = parent.parent;
             }
-            WindowFrame.setupWindow.println("closed " + closed.size());
+            //WindowFrame.setupWindow.println("closed " + closed.size());
             return path;
         }
         return null;

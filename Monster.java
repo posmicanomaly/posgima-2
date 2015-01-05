@@ -8,13 +8,17 @@ public class Monster extends Entity{
     private boolean aggroPlayer;
 
     private LinkedList<Vector2i> moveQueue;
-    private boolean alive;
+    private int age;
 
     public Monster(char glyph) {
         super(glyph);
         moveQueue = new LinkedList<Vector2i>();
         aggroPlayer = false;
         alive = true;
+        strength = 1;
+        maxHP = 7;
+        currentHP = maxHP;
+        age = 0;
     }
 
     public boolean[][] getVisibility() {
@@ -28,19 +32,23 @@ public class Monster extends Entity{
         }
     }
 
-    public LinkedList<Vector2i> getMoveQueue() {
-        return moveQueue;
-    }
-
     public boolean die() {
         alive = false;
         this.tile.addItem(new Corpse('}', this));
         this.tile.remove(this);
-        WindowFrame.setupWindow.println(this + " died.");
+        //WindowFrame.setupWindow.println(this + " died.");
         return true;
     }
 
-    public boolean isAlive() {
-        return alive;
+    public LinkedList<Vector2i> getMoveQueue() {
+        return moveQueue;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void addAge(int i) {
+        age += i;
     }
 }

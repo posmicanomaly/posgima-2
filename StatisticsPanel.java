@@ -24,4 +24,36 @@ public class StatisticsPanel extends JPanel{
         setLayout(new BorderLayout());
         add(statisticsScroller, BorderLayout.CENTER);
     }
+
+    public void update(GameState gameState) {
+        Player player = gameState.getPlayer();
+        StringBuilder sb = new StringBuilder(16 * 6);
+        sb.append(player).append("\n");
+        sb.append("Barbarian").append("\n\n");
+        sb.append(getStatsDisplayString(gameState));
+        statisticsTextArea.setText(sb.toString());
+    }
+
+    private String getStatsDisplayString(GameState gameState) {
+        StringBuilder result = new StringBuilder();
+        Player p = gameState.getPlayer();
+        result.append("HP:  ").append(p.getCurentHP()).append(" / ").append(p.getMaxHP()).append("\n");
+        result.append("STR: ").append(p.getStrength()).append("\n");
+        result.append("AGI: ").append(p.getAgility()).append("\n");
+        result.append("DEX: ").append(p.getDexterity()).append("\n");
+        result.append("\n");
+        result.append(p.getTile().getGlyph()).append("\n");
+        if(p.getTile().hasItems()) {
+            result.append("items lay here").append("\n");
+        } else {
+            result.append("\n");
+        }
+        result.append("\n");
+        if(gameState.monstersInView() > 0) {
+            result.append(gameState.monstersInView() + " monsters in view").append("\n");
+        } else {
+            result.append("\n");
+        }
+        return result.toString();
+    }
 }

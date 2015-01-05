@@ -36,7 +36,7 @@ public class Monster extends Entity{
         alive = false;
         this.tile.addItem(new Corpse('}', this));
         this.tile.remove(this);
-        System.out.println(this + " died.");
+        WindowFrame.setupWindow.println(this + " died.");
         return true;
     }
 

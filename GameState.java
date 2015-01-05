@@ -7,6 +7,8 @@ public class GameState {
     //private char[][] map;
     //private boolean[][] visibleMap;
     private Dungeon dungeon;
+    private int monstersInView;
+    private int playerState;
 
     public void setMessage(String message) {
         this.message = message;
@@ -43,5 +45,21 @@ public class GameState {
 
     public Dungeon getDungeon() {
         return dungeon;
+    }
+
+    public int monstersInView() {
+        return monstersInView;
+    }
+
+    public void setMonstersInView(int monstersInView) {
+        this.monstersInView = monstersInView;
+    }
+
+    public int getPlayerState() {
+        return playerState;
+    }
+
+    public void setPlayerState(int newState) {
+        playerState = newState;
     }
 }

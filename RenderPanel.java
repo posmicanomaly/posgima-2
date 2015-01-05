@@ -20,8 +20,8 @@ public class RenderPanel extends JPanel {
     // Used to dim colors "explored" but not "visible"
     private static final int DIM_DIVISOR = 2;
 
-    private static final int visibleY = 31;//43;
-    private static final int visibleX = 99;//128;
+    private static final int visibleY = 30;//43;
+    private static final int visibleX = 87;//128;
     private static final Color COLOR_EXPLORED = new Color(52, 52, 72);
     Color tileGray = new Color(54, 54, 54);
     private GameState currentState;
@@ -98,6 +98,7 @@ public class RenderPanel extends JPanel {
 
 
     private void drawMap(int rowStart, int rowEnd, int colStart, int colEnd, Graphics g) {
+        long time = System.currentTimeMillis();
         int y = fontSize;
         for(int i = rowStart; i < currentState.getDungeon().getTileMap().length; i++) {
             int x = fontSize;
@@ -131,6 +132,7 @@ public class RenderPanel extends JPanel {
             }
             y += yIncrement;
         }
+        WindowFrame.setupWindow.println("drawMap took " + (System.currentTimeMillis() - time) + "ms");
     }
 
     private Color addYellow(Color color) {

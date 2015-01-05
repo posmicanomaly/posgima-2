@@ -6,6 +6,12 @@ public abstract class Entity {
     protected char glyph;
     protected int y;
     protected int x;
+    private int curentHP;
+    private int maxHP;
+    private int strength;
+    private int agility;
+    private int dexterity;
+    private Tile targetTile;
 
     public Entity(char glyph) {
         this.glyph = glyph;
@@ -62,5 +68,33 @@ public abstract class Entity {
 
     public void setTile(Tile tile) {
         this.tile = tile;
+    }
+
+    public int getCurentHP() {
+        return curentHP;
+    }
+
+    public int getMaxHP() {
+        return maxHP;
+    }
+
+    public int getStrength() {
+        return strength;
+    }
+
+    public int getAgility() {
+        return agility;
+    }
+
+    public int getDexterity() {
+        return dexterity;
+    }
+
+    public void setTargetTile(Tile targetTile) {
+        this.targetTile = targetTile;
+    }
+
+    public Tile getTargetTile() {
+        return targetTile;
     }
 }

@@ -50,6 +50,8 @@ public class AStar {
                     node.calcHCost(end.getY(), end.getX());
                     node.calcFCost();
                 } else {
+                    //current.calcFCost();
+                    //node.calcFCost();
                     if(current.fCost < node.fCost) {
                         node.setParent(current);
                     }
@@ -57,7 +59,7 @@ public class AStar {
             }
         }
         if(open.isEmpty()) {
-            System.out.println("no path");
+            WindowFrame.setupWindow.println("no path");
         } else {
             ArrayList<Vector2i> path = new ArrayList<Vector2i>();
             AStarNode parent = current;
@@ -65,6 +67,7 @@ public class AStar {
                 path.add(new Vector2i(parent.y, parent.x));
                 parent = parent.parent;
             }
+            WindowFrame.setupWindow.println("closed " + closed.size());
             return path;
         }
         return null;
@@ -115,11 +118,11 @@ public class AStar {
         int xd = Math.abs(start.getX() - end.getX());
         int yd = Math.abs(start.getY() - end.getY());
 
-        int minY = start.y - yd * 8;
-        int maxY = start.y + yd * 8;
+        int minY = start.y - yd * 4;
+        int maxY = start.y + yd * 4;
 
-        int minX = start.x - xd * 8;
-        int maxX = start.x + xd * 8;
+        int minX = start.x - xd * 4;
+        int maxX = start.x + xd * 4;
 
         if(current.y - 1 > 0 && current.y - 1 > minY)
             nodes.add(new AStarNode(current.y - 1, current.x));

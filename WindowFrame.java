@@ -6,17 +6,22 @@ import java.awt.event.*;
  * Created by Jesse Pospisil on 12/26/2014.
  */
 public class WindowFrame extends JFrame implements KeyEventPostProcessor, WindowListener {
+    static SetupWindow setupWindow;
+
     RenderPanel renderPanel;
-    ConsolePanel consolePanel;
+    static ConsolePanel consolePanel;
     StatisticsPanel statisticsPanel;
 
     Game game;
 
     public WindowFrame(String title) throws HeadlessException {
         super(title);
+        setupWindow = new SetupWindow();
+
+
         //pane = new JPanel(new GridBagLayout());
 
-        setExtendedState(MAXIMIZED_BOTH);
+        //setExtendedState(MAXIMIZED_BOTH);
 
 
         setLayout(new GridBagLayout());
@@ -54,13 +59,29 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor(this);
         addWindowListener(this);
         setFocusable(true);
+
+
+
+        setPreferredSize(new Dimension(1366, 768));
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+
+        setResizable(false);
+        pack();
+        this.setLocation((dim.width / 2) - (getSize().width / 2), (dim.height / 2) - (this.getSize().height / 2));
+
         game = new Game();
         renderPanel.updateGameState(game.getGameState());
+        statisticsPanel.update(game.getGameState());
+
         setVisible(true);
+
     }
 
     public void Update() {
+        long time = System.currentTimeMillis();
         renderPanel.Update();
+
+        setupWindow.println("update took " + (System.currentTimeMillis() - time));
     }
 
 
@@ -102,16 +123,24 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
     public boolean postProcessKeyEvent(KeyEvent e) {
         if(e.getID() == KeyEvent.KEY_PRESSED) {
             //consolePanel.insertText("/warning/key_pressed: " + e.getKeyCode() + "\n");
+            long time = System.currentTimeMillis();
             GameState nextState = game.Update(e);
-            consolePanel.insertText(nextState.getMessage() + "\n");
+            setupWindow.println("game.Update() took " + (System.currentTimeMillis() - time));
+            //consolePanel.insertText(nextState.getMessage() + "\n");
             //consolePanel.insertText("/info/x: " + nextState.getPlayer().getX() + "  y: " + nextState.getPlayer().getY
             //        () + "\n");
+            statisticsPanel.update(nextState);
             renderPanel.updateGameState(nextState);
+            Update();
             return true;
         } else if(e.getID() == KeyEvent.KEY_RELEASED) {
             //consolePanel.insertText("/success/key_released: " + e.getKeyCode() + "\n");
             return true;
         }
         return false;
+    }
+
+    public static void writeConsole(String string) {
+        consolePanel.insertText(string + "\n");
     }
 }

@@ -5,35 +5,93 @@ import java.util.ArrayList;
  * Created by Jesse Pospisil on 12/27/2014.
  */
 public class Game {
+
+
     private static final int TEST_MAP_HEIGHT = 64;
     private static final int TEST_MAP_WIDTH = 128;
     public static final int UP = 0;
     public static final int DOWN = 1;
     public static final int LEFT = 2;
     public static final int RIGHT = 3;
+    public static final int STATE_READY = 0;
+    public static final int STATE_DOOR_CLOSED = 1;
+    private static final int PLAYER_MOVED = 0;
+    private static final int PLAYER_COMBAT = 1;
+    private static final int PLAYER_HIT_WALL = 2;
+    private static final int PLAYER_HIT_CLOSED_DOOR = 3;
+    private static final int ERROR_PLAYER_MOVE = 4;
+    private static final int ERROR_OUT_OF_MAP_RANGE = 5;
+    //reassign
+    private static int MAX_MONSTERS = 0;
     private Player player;
     //private char[][] charMap;
     private boolean[][] visibleMap;
     private Tile[][] tileMap;
     private Dungeon dungeon;
+    private boolean turnTickActionOccurred;
 
     public Game() {
+        WindowFrame.setupWindow.println("Setting up game");
         initMap();
         Room startingRoom = dungeon.getRandomRoom();
         player = new Player('@');
         Vector2i center = startingRoom.getCenter();
         dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
-        System.out.println("player " + player.getY() + " " + player.getX());
+        WindowFrame.setupWindow.println("player " + player.getY() + " " + player.getX());
+        MAX_MONSTERS = dungeon.getMonsters().size() * 2;
     }
 
     public GameState Update(KeyEvent e) {
+
+        turnTickActionOccurred = false;
+        switch(player.getState()) {
+            case STATE_READY:
+                processStateReadyKeys(e);
+                break;
+            case STATE_DOOR_CLOSED:
+                processStateDoorClosedKeys(e);
+                break;
+        }
+        if(turnTickActionOccurred) {
+            evaluatePlayer(player);
+
+            processMonsters();
+
+
+            //gameState.setMap(charMap);
+            dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
+        }
         GameState gameState = new GameState();
-        gameState.setMessage("/info/");
+        gameState.setPlayer(player);
+        gameState.setDungeon(dungeon);
+        return gameState;
+    }
+
+    private void processStateDoorClosedKeys(KeyEvent e) {
+        switch(e.getKeyCode()) {
+            case KeyEvent.VK_Y:
+                WindowFrame.writeConsole("temp, you open door");
+                dungeon.toggleDoor(player.getTargetTile());
+                turnTickActionOccurred = true;
+                player.setState(STATE_READY);
+                break;
+            case KeyEvent.VK_N:
+                WindowFrame.writeConsole("temp, you choose no");
+                player.setState(STATE_READY);
+                break;
+            case KeyEvent.VK_Z:
+                WindowFrame.writeConsole("temp, you canceled menu");
+                player.setState(STATE_READY);
+                break;
+        }
+    }
+
+    private void processStateReadyKeys(KeyEvent e) {
         int nextY = player.getY();
         int nextX = player.getX();
         boolean moveRequest = false;
-        switch(e.getKeyCode()) {
+        switch (e.getKeyCode()) {
             /*
             Movement
              */
@@ -58,55 +116,72 @@ public class Game {
             Other
              */
             case KeyEvent.VK_R:
+                WindowFrame.writeConsole("/success/initMap()");
                 initMap();
                 break;
             case KeyEvent.VK_P:
                 dungeon.setFullyExplored();
+                WindowFrame.writeConsole("/success/map fully explored");
                 break;
             case KeyEvent.VK_PERIOD:
-                gameState.setMessage(gameState.getMessage() + "idle");
+                WindowFrame.writeConsole("idle");
+                turnTickActionOccurred = true;
+                break;
         }
 
-        if(moveRequest) {
-            if(dungeon.isPassable(nextX, nextY)) {
-                int direction = 0;
-                if(nextY < player.getY()) {
-                    direction = Game.UP;
-                } else if(nextY > player.getY()) {
-                    direction = Game.DOWN;
-                }
+        if (moveRequest) {
+            switch(processPlayerMoveRequest(nextY, nextX)) {
+                case PLAYER_MOVED:
+                case PLAYER_COMBAT:
+                    turnTickActionOccurred = true;
+                    break;
+                case PLAYER_HIT_WALL:
+                    WindowFrame.writeConsole("You bump into the wall.");
+                    break;
+                case PLAYER_HIT_CLOSED_DOOR:
+                    WindowFrame.writeConsole("temp, Open door? Y/n/z");
+                    break;
+                case ERROR_PLAYER_MOVE:
+                    WindowFrame.writeConsole("/warning/processMovePlayerRequest() error in <not passable><no " +
+                            "monster> switch(check door/wall)");
+                    break;
+                case ERROR_OUT_OF_MAP_RANGE:
+                    WindowFrame.writeConsole("The void beckons, but you resist its call.");
+                    break;
 
-                if(nextX < player.getX()) {
-                    direction = Game.LEFT;
-                } else if(nextX > player.getX()) {
-                    direction = Game.RIGHT;
-                }
-                //player.move(direction);
-                player.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
-                //System.out.println("passable");
-            } else if(dungeon.hasMonster(nextY, nextX)) {
-                Monster monster = dungeon.getMonsterAt(nextY, nextX);
-                if(monster.die())
-                {
-                    dungeon.getMonsters().remove(monster);
-                }
-                //System.out.println("has entity");
-            } else {
-                //System.out.println("not passable, no entity");
             }
         }
-        String playerEvaluation = evaluatePlayer(player);
-        if(playerEvaluation != null) {
-            gameState.setMessage(gameState.getMessage() + "\n" + playerEvaluation);
+    }
+
+    private int processPlayerMoveRequest(int nextY, int nextX) {
+        if (dungeon.inRange(nextY, nextX)) {
+            if (dungeon.isPassable(nextX, nextY)) {
+                player.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
+                return PLAYER_MOVED;
+                //System.out.println("passable");
+            } else if (dungeon.hasMonster(nextY, nextX)) {
+                Monster monster = dungeon.getMonsterAt(nextY, nextX);
+                if (monster.die()) {
+                    WindowFrame.writeConsole("/combat//atk/You crush " + monster + ".");
+                    dungeon.getMonsters().remove(monster);
+                }
+                return PLAYER_COMBAT;
+                //System.out.println("has entity");
+            } else {
+                switch(dungeon.getTileMap()[nextY][nextX].getGlyph()) {
+                    case RenderPanel.WALL:
+                        return PLAYER_HIT_WALL;
+                    case RenderPanel.DOOR_CLOSED:
+                        player.setState(STATE_DOOR_CLOSED);
+                        player.setTargetTile(dungeon.getTileMap()[nextY][nextX]);
+                        return PLAYER_HIT_CLOSED_DOOR;
+                    default:
+                        return ERROR_PLAYER_MOVE;
+                }
+            }
+        } else {
+            return ERROR_OUT_OF_MAP_RANGE;
         }
-
-        processMonsters();
-
-        gameState.setPlayer(player);
-        gameState.setDungeon(dungeon);
-        //gameState.setMap(charMap);
-        dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
-        return gameState;
     }
 
     private boolean monsterCanSeePlayer(Monster monster) {
@@ -120,10 +195,6 @@ public class Game {
             }
             m.calculateVisibility(dungeon);
             if(monsterCanSeePlayer(m)) {
-               // long time = System.currentTimeMillis();
-                //System.out.println(m + " sees you");
-                //System.out.println("monster: " + m.getY() + ", " + m.getX());
-                //System.out.println("player: " + player.getY() + ", " + player.getX());
                 AStar astar = new AStar(dungeon);
                 ArrayList<Vector2i> shortestPath = astar.getPath(new Vector2i(m.getY(), m.getX()), new Vector2i
                         (player.getY(), player.getX()), false, true);
@@ -135,9 +206,8 @@ public class Game {
                     m.getMoveQueue().add(shortestPath.get(i));
                 }
                // System.out.println("process monsters took " + (System.currentTimeMillis() - time));
-            } //else if(monsterCanSeePlayer(m) && m.getMoveQueue().size() > 0) {
+            }
 
-            //}
             if(m.getMoveQueue().size() == 0) {
                 int direction = (int) (Math.random() * 4);
                 int nextY = m.getY();
@@ -166,7 +236,7 @@ public class Game {
                 processMonsterMoveQueue(m);
             }
         }
-        if(dungeon.getMonsters().size() < 15) {
+        if(dungeon.getMonsters().size() < MAX_MONSTERS) {
             dungeon.spawnMonster('r', dungeon.getVisibleMap());
         }
     }
@@ -174,7 +244,7 @@ public class Game {
     private void processMonsterMoveQueue(Monster m) {
         Vector2i next = m.getMoveQueue().remove();
         if(hasPlayer(next.getY(), next.getX())) {
-            System.out.println(m + " hits you");
+            WindowFrame.writeConsole("/combat//def/" + m + " hits you");
         } else if(dungeon.isPassable(next.getX(), next.getY())) {
             //m.move(direction);
             if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() != RenderPanel.DOOR_CLOSED)
@@ -191,13 +261,12 @@ public class Game {
         return y == player.getY() && x == player.getX();
     }
 
-    private String evaluatePlayer(Player player) {
+    private void evaluatePlayer(Player player) {
         Tile tile = player.getTile();
         if(tile.getGlyph() == RenderPanel.DOOR_CLOSED) {
             tile.setGlyph(RenderPanel.DOOR_OPEN);
-            return "opened door";
+            WindowFrame.writeConsole("You open the door.");
         }
-        return null;
     }
 
     public void initMap() {

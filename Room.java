@@ -223,7 +223,7 @@ public class Room {
         if(entrances.size() < maxEntrances) {
             return true;
         }
-        System.out.println("can't add any more entrances");
+        WindowFrame.setupWindow.println("can't add any more entrances");
         return false;
     }
 
@@ -232,7 +232,7 @@ public class Room {
         connectedEntrances.add(new Boolean(false));
 
         charMap[entrance.getY()][entrance.getX()] = RenderPanel.DOOR_CLOSED;
-        System.out.println("add entrance");
+        WindowFrame.setupWindow.println("add entrance");
         return true;
     }
 
@@ -268,13 +268,13 @@ public class Room {
         } else if(entrance.getX() == rightSide) {
             return 3;
         }
-        System.out.println("getside returned -1, that's bad");
+        WindowFrame.setupWindow.println("getside returned -1, that's bad");
         return -1;
     }
 
     private Vector2i getRandomWallOnSide(int side) {
         if(side == -1) {
-            System.out.println("getRandomWallOnSide error side is -1, this is bad");
+            WindowFrame.setupWindow.println("getRandomWallOnSide error side is -1, this is bad");
             return null;
         }
         int topRow = center.getY() - (height / 2);
@@ -318,7 +318,7 @@ public class Room {
         // pick a random side that doesn't have an entrance already
         int viableSide;
         if(sides[0] && sides[1] && sides[2] && sides[3]) {
-            System.out.println("all sides have an entrance, we shouldn't be here, picking random entrance that exists");
+            WindowFrame.setupWindow.println("all sides have an entrance, we shouldn't be here, picking random entrance that exists");
             return getRandomWallOnSide(viableSide = (int)(Math.random() * 4));
         }
         do {

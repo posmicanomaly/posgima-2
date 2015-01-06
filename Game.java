@@ -9,41 +9,79 @@ public class Game {
     public static final String VERSION = "0.0.1.0";
     public static final String STAGE = "Alpha";
 
+    /**
+     * Dungeon dimensions
+     */
     private static final int TEST_MAP_HEIGHT = 64;
     private static final int TEST_MAP_WIDTH = 128;
+
+    /**
+     * Cardinal directions
+     */
     public static final int UP = 0;
     public static final int DOWN = 1;
     public static final int LEFT = 2;
     public static final int RIGHT = 3;
+    /**
+     * STATE_x
+     * Player states such as "ready", "door closed", "item pickup"
+     * to determine which key options to accept, and control game flow.
+     */
     public static final int STATE_READY = 0;
     public static final int STATE_DOOR_CLOSED = 1;
+    private static final int STATE_GAME_OVER = 2;
+    public static final int STATE_ITEM_PICKUP = 3;
+
+    /**
+     * PLAYER_x
+     * Flags set in movement
+     */
     private static final int PLAYER_MOVED = 0;
     private static final int PLAYER_COMBAT = 1;
     private static final int PLAYER_HIT_WALL = 2;
     private static final int PLAYER_HIT_CLOSED_DOOR = 3;
+    //Errors set in movement
     private static final int ERROR_PLAYER_MOVE = 4;
     private static final int ERROR_OUT_OF_MAP_RANGE = 5;
-    private static final int STATE_GAME_OVER = 2;
-    //reassign
+
+
+
+    /**
+     * TILE_x
+     * Flags set in tile pickup
+     */
+    private static final int TILE_HAS_ITEMS = 1;
+    private static final int TILE_HAS_NO_ITEMS = 0;
+
+    // Reassign this later, based on amount of rooms
     private static int MAX_MONSTERS = 0;
+
     private Player player;
-    //private char[][] charMap;
-    private boolean[][] visibleMap;
-    private Tile[][] tileMap;
     private Dungeon dungeon;
+
+    /**
+     * Set true if a major move was performed, like moving, or quaffing, opening a door
+     * Do not set if a move was cancelled, didn't open door, didn't pick up items, etc.
+     */
     private boolean turnTickActionOccurred;
     private int turns;
 
     public Game() {
-        WindowFrame.setupWindow.println("Setting up game");
+        SetupWindow.println("Setting up game");
+
         initMap();
         Room startingRoom = dungeon.getRandomRoom();
-        player = new Player('@');
         Vector2i center = startingRoom.getCenter();
+
+        player = new Player('@');
+
         dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
-        WindowFrame.setupWindow.println("player " + player.getY() + " " + player.getX());
+
+        SetupWindow.println("player " + player.getY() + " " + player.getX());
+
         MAX_MONSTERS = dungeon.getMonsters().size() * 2;
+
         turns = 0;
     }
 
@@ -66,26 +104,38 @@ public class Game {
             case STATE_DOOR_CLOSED:
                 processStateDoorClosedKeys(e);
                 break;
+            case STATE_ITEM_PICKUP:
+                processItemPickupKeys(e);
             case STATE_GAME_OVER:
                 break;
         }
         if(turnTickActionOccurred) {
-            //evaluatePlayer(player);
-
             processMonsters();
 
-
-            //gameState.setMap(charMap);
             dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
             resetAttackStates();
             endTurn();
             turns++;
         }
+
         GameState gameState = new GameState();
         gameState.setPlayer(player);
         gameState.setDungeon(dungeon);
         gameState.setTurns(turns);
         return gameState;
+    }
+
+    private void processItemPickupKeys(KeyEvent e) {
+        switch(e.getKeyCode()) {
+            case KeyEvent.VK_Y:
+                WindowFrame.writeConsole("temp, you pick up the items.");
+                player.setState(STATE_READY);
+                break;
+            case KeyEvent.VK_N:
+                WindowFrame.writeConsole("temp, you leave the items.");
+                player.setState(STATE_READY);
+                break;
+        }
     }
 
     private void resetAttackStates() {
@@ -133,6 +183,7 @@ public class Game {
         int nextY = player.getY();
         int nextX = player.getX();
         boolean moveRequest = false;
+        boolean itemPickupRequest = false;
         switch (e.getKeyCode()) {
             /*
             Movement
@@ -152,6 +203,13 @@ public class Game {
             case KeyEvent.VK_D:
                 moveRequest = true;
                 nextX++;
+                break;
+
+            /*
+            Interaction
+             */
+            case KeyEvent.VK_COMMA:
+                itemPickupRequest = true;
                 break;
 
             /*
@@ -192,6 +250,25 @@ public class Game {
                     break;
 
             }
+        } else if(itemPickupRequest) {
+            switch(processPlayerItemPickupRequest()) {
+                case TILE_HAS_ITEMS:
+                    WindowFrame.writeConsole("temp, pick up items? Y/n");
+                    player.setState(STATE_ITEM_PICKUP);
+                    break;
+                case TILE_HAS_NO_ITEMS:
+                    WindowFrame.writeConsole("There's nothing to pickup.");
+                    break;
+            }
+        }
+    }
+
+    private int processPlayerItemPickupRequest() {
+        Tile tile = dungeon.getTileMap()[player.getY()][player.getX()];
+        if(tile.hasItems()) {
+            return TILE_HAS_ITEMS;
+        } else {
+            return TILE_HAS_NO_ITEMS;
         }
     }
 
@@ -327,7 +404,7 @@ public class Game {
     public void initMap() {
         dungeon = new Dungeon(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);
         //charMap = dungeon.getMap();
-        visibleMap = dungeon.getVisibleMap();
+        //visibleMap = dungeon.getVisibleMap();
 
     }
 

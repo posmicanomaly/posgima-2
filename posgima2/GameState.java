@@ -1,3 +1,5 @@
+package posgima2;
+
 /**
  * Created by Jesse Pospisil on 12/27/2014.
  */

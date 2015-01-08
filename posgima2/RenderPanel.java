@@ -1,3 +1,5 @@
+package posgima2;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -77,7 +79,7 @@ public class RenderPanel extends JPanel {
     }
 
 //    private void drawMonsters(int rowStart, int rowEnd, int colStart, int colEnd, Graphics g) {
-//        for(Monster m : currentState.getDungeon().getMonsters()) {
+//        for(posgima2.Monster m : currentState.getDungeon().getMonsters()) {
 //            g.setColor(getGlyphColor(m.getGlyph()));
 //            g.drawChars(new char[]{m.getGlyph()}, 0, 1, m.getX() * fontSize, m.getY() * fontSize);
 //        }
@@ -98,53 +100,113 @@ public class RenderPanel extends JPanel {
 
 
     private void drawMap(int rowStart, int rowEnd, int colStart, int colEnd, Graphics g) {
-        long time = System.currentTimeMillis();
+        Player p = currentState.getPlayer();
+        Dungeon d = currentState.getDungeon();
+        Tile[][] tMap = currentState.getDungeon().getTileMap();
+        boolean[][] visMap = currentState.getDungeon().getVisibleMap();
+        boolean[][] expMap = currentState.getDungeon().getExploredMap();
+
         int y = fontSize;
-        for(int i = rowStart; i < currentState.getDungeon().getTileMap().length; i++) {
+        for(int i = rowStart; i < tMap.length; i++) {
             int x = fontSize;
-            for(int j = colStart; j < currentState.getDungeon().getTileMap()[i].length; j++) {
+            for(int j = colStart; j < tMap[i].length; j++) {
+                /*
+                Player gets first priority
+                 */
                 if(hasPlayer(i, j)) {
-                    drawPlayer(y, x, g, currentState.getPlayer());
-                } else {
-                    g.setColor(getGlyphColor(currentState.getDungeon().getTileMap()[i][j].getGlyph()));
-                    if (currentState.getVisibleMap()[i][j]) {
-                        g.setColor(addYellow(g.getColor()));
+                    drawPlayer(y, x, g, p);
+                }
+                /*
+
+                 */
+                else {
+                    // set color based on a lookup switch for the glyph
+                    g.setColor(getGlyphColor(tMap[i][j].getGlyph()));
+                    // if this tile is visible to the player
+                    if (visMap[i][j]) {
+                        // apply a torch light effect
+                        g.setColor(addTorchLight(g.getColor(), getLargestDistanceDifference(p.getY(), p.getX(), i, j)));
+                        /*
+                        Priority: Monster -> Items -> Empty Tile
+                         */
                         if(hasMonster(i, j)) {
-                            drawMonster(currentState.getDungeon().getMonsterAt(i, j), y, x, g);
-                        } else if(currentState.getDungeon().hasItems(i, j)) {
-                            drawItem(currentState.getDungeon().getTileMap()[i][j], y, x, g);
+                            drawMonster(d.getMonsterAt(i, j), y, x, g);
+                        } else if(d.hasItems(i, j)) {
+                            drawItem(tMap[i][j], y, x, g);
                         } else {
-                            g.drawChars(new char[]{currentState.getDungeon().getTileMap()[i][j].getGlyph()}, 0, 1, x,
-                                    y);
+                            g.drawChars(new char[]{tMap[i][j].getGlyph()}, 0, 1, x, y);
                         }
                     }
-                    else if (currentState.getDungeon().getExploredMap()[i][j]) {
-                        int R = g.getColor().getRed() / DIM_DIVISOR;
-                        int G = g.getColor().getGreen() / DIM_DIVISOR;
-                        int B = g.getColor().getGreen() / DIM_DIVISOR;
+                    // if it's not visible, but has been explored before
+                    else if (expMap[i][j]) {
+                        /*
+                        Draw the tile in a dark blue, without monsters or items.
+                         */
+                        int R = 0;
+                        int G = 0;
+                        int B = 64;
 
                         g.setColor(new Color(R, G, B));
-                        g.drawChars(new char[]{currentState.getDungeon().getTileMap()[i][j].getGlyph()}, 0, 1, x, y);
+                        g.drawChars(new char[]{tMap[i][j].getGlyph()}, 0, 1, x, y);
                     }
                 }
-
+                // Next draw column
                 x += xIncrement;
             }
+            // Next draw row
             y += yIncrement;
         }
-        WindowFrame.setupWindow.println("drawMap took " + (System.currentTimeMillis() - time) + "ms");
     }
 
-    private Color addYellow(Color color) {
-        int r = color.getRed();
-        int g = color.getGreen();
+    /**
+     * Gives the absolute highest difference of distance between y0,x0 and y1,x1
+     * @param y0 start Y
+     * @param x0 start X
+     * @param y1 end Y
+     * @param x1 end X
+     * @return largest difference, either y0-y1 or x0-x1
+     */
+    private int getLargestDistanceDifference(int y0, int x0, int y1, int x1) {
+        int yd = Math.abs(y0-y1);
+        int xd = Math.abs(x0-x1);
+
+        if(yd > xd) {
+            return yd;
+        }
+        return xd;
+    }
+
+    /**
+     * Calculate a fading torchlight color based on the distance from its source
+     * @param color Original color of tile
+     * @param distanceFrom absolute distance from the source
+     * @return Color
+     */
+    private Color addTorchLight(Color color, int distanceFrom) {
+        /*
+        Extract the RGB values from color
+         */
         int b = color.getBlue();
-        r += r / 2;
-        g += g / 2;
-        if(r > 255)
+        /*
+        Apply a reddish "torch" color, and subtract te distanceFrom * 16 value
+        Higher values will give less of a "bright" radius, and also decrease the initial brightness
+        Lower values will give a higher initial value, and a larger radius that fades slower
+         */
+        int r = color.getRed() + (150 - (distanceFrom * 16));
+        int g = color.getRed() + (120 - (distanceFrom * 16));
+
+        /*
+        Bounds checking for R and G
+         */
+        if(r < 0)
+            r = 0;
+        else if(r > 255)
             r = 255;
-        if(g > 255)
+        if(g < 0)
+            g = 0;
+        else if(g > 255)
             g = 255;
+
         color = new Color(r,g,b);
         return color;
     }
@@ -173,13 +235,17 @@ public class RenderPanel extends JPanel {
     private Color getGlyphColor(char c) {
         switch(c) {
             case '@' : return Color.cyan;
-            case 'r' : return Color.red;
             case WALL : return Color.darkGray;
             case ITEM :
             case SCROLL :
             case WEAPON : return Color.pink;
             case STAIRS : return Color.green;
             case WATER : return Color.blue;
+            case 'r': return Color.red;
+            case 'g': return Color.green;
+            case 'D': return Color.BLUE;
+            case 'T': return Color.green;
+            case 'b': return Color.pink;
             default : return Color.gray;
         }
     }

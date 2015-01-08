@@ -1,3 +1,5 @@
+package posgima2;
+
 import java.util.ArrayList;
 
 /**

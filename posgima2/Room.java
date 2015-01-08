@@ -1,3 +1,5 @@
+package posgima2;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -28,7 +30,7 @@ public class Room {
         // unsignedOffset is to check for an offset too large in relation to the dimension
         int unsignedOffset = Math.abs(offset);
 
-        // Direction is only meant to go one way, so if Y is set, then offset will be based on width
+        // posgima2.Direction is only meant to go one way, so if Y is set, then offset will be based on width
         if(direction.getyMod() != 0) {
             if(unsignedOffset >= width / 2)
                 return;
@@ -114,7 +116,7 @@ public class Room {
         // unsignedOffset is to check for an offset too large in relation to the dimension
         //int unsignedOffset = Math.abs(offset);
 
-        // Direction is only meant to go one way, so if Y is set, then offset will be based on width
+        // posgima2.Direction is only meant to go one way, so if Y is set, then offset will be based on width
 //        if(direction.getyMod() != 0) {
 //            if(unsignedOffset >= width / 2)
 //                return;
@@ -153,7 +155,7 @@ public class Room {
 //            centerX = entranceX + (height / 2);
 //        }
 
-//        center = new Vector2i(centerY, centerX);
+//        center = new posgima2.Vector2i(centerY, centerX);
 
         int startRow = center.getY() - (height / 2);
         int startCol = center.getX() - (width / 2);
@@ -165,7 +167,7 @@ public class Room {
             for(int x = startCol; x <= endCol; x++) {
 //                // Place a door
 //                if(y == entranceY && x == entranceX) {
-//                    charMap[y][x] = RenderPanel.DOOR_CLOSED;
+//                    charMap[y][x] = posgima2.RenderPanel.DOOR_CLOSED;
 //                }
                 // Top or bottom row, place a wall
                 if(y == startRow || y == endRow) {

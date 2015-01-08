@@ -1,3 +1,5 @@
+package posgima2;
+
 import java.util.LinkedList;
 
 /**
@@ -6,6 +8,7 @@ import java.util.LinkedList;
 public class Monster extends Entity{
     private boolean[][] visibility;
     private boolean aggroPlayer;
+    private int aggroTurnStart;
 
     private LinkedList<Vector2i> moveQueue;
     private int age;
@@ -14,6 +17,7 @@ public class Monster extends Entity{
         super(glyph);
         moveQueue = new LinkedList<Vector2i>();
         aggroPlayer = false;
+        aggroTurnStart = 0;
         alive = true;
         strength = 1;
         maxHP = 7;
@@ -36,9 +40,25 @@ public class Monster extends Entity{
         alive = false;
         this.tile.addItem(new Corpse('}', this));
         this.tile.remove(this);
-        //WindowFrame.setupWindow.println(this + " died.");
+        //posgima2.WindowFrame.setupWindow.println(this + " died.");
         return true;
     }
+
+    public void setAggro(boolean b, int turn) {
+        aggroPlayer = b;
+        if(b) {
+            aggroTurnStart = turn;
+        }
+    }
+
+    public boolean isAggroPlayer() {
+        return aggroPlayer;
+    }
+
+    public int getAggroTurnStart() {
+        return aggroTurnStart;
+    }
+
 
     public LinkedList<Vector2i> getMoveQueue() {
         return moveQueue;

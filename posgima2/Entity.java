@@ -1,3 +1,7 @@
+package posgima2;
+
+import java.util.ArrayList;
+
 /**
  * Created by Jesse Pospisil on 1/2/2015.
  */
@@ -15,6 +19,8 @@ public abstract class Entity {
     protected boolean alive;
 
     protected boolean attackedThisTurn;
+    protected ArrayList<Item> inventory;
+    protected String name;
 
     public Entity(char glyph) {
         this.glyph = glyph;
@@ -22,6 +28,7 @@ public abstract class Entity {
         y = 0;
         x = 0;
         attackedThisTurn = false;
+        inventory = new ArrayList<Item>();
     }
 
     public boolean move(int dir) {
@@ -141,13 +148,13 @@ public abstract class Entity {
                 }
 
             } else {
-                //WindowFrame.writeConsole("/info/" + entity + " could not defend.");
+                //posgima2.WindowFrame.writeConsole("/info/" + entity + " could not defend.");
                 entity.applyDamage(this.strength);
                 attackedThisTurn = true;
                 sendCombatMessage(this, entity);
             }
         } else {
-            //WindowFrame.writeConsole("/info/" + this + " could not attack.");
+            //posgima2.WindowFrame.writeConsole("/info/" + this + " could not attack.");
         }
     }
 
@@ -168,5 +175,24 @@ public abstract class Entity {
         if(currentHP < maxHP) {
             currentHP++;
         }
+    }
+
+    public void addInventory(Item i) {
+        inventory.add(i);
+    }
+
+    public ArrayList<Item> getInventory() {
+        return inventory;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        if(name != null)
+            return name;
+        return String.valueOf(hashCode());
     }
 }

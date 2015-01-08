@@ -1,3 +1,8 @@
+package posgima2;
+
+import weapon.Sword;
+import weapon.Weapon;
+
 import java.util.ArrayList;
 
 /**
@@ -76,10 +81,13 @@ public class Dungeon {
             case RenderPanel.WALL: return false;
             case RenderPanel.DOOR_CLOSED: return false;
         }
-//        if(tileMap[y][x].getGlyph() == RenderPanel.WALL)
+//        if(tileMap[y][x].getGlyph() == posgima2.RenderPanel.WALL)
 //            return false;
-        if(hasMonster(y, x) && getMonsterAt(y, x).isAlive())
+        if(hasEntity(y, x)) {
+            if(!getEntityAt(y, x).isAlive())
+                return true;
             return false;
+        }
         return true;
     }
 
@@ -90,6 +98,12 @@ public class Dungeon {
             return true;
         }
 
+        return false;
+    }
+
+    public boolean hasEntity(int y, int x) {
+        if(tileMap[y][x].getEntity() != null)
+            return true;
         return false;
     }
 
@@ -133,9 +147,7 @@ public class Dungeon {
             do {
                 tile = getRandomTileOf(RenderPanel.FLOOR);
             } while(tile.hasEntity());
-            Monster monster = new Monster('r');
-            monsters.add(monster);
-            tile.addEntity(monster);
+            spawnRandomMonster();
         }
     }
 
@@ -152,28 +164,57 @@ public class Dungeon {
     }
 
     private void sprinkleItems() {
-        for(int i = 0; i < 25; i++) {
-            Item item = new Item(RenderPanel.SCROLL);
-            getRandomTileOf(RenderPanel.FLOOR).addItem(item);
-        }
-
-        for(int i = 0; i < 25; i++) {
-            Item item = new Item(RenderPanel.ITEM);
-            getRandomRoom().addItem(tileMap, item);
-        }
-
-        for(int i = 0; i < 10; i++) {
-            Item item = new Item(RenderPanel.WEAPON);
-            getRandomRoom().addItem(tileMap, item);
+        for(int i = 0; i < 50; i++) {
+            Sword sword = new Sword(RenderPanel.WEAPON, 5, 0, 0);
+            getRandomTileOf(RenderPanel.FLOOR).addItem(sword);
         }
     }
 
-    public void spawnMonster(char glyph, boolean[][] invalidList) {
+    public void spawnRandomMonster(boolean[][] invalidList) {
         Tile tile = null;
         do{
             tile = getRandomTileOf(RenderPanel.FLOOR);
-        } while(invalidList[tile.getY()][tile.getX()] == true && tile.hasEntity());
+        } while(invalidList[tile.getY()][tile.getX()] && tile.hasEntity());
+        int m = (int)(Math.random() * 5);
+        char glyph = 'x';
+        String name = "x";
+        switch(m) {
+            case 0: glyph = 'r'; name = "large rat"; break;
+            case 1: glyph = 'g'; name = "goblin"; break;
+            case 2: glyph = 'D'; name = "dragon"; break;
+            case 3: glyph = 'T'; name = "troll"; break;
+            case 4: glyph = 'b'; name = "bat"; break;
+        }
         Monster monster = new Monster(glyph);
+        monster.setName(name);
+        monsters.add(monster);
+        tile.addEntity(monster);
+        //System.out.println("spawned mob");
+    }
+
+    private Monster createRandomMonster() {
+        int m = (int)(Math.random() * 5);
+        char glyph = 'x';
+        String name = "x";
+        switch(m) {
+            case 0: glyph = 'r'; name = "large rat"; break;
+            case 1: glyph = 'g'; name = "goblin"; break;
+            case 2: glyph = 'D'; name = "dragon"; break;
+            case 3: glyph = 'T'; name = "troll"; break;
+            case 4: glyph = 'b'; name = "bat"; break;
+        }
+        Monster monster = new Monster(glyph);
+        monster.setName(name);
+        return monster;
+    }
+
+    public void spawnRandomMonster() {
+        Tile tile = null;
+        do{
+            tile = getRandomTileOf(RenderPanel.FLOOR);
+        } while(tile.hasEntity());
+
+        Monster monster = createRandomMonster();
         monsters.add(monster);
         tile.addEntity(monster);
         //System.out.println("spawned mob");
@@ -285,7 +326,7 @@ public class Dungeon {
         int height;
         int width;
         Vector2i center;
-        //Direction dir;
+        //posgima2.Direction dir;
         int maxTimeout = 50;
         int timeout = 0;
         //int offset = 0;
@@ -362,6 +403,10 @@ public class Dungeon {
 
     public Monster getMonsterAt(int row, int col) {
         return (Monster) tileMap[row][col].getEntity();
+    }
+
+    public Entity getEntityAt(int row, int col) {
+        return tileMap[row][col].getEntity();
     }
 
     public Tile[][] getTileMap() {

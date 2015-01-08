@@ -1,3 +1,5 @@
+package posgima2;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -8,11 +10,11 @@ import java.awt.event.*;
 public class WindowFrame extends JFrame implements KeyEventPostProcessor, WindowListener {
     static SetupWindow setupWindow;
 
-    RenderPanel renderPanel;
+    static RenderPanel renderPanel;
     static ConsolePanel consolePanel;
-    StatisticsPanel statisticsPanel;
+    static StatisticsPanel statisticsPanel;
 
-    Game game;
+    static Game game;
 
     public WindowFrame(String title) throws HeadlessException {
         super(title);
@@ -77,8 +79,8 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
 
     }
 
-    public void Update() {
-        long time = System.currentTimeMillis();
+    public static void Update() {
+        //long time = System.currentTimeMillis();
         renderPanel.Update();
 
         //setupWindow.println("update took " + (System.currentTimeMillis() - time));
@@ -138,6 +140,16 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
             return true;
         }
         return false;
+    }
+
+    /**
+     * Only call this if the player's state is not STATE_READY
+     */
+    public static void forceGameUpdate() {
+        GameState nextState = game.Update(null);
+        statisticsPanel.update(nextState);
+        renderPanel.updateGameState(nextState);
+        Update();
     }
 
     public static void writeConsole(String string) {

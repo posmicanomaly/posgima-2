@@ -1,3 +1,5 @@
+package posgima2;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -10,11 +12,13 @@ public class StatisticsPanel extends JPanel{
     public StatisticsPanel() {
         setBackground(Color.black);
 
-        statisticsTextArea = new JTextArea("Player\nBarbarian\n\nHP: 15 / 16\nStr: 0\nAgi: 0\n\nNormal");
+        statisticsTextArea = new JTextArea("posgima2.Player\nBarbarian\n\nHP: 15 / 16\nStr: 0\nAgi: 0\n\nNormal");
         statisticsTextArea.setFont(new Font("Consolas", Font.PLAIN, 16));
         statisticsTextArea.setForeground(Color.white);
         statisticsTextArea.setOpaque(false);
         statisticsTextArea.setEditable(false);
+        //statisticsTextArea.setWrapStyleWord(false);
+        //statisticsTextArea.setLineWrap(true);
 
         statisticsScroller = new JScrollPane(statisticsTextArea);
         statisticsScroller.setOpaque(false);
@@ -44,7 +48,11 @@ public class StatisticsPanel extends JPanel{
         result.append("\n");
         result.append(p.getTile().getGlyph()).append("\n");
         if(p.getTile().hasItems()) {
-            result.append("items lay here").append("\n");
+            if(p.getTile().getItems().size() > 1) {
+                result.append("items lay here").append("\n");
+            } else {
+                result.append(p.getTile().getItems().get(0)).append(" on ground\n");
+            }
         } else {
             result.append("\n");
         }

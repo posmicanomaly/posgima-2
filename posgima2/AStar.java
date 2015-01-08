@@ -1,3 +1,5 @@
+package posgima2;
+
 import java.util.ArrayList;
 
 /**
@@ -66,7 +68,7 @@ public class AStar {
                 path.add(new Vector2i(parent.y, parent.x));
                 parent = parent.parent;
             }
-            //WindowFrame.setupWindow.println("closed " + closed.size());
+            //posgima2.WindowFrame.setupWindow.println("closed " + closed.size());
             return path;
         }
         return null;

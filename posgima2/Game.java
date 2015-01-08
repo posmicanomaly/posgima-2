@@ -1,5 +1,9 @@
+package posgima2;
+
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
+import static posgima2.Controls.*;
 
 /**
  * Created by Jesse Pospisil on 12/27/2014.
@@ -10,7 +14,7 @@ public class Game {
     public static final String STAGE = "Alpha";
 
     /**
-     * Dungeon dimensions
+     * posgima2.Dungeon dimensions
      */
     private static final int TEST_MAP_HEIGHT = 64;
     private static final int TEST_MAP_WIDTH = 128;
@@ -24,13 +28,16 @@ public class Game {
     public static final int RIGHT = 3;
     /**
      * STATE_x
-     * Player states such as "ready", "door closed", "item pickup"
+     * posgima2.Player states such as "ready", "door closed", "item pickup"
      * to determine which key options to accept, and control game flow.
      */
+    public static final int STATE_CANCEL = -1;
     public static final int STATE_READY = 0;
     public static final int STATE_DOOR_CLOSED = 1;
     private static final int STATE_GAME_OVER = 2;
     public static final int STATE_ITEM_PICKUP = 3;
+    private static final int STATE_LOOTING = 4;
+    public static final int STATE_LOOTED = 5;
 
     /**
      * PLAYER_x
@@ -59,6 +66,10 @@ public class Game {
     private Player player;
     private Dungeon dungeon;
 
+    private LootWindow lootWindow;
+    private CharacterWindow characterWindow;
+    private InventoryWindow inventoryWindow;
+
     /**
      * Set true if a major move was performed, like moving, or quaffing, opening a door
      * Do not set if a move was cancelled, didn't open door, didn't pick up items, etc.
@@ -74,6 +85,7 @@ public class Game {
         Vector2i center = startingRoom.getCenter();
 
         player = new Player('@');
+        player.setName("AlphaTester");
 
         dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
@@ -83,6 +95,8 @@ public class Game {
         MAX_MONSTERS = dungeon.getMonsters().size() * 2;
 
         turns = 0;
+        characterWindow = new CharacterWindow(player);
+        inventoryWindow = new InventoryWindow(player);
     }
 
     /**
@@ -96,47 +110,89 @@ public class Game {
      * @return
      */
     public GameState Update(KeyEvent e) {
+
         turnTickActionOccurred = false;
-        switch(player.getState()) {
+        switch (player.getState()) {
+            /*
+            The main player STATE. The player is ready for anything(mostly), so process the most keys
+             */
             case STATE_READY:
                 processStateReadyKeys(e);
                 break;
+            /*
+            Use STATE_CANCEL when returning from another window, because forceGameUpdate passes a null KeyEvent, and
+            so STATE_READY would try and read that key event and crash.
+             */
+            case STATE_CANCEL:
+                player.setState(STATE_READY);
+                break;
+            /*
+            STATE_LOOTED is for after we've looted items from the Loot window.
+            It can provide a message stating such, and also sets the turn to be expended.
+            Currently, looting one or more items only takes up a single turn, the player grabs items very quickly
+            apparently.
+             */
+            case STATE_LOOTED:
+                StringBuilder inventoryMessage = new StringBuilder("inventory: ");
+                for (Item i : player.getInventory()) {
+                    inventoryMessage.append("[").append(i).append("] ");
+                }
+                WindowFrame.writeConsole(inventoryMessage.toString());
+                turnTickActionOccurred = true;
+                player.setState(STATE_READY);
+                break;
+            /*
+            STATE_DOOR_CLOSED is set when the player bumps into a door. A should already have been sent at this point
+             before setting this state, and so the next key pressed(Y/n), will be passed into
+             processStateDoorClosedKeys().
+             */
             case STATE_DOOR_CLOSED:
                 processStateDoorClosedKeys(e);
                 break;
-            case STATE_ITEM_PICKUP:
-                processItemPickupKeys(e);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /*
+            STATES below here are "blocking"
+            Usually set when we've opened another window like when looting
+            This is important because the WindowFrame is always listening, and we don't want to allow movement or
+            other actions while looting. Similar to how we use specific processKey methods for various other states
+            to prevent illegal actions.
+             */
+            case STATE_LOOTING:
+                break;
             case STATE_GAME_OVER:
                 break;
         }
-        if(turnTickActionOccurred) {
+        /*
+        If the turn has been expended by the player, or otherwise set due to an effect
+         */
+        if (turnTickActionOccurred) {
             processMonsters();
 
+            /*
+            todo: have player calculate their own vis, remove it from dungeon.
+             */
             dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
+            /*
+            Reset the attack states so next turn everyone can attack again.
+             */
             resetAttackStates();
+
             endTurn();
             turns++;
         }
 
-        GameState gameState = new GameState();
-        gameState.setPlayer(player);
-        gameState.setDungeon(dungeon);
-        gameState.setTurns(turns);
-        return gameState;
+        inventoryWindow.update();
+        characterWindow.update();
+
+        return getGameState();
     }
 
-    private void processItemPickupKeys(KeyEvent e) {
-        switch(e.getKeyCode()) {
-            case KeyEvent.VK_Y:
-                WindowFrame.writeConsole("temp, you pick up the items.");
-                player.setState(STATE_READY);
-                break;
-            case KeyEvent.VK_N:
-                WindowFrame.writeConsole("temp, you leave the items.");
-                player.setState(STATE_READY);
-                break;
-        }
+    private void processItemLootingWithWindow() {
+        lootWindow = new LootWindow(dungeon.getTileMap()[player.getY()][player.getX()], player);
+        player.setState(STATE_LOOTING);
     }
+
 
     private void resetAttackStates() {
         player.resetTurnTick();
@@ -160,20 +216,17 @@ public class Game {
         }
     }
 
+
     private void processStateDoorClosedKeys(KeyEvent e) {
         switch(e.getKeyCode()) {
-            case KeyEvent.VK_Y:
-                WindowFrame.writeConsole("temp, you open door");
+            case KEY_YES:
+                WindowFrame.writeConsole("You open the door.");
                 dungeon.toggleDoor(player.getTargetTile());
                 turnTickActionOccurred = true;
                 player.setState(STATE_READY);
                 break;
-            case KeyEvent.VK_N:
-                WindowFrame.writeConsole("temp, you choose no");
-                player.setState(STATE_READY);
-                break;
-            case KeyEvent.VK_Z:
-                WindowFrame.writeConsole("temp, you canceled menu");
+            case KEY_NO:
+                // Chose not to open door
                 player.setState(STATE_READY);
                 break;
         }
@@ -188,19 +241,19 @@ public class Game {
             /*
             Movement
              */
-            case KeyEvent.VK_W:
+            case KEY_NORTH:
                 moveRequest = true;
                 nextY--;
                 break;
-            case KeyEvent.VK_S:
+            case KEY_SOUTH:
                 moveRequest = true;
                 nextY++;
                 break;
-            case KeyEvent.VK_A:
+            case KEY_WEST:
                 moveRequest = true;
                 nextX--;
                 break;
-            case KeyEvent.VK_D:
+            case KEY_EAST:
                 moveRequest = true;
                 nextX++;
                 break;
@@ -208,17 +261,13 @@ public class Game {
             /*
             Interaction
              */
-            case KeyEvent.VK_COMMA:
+            case KEY_PICKUP:
                 itemPickupRequest = true;
                 break;
 
             /*
             Other
              */
-            case KeyEvent.VK_R:
-                WindowFrame.writeConsole("/success/initMap()");
-                initMap();
-                break;
             case KeyEvent.VK_P:
                 dungeon.setFullyExplored();
                 WindowFrame.writeConsole("/success/map fully explored");
@@ -227,6 +276,19 @@ public class Game {
                 WindowFrame.writeConsole("idle");
                 turnTickActionOccurred = true;
                 break;
+            case KEY_CHARACTER:
+                if (characterWindow.isVisible()) {
+                    characterWindow.hideWindow();
+                } else {
+                    characterWindow.showWindow();
+                }
+                break;
+            case KEY_INVENTORY:
+                if(inventoryWindow.isVisible()) {
+                    inventoryWindow.hideWindow();
+                } else {
+                    inventoryWindow.showWindow();
+                }
         }
 
         if (moveRequest) {
@@ -236,10 +298,10 @@ public class Game {
                     turnTickActionOccurred = true;
                     break;
                 case PLAYER_HIT_WALL:
-                    WindowFrame.writeConsole("You bump into the wall.");
+                    WindowFrame.writeConsole("You bump into the wall. OUCH!");
                     break;
                 case PLAYER_HIT_CLOSED_DOOR:
-                    WindowFrame.writeConsole("temp, Open door? Y/n/z");
+                    WindowFrame.writeConsole("Will you open the door? Y/n");
                     break;
                 case ERROR_PLAYER_MOVE:
                     WindowFrame.writeConsole("/warning/processMovePlayerRequest() error in <not passable><no " +
@@ -253,8 +315,7 @@ public class Game {
         } else if(itemPickupRequest) {
             switch(processPlayerItemPickupRequest()) {
                 case TILE_HAS_ITEMS:
-                    WindowFrame.writeConsole("temp, pick up items? Y/n");
-                    player.setState(STATE_ITEM_PICKUP);
+                    processItemLootingWithWindow();
                     break;
                 case TILE_HAS_NO_ITEMS:
                     WindowFrame.writeConsole("There's nothing to pickup.");
@@ -315,26 +376,84 @@ public class Game {
         return monster.getVisibility()[player.getY()][player.getX()];
     }
 
+    private void setMonsterPathToPlayer(Monster m) {
+        AStar astar = new AStar(dungeon);
+        ArrayList<Vector2i> shortestPath = astar.getPath(new Vector2i(m.getY(), m.getX()), new Vector2i
+                (player.getY(), player.getX()), false, true);
+        m.getMoveQueue().clear();
+
+        // i = size - 2 because we throw away the first move, because its the current location.
+        for(int i = shortestPath.size() - 2; i >= 0; i--) {
+            // System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
+            m.getMoveQueue().add(shortestPath.get(i));
+        }
+        // System.out.println("process monsters took " + (System.currentTimeMillis() - time));
+    }
+
     private void processMonsters() {
         for(Monster m : dungeon.getMonsters()) {
             if(!m.isAlive()) {
                 continue;
             }
             m.calculateVisibility(dungeon);
+            /*
+            If monster can see player
+             */
             if(monsterCanSeePlayer(m)) {
-                AStar astar = new AStar(dungeon);
-                ArrayList<Vector2i> shortestPath = astar.getPath(new Vector2i(m.getY(), m.getX()), new Vector2i
-                        (player.getY(), player.getX()), false, true);
-                m.getMoveQueue().clear();
+                /*
+                If monster is already aggro on player
+                 */
+                if(m.isAggroPlayer()) {
+                    /*
+                    Every 3rd turn that this Monster has been aggro on the player
+                    perform a fresh path calculation.
+                    This is to prevent lockstep movement, at "2" you can run circles with a Monster.
+                    at "3" its a little bit more spaced out.
+                     */
 
-                // i = size - 2 because we throw away the first move, because its the current location.
-                for(int i = shortestPath.size() - 2; i >= 0; i--) {
-                   // System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
-                    m.getMoveQueue().add(shortestPath.get(i));
+                    /*
+                    If the turn is multiple of 3
+                     */
+                    if((turns - m.getAggroTurnStart()) % 3 == 0) {
+                        setMonsterPathToPlayer(m);
+                        //WindowFrame.writeConsole(m + " fresh calc");
+                    }
+                    /*
+                    If the move queue is empty
+                     */
+                    if(m.getMoveQueue().size() == 0) {
+                        setMonsterPathToPlayer(m);
+                        //WindowFrame.writeConsole(m + " moveQueue empty, sees you, aggro on you already. Recalc");
+                    }
                 }
-               // System.out.println("process monsters took " + (System.currentTimeMillis() - time));
+                /*
+                If monster is not aggro on player
+                 */
+                else if(!m.isAggroPlayer()){
+                    m.setAggro(true, turns);
+                    setMonsterPathToPlayer(m);
+                    WindowFrame.writeConsole(m + " aggro on you");
+                }
             }
 
+            /*
+            If monster cannot see the player
+             */
+            else {
+                /*
+                But they are aggro, and they have no more moves left in their queue
+                 */
+                if(m.isAggroPlayer() && m.getMoveQueue().size() == 0) {
+                    // Drop aggro
+                    m.setAggro(false, turns);
+                    //WindowFrame.writeConsole(m + " dropped aggro");
+                }
+            }
+
+            /*
+            If there are no moves in the monster's queue
+            Pick a random direction and go
+             */
             if(m.getMoveQueue().size() == 0) {
                 int direction = (int) (Math.random() * 4);
                 int nextY = m.getY();
@@ -354,24 +473,32 @@ public class Game {
                         break;
                 }
                 if (dungeon.isPassable(nextX, nextY)) {
-                    //m.move(direction);
                     // Monsters can't open doors (yet)
                     if(dungeon.getTileMap()[nextY][nextX].getGlyph() != RenderPanel.DOOR_CLOSED)
-                        m.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
+                        m.getMoveQueue().add(new Vector2i(nextY, nextX));
+                       // m.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
                 }
-            } else {
+            }
+            /*
+            Otherwise, process next move in queue
+             */
+            if(m.getMoveQueue().size() > 0) {
                 processMonsterMoveQueue(m);
             }
+            //}
         }
+        /*
+        Spawn a new monster if we're below the max limit.
+         */
         if(dungeon.getMonsters().size() < MAX_MONSTERS) {
-            dungeon.spawnMonster('r', dungeon.getVisibleMap());
+            dungeon.spawnRandomMonster(dungeon.getVisibleMap());
         }
     }
 
     private void processMonsterMoveQueue(Monster m) {
         Vector2i next = m.getMoveQueue().remove();
         if(hasPlayer(next.getY(), next.getX())) {
-            //WindowFrame.writeConsole("/combat//def/" + m + " hits you");
+            //posgima2.WindowFrame.writeConsole("/combat//def/" + m + " hits you");
             m.meleeAttack(player, false);
             if(!player.isAlive()) {
                 WindowFrame.writeConsole("/warning/You died.");
@@ -393,11 +520,11 @@ public class Game {
         return y == player.getY() && x == player.getX();
     }
 
-//    private void evaluatePlayer(Player player) {
-//        Tile tile = player.getTile();
-//        if(tile.getGlyph() == RenderPanel.DOOR_CLOSED) {
-//            tile.setGlyph(RenderPanel.DOOR_OPEN);
-//            WindowFrame.writeConsole("You open the door.");
+//    private void evaluatePlayer(posgima2.Player player) {
+//        posgima2.Tile tile = player.getTile();
+//        if(tile.getGlyph() == posgima2.RenderPanel.DOOR_CLOSED) {
+//            tile.setGlyph(posgima2.RenderPanel.DOOR_OPEN);
+//            posgima2.WindowFrame.writeConsole("You open the door.");
 //        }
 //    }
 
@@ -410,10 +537,9 @@ public class Game {
 
     public GameState getGameState() {
         GameState gameState = new GameState();
-        gameState.setMessage("getGameState()");
         gameState.setPlayer(player);
-        //gameState.setMap(charMap);
         gameState.setDungeon(dungeon);
+        gameState.setTurns(turns);
         return gameState;
     }
 }

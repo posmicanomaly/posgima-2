@@ -1,3 +1,5 @@
+package posgima2;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -6,6 +8,10 @@ import java.awt.*;
  */
 public class SetupWindow extends JFrame {
     private static JTextArea console;
+    private static JLabel currentRoomsMadeLabel;
+    private static JLabel totalRoomsLabel;
+    private static JLabel totalConnectionsMadeLabel;
+    private static JLabel currentOperationLabel;
     private JScrollPane consoleScroller;
 
     public SetupWindow() {
@@ -24,5 +30,9 @@ public class SetupWindow extends JFrame {
     public static void println(String line) {
         console.append(line + "\n");
         console.setCaretPosition(console.getText().length());
+    }
+
+    public static void setCurrentRoomsMade(int r) {
+
     }
 }

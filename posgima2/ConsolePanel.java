@@ -1,3 +1,5 @@
+package posgima2;
+
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;

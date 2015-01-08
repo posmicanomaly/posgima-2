@@ -1,9 +1,16 @@
-package posgima2;
+package posgima2.world.dungeon;
 
+import posgima2.FieldOfView;
+import posgima2.Vector2i;
+import posgima2.pathfinding.AStar;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;
 import posgima2.swing.WindowFrame;
 import posgima2.item.weapon.Sword;
+import posgima2.world.Entity;
+import posgima2.world.Monster;
+import posgima2.world.Room;
+import posgima2.world.Tile;
 
 import java.util.ArrayList;
 
@@ -19,8 +26,8 @@ public class Dungeon {
 
     char[][] charMap;
     Tile[][] tileMap;
-    int MAP_ROWS;
-    int MAP_COLS;
+    private final int MAP_ROWS;
+    private final int MAP_COLS;
     private boolean[][] visibleMap;
     private boolean[][] exploredMap;
     private ArrayList<Monster> monsters;
@@ -427,5 +434,13 @@ public class Dungeon {
         } else {
             WindowFrame.writeConsole("/warning/toggleDoor() error");
         }
+    }
+
+    public int getMAP_ROWS() {
+        return MAP_ROWS;
+    }
+
+    public int getMAP_COLS() {
+        return MAP_COLS;
     }
 }

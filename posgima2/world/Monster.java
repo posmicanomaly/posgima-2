@@ -1,4 +1,9 @@
-package posgima2;
+package posgima2.world;
+
+import posgima2.Corpse;
+import posgima2.FieldOfView;
+import posgima2.Vector2i;
+import posgima2.world.dungeon.Dungeon;
 
 import java.util.LinkedList;
 
@@ -30,7 +35,7 @@ public class Monster extends Entity{
     }
 
     public void calculateVisibility(Dungeon dungeon) {
-        visibility = new boolean[dungeon.MAP_ROWS][dungeon.MAP_COLS];
+        visibility = new boolean[dungeon.getMAP_ROWS()][dungeon.getMAP_COLS()];
         for(Vector2i v : FieldOfView.bresenhamFov(dungeon.getTileMap(), y, x, 0)) {
             visibility[v.getY()][v.getX()] = true;
         }

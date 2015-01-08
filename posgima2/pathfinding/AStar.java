@@ -1,8 +1,10 @@
-package posgima2;
+package posgima2.pathfinding;
 
+import posgima2.world.dungeon.Dungeon;
+import posgima2.world.Tile;
+import posgima2.Vector2i;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;
-import posgima2.swing.WindowFrame;
 
 import java.util.ArrayList;
 
@@ -123,11 +125,11 @@ public class AStar {
         int xd = Math.abs(start.getX() - end.getX());
         int yd = Math.abs(start.getY() - end.getY());
 
-        int minY = start.y - yd * 4;
-        int maxY = start.y + yd * 4;
+        int minY = start.getY() - yd * 4;
+        int maxY = start.getY() + yd * 4;
 
-        int minX = start.x - xd * 4;
-        int maxX = start.x + xd * 4;
+        int minX = start.getX() - xd * 4;
+        int maxX = start.getX() + xd * 4;
 
         if(current.y - 1 > 0 && current.y - 1 > minY)
             nodes.add(new AStarNode(current.y - 1, current.x));

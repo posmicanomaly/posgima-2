@@ -1,7 +1,10 @@
 package posgima2;
 
 import posgima2.item.Item;
+import posgima2.pathfinding.AStar;
 import posgima2.swing.*;
+import posgima2.world.*;
+import posgima2.world.dungeon.Dungeon;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -17,7 +20,7 @@ public class Game {
     public static final String STAGE = "Pre Alpha";
 
     /**
-     * posgima2.Dungeon dimensions
+     * posgima2.world.dungeon.Dungeon dimensions
      */
     private static final int TEST_MAP_HEIGHT = 64;
     private static final int TEST_MAP_WIDTH = 128;
@@ -31,7 +34,7 @@ public class Game {
     public static final int RIGHT = 3;
     /**
      * STATE_x
-     * posgima2.Player states such as "ready", "door closed", "item pickup"
+     * posgima2.world.Player states such as "ready", "door closed", "item pickup"
      * to determine which key options to accept, and control game flow.
      */
     public static final int STATE_CANCEL = -1;
@@ -507,6 +510,10 @@ public class Game {
                 WindowFrame.writeConsole("/warning/You died.");
                 player.setState(STATE_GAME_OVER);
             }
+            /*
+            Clear the move queue now, so we don't teleport to the next spot.
+             */
+            m.getMoveQueue().clear();
         } else if(dungeon.isPassable(next.getX(), next.getY())) {
             //m.move(direction);
             if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() != RenderPanel.DOOR_CLOSED)
@@ -523,8 +530,8 @@ public class Game {
         return y == player.getY() && x == player.getX();
     }
 
-//    private void evaluatePlayer(posgima2.Player player) {
-//        posgima2.Tile tile = player.getTile();
+//    private void evaluatePlayer(posgima2.world.Player player) {
+//        posgima2.world.Tile tile = player.getTile();
 //        if(tile.getGlyph() == posgima2.swing.RenderPanel.DOOR_CLOSED) {
 //            tile.setGlyph(posgima2.swing.RenderPanel.DOOR_OPEN);
 //            posgima2.swing.WindowFrame.writeConsole("You open the door.");

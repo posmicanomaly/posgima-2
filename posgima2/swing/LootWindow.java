@@ -2,8 +2,8 @@ package posgima2.swing;
 
 import posgima2.Game;
 import posgima2.item.Item;
-import posgima2.Player;
-import posgima2.Tile;
+import posgima2.world.Player;
+import posgima2.world.Tile;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

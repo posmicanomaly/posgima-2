@@ -1,6 +1,6 @@
 package posgima2.swing;
 
-import posgima2.Player;
+import posgima2.world.Player;
 
 import javax.swing.*;
 import java.awt.*;

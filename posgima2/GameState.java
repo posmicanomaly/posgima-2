@@ -1,5 +1,8 @@
 package posgima2;
 
+import posgima2.world.dungeon.Dungeon;
+import posgima2.world.Player;
+
 /**
  * Created by Jesse Pospisil on 12/27/2014.
  */

@@ -1,5 +1,7 @@
-package posgima2;
+package posgima2.world;
 
+import posgima2.Direction;
+import posgima2.Vector2i;
 import posgima2.item.Item;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;

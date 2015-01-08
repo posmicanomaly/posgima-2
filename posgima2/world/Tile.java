@@ -1,4 +1,4 @@
-package posgima2;
+package posgima2.world;
 
 import posgima2.item.Item;
 

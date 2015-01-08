@@ -1,5 +1,6 @@
-package posgima2;
+package posgima2.world;
 
+import posgima2.Game;
 import posgima2.item.Item;
 import posgima2.swing.WindowFrame;
 

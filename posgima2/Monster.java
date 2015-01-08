@@ -40,7 +40,7 @@ public class Monster extends Entity{
         alive = false;
         this.tile.addItem(new Corpse('}', this));
         this.tile.remove(this);
-        //posgima2.WindowFrame.setupWindow.println(this + " died.");
+        //posgima2.swing.WindowFrame.setupWindow.println(this + " died.");
         return true;
     }
 

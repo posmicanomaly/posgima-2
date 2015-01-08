@@ -1,7 +1,9 @@
 package posgima2;
 
-import weapon.Sword;
-import weapon.Weapon;
+import posgima2.swing.RenderPanel;
+import posgima2.swing.SetupWindow;
+import posgima2.swing.WindowFrame;
+import posgima2.item.weapon.Sword;
 
 import java.util.ArrayList;
 
@@ -35,16 +37,16 @@ public class Dungeon {
 
         rooms = new ArrayList<Room>();
 
-        WindowFrame.setupWindow.println("Creating and connecting rooms");
+        SetupWindow.println("Creating and connecting rooms");
         createAndConnectRooms(40);
-        WindowFrame.setupWindow.println("total rooms: " + rooms.size());
+        SetupWindow.println("total rooms: " + rooms.size());
 
-        WindowFrame.setupWindow.println("blasting rooms");
+        SetupWindow.println("blasting rooms");
         blastExtraEntrances(rooms.size() / 4);
 
-        WindowFrame.setupWindow.println("finishing map");
+        SetupWindow.println("finishing map");
         finishMap();
-        WindowFrame.setupWindow.println("creating tileMap");
+        SetupWindow.println("creating tileMap");
         for(int y = 0; y < MAP_ROWS; y++) {
             for(int x = 0; x < MAP_COLS; x++) {
                 Tile tile = new Tile(charMap[y][x], y, x);
@@ -52,9 +54,9 @@ public class Dungeon {
             }
         }
 
-        WindowFrame.setupWindow.println("sprinkling items");
+        SetupWindow.println("sprinkling items");
         sprinkleItems();
-        WindowFrame.setupWindow.println("sprinkling monsters");
+        SetupWindow.println("sprinkling monsters");
         sprinkleMonsters();
     }
 
@@ -81,7 +83,7 @@ public class Dungeon {
             case RenderPanel.WALL: return false;
             case RenderPanel.DOOR_CLOSED: return false;
         }
-//        if(tileMap[y][x].getGlyph() == posgima2.RenderPanel.WALL)
+//        if(tileMap[y][x].getGlyph() == posgima2.swing.RenderPanel.WALL)
 //            return false;
         if(hasEntity(y, x)) {
             if(!getEntityAt(y, x).isAlive())
@@ -247,7 +249,7 @@ public class Dungeon {
             startEntrance = start.getViableEntranceLocation();
             start.addEntrance(startEntrance, charMap);
         } else {
-            WindowFrame.setupWindow.println(start + " no unconnected rooms, cannot add new entrance, using existing one");
+            SetupWindow.println(start + " no unconnected rooms, cannot add new entrance, using existing one");
             startEntrance = start.getEntrances().get((int)(Math.random() * start.getEntrances().size()));
         }
 
@@ -257,7 +259,7 @@ public class Dungeon {
             endEntrance = end.getViableEntranceLocation();
             end.addEntrance(endEntrance, charMap);
         } else {
-            WindowFrame.setupWindow.println(end + " no unconnected rooms, cannot add new entrance, using existing one");
+            SetupWindow.println(end + " no unconnected rooms, cannot add new entrance, using existing one");
             endEntrance = end.getEntrances().get((int)(Math.random() * end.getEntrances().size()));
         }
         carvePath(startEntrance, endEntrance, fillglyph);

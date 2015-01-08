@@ -1,5 +1,8 @@
 package posgima2;
 
+import posgima2.item.Item;
+import posgima2.swing.*;
+
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
@@ -498,7 +501,7 @@ public class Game {
     private void processMonsterMoveQueue(Monster m) {
         Vector2i next = m.getMoveQueue().remove();
         if(hasPlayer(next.getY(), next.getX())) {
-            //posgima2.WindowFrame.writeConsole("/combat//def/" + m + " hits you");
+            //posgima2.swing.WindowFrame.writeConsole("/combat//def/" + m + " hits you");
             m.meleeAttack(player, false);
             if(!player.isAlive()) {
                 WindowFrame.writeConsole("/warning/You died.");
@@ -522,9 +525,9 @@ public class Game {
 
 //    private void evaluatePlayer(posgima2.Player player) {
 //        posgima2.Tile tile = player.getTile();
-//        if(tile.getGlyph() == posgima2.RenderPanel.DOOR_CLOSED) {
-//            tile.setGlyph(posgima2.RenderPanel.DOOR_OPEN);
-//            posgima2.WindowFrame.writeConsole("You open the door.");
+//        if(tile.getGlyph() == posgima2.swing.RenderPanel.DOOR_CLOSED) {
+//            tile.setGlyph(posgima2.swing.RenderPanel.DOOR_OPEN);
+//            posgima2.swing.WindowFrame.writeConsole("You open the door.");
 //        }
 //    }
 

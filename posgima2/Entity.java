@@ -1,5 +1,8 @@
 package posgima2;
 
+import posgima2.item.Item;
+import posgima2.swing.WindowFrame;
+
 import java.util.ArrayList;
 
 /**
@@ -148,13 +151,13 @@ public abstract class Entity {
                 }
 
             } else {
-                //posgima2.WindowFrame.writeConsole("/info/" + entity + " could not defend.");
+                //posgima2.swing.WindowFrame.writeConsole("/info/" + entity + " could not defend.");
                 entity.applyDamage(this.strength);
                 attackedThisTurn = true;
                 sendCombatMessage(this, entity);
             }
         } else {
-            //posgima2.WindowFrame.writeConsole("/info/" + this + " could not attack.");
+            //posgima2.swing.WindowFrame.writeConsole("/info/" + this + " could not attack.");
         }
     }
 

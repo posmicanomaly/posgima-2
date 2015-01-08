@@ -1,5 +1,7 @@
 package posgima2;
 
+import posgima2.swing.WindowFrame;
+
 /**
  * Created by Jesse Pospisil on 12/26/2014.
  */

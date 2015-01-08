@@ -1,5 +1,9 @@
 package posgima2;
 
+import posgima2.item.Item;
+import posgima2.swing.RenderPanel;
+import posgima2.swing.SetupWindow;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -167,7 +171,7 @@ public class Room {
             for(int x = startCol; x <= endCol; x++) {
 //                // Place a door
 //                if(y == entranceY && x == entranceX) {
-//                    charMap[y][x] = posgima2.RenderPanel.DOOR_CLOSED;
+//                    charMap[y][x] = posgima2.swing.RenderPanel.DOOR_CLOSED;
 //                }
                 // Top or bottom row, place a wall
                 if(y == startRow || y == endRow) {
@@ -225,7 +229,7 @@ public class Room {
         if(entrances.size() < maxEntrances) {
             return true;
         }
-        WindowFrame.setupWindow.println("can't add any more entrances");
+        SetupWindow.println("can't add any more entrances");
         return false;
     }
 
@@ -234,7 +238,7 @@ public class Room {
         connectedEntrances.add(new Boolean(false));
 
         charMap[entrance.getY()][entrance.getX()] = RenderPanel.DOOR_CLOSED;
-        WindowFrame.setupWindow.println("add entrance");
+        SetupWindow.println("add entrance");
         return true;
     }
 
@@ -270,13 +274,13 @@ public class Room {
         } else if(entrance.getX() == rightSide) {
             return 3;
         }
-        WindowFrame.setupWindow.println("getside returned -1, that's bad");
+        SetupWindow.println("getside returned -1, that's bad");
         return -1;
     }
 
     private Vector2i getRandomWallOnSide(int side) {
         if(side == -1) {
-            WindowFrame.setupWindow.println("getRandomWallOnSide error side is -1, this is bad");
+            SetupWindow.println("getRandomWallOnSide error side is -1, this is bad");
             return null;
         }
         int topRow = center.getY() - (height / 2);
@@ -320,7 +324,7 @@ public class Room {
         // pick a random side that doesn't have an entrance already
         int viableSide;
         if(sides[0] && sides[1] && sides[2] && sides[3]) {
-            WindowFrame.setupWindow.println("all sides have an entrance, we shouldn't be here, picking random entrance that exists");
+            SetupWindow.println("all sides have an entrance, we shouldn't be here, picking random entrance that exists");
             return getRandomWallOnSide(viableSide = (int)(Math.random() * 4));
         }
         do {

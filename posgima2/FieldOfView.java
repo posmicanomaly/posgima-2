@@ -1,5 +1,7 @@
 package posgima2;
 
+import posgima2.swing.RenderPanel;
+
 import java.util.ArrayList;
 
 /**

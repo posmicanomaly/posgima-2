@@ -1,4 +1,4 @@
-package posgima2;
+package posgima2.item;
 
 /**
  * Created by Jesse Pospisil on 1/2/2015.

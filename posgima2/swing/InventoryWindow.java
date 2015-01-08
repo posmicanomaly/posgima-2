@@ -1,4 +1,7 @@
-package posgima2;
+package posgima2.swing;
+
+import posgima2.item.Item;
+import posgima2.Player;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -28,7 +31,7 @@ public class InventoryWindow extends JFrame {
 
     public void update() {
         inventoryModel = new DefaultTableModel();
-        inventoryModel.addColumn("posgima2.Item");
+        inventoryModel.addColumn("posgima2.item.weapon.Item");
         for(Item i : player.getInventory()) {
             inventoryModel.addRow(new Object[]{i.toString()});
         }

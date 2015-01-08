@@ -1,4 +1,7 @@
-package posgima2;
+package posgima2.swing;
+
+import posgima2.Game;
+import posgima2.GameState;
 
 import javax.swing.*;
 import java.awt.*;

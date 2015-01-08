@@ -1,4 +1,4 @@
-package posgima2;
+package posgima2.swing;
 
 import javax.swing.*;
 import java.awt.*;

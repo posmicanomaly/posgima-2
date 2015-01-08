@@ -1,5 +1,9 @@
 package posgima2;
 
+import posgima2.swing.RenderPanel;
+import posgima2.swing.SetupWindow;
+import posgima2.swing.WindowFrame;
+
 import java.util.ArrayList;
 
 /**
@@ -60,7 +64,7 @@ public class AStar {
             }
         }
         if(open.isEmpty()) {
-            WindowFrame.setupWindow.println("no path");
+            SetupWindow.println("no path");
         } else {
             ArrayList<Vector2i> path = new ArrayList<Vector2i>();
             AStarNode parent = current;
@@ -68,7 +72,7 @@ public class AStar {
                 path.add(new Vector2i(parent.y, parent.x));
                 parent = parent.parent;
             }
-            //posgima2.WindowFrame.setupWindow.println("closed " + closed.size());
+            //posgima2.swing.WindowFrame.setupWindow.println("closed " + closed.size());
             return path;
         }
         return null;

@@ -1,5 +1,6 @@
-package weapon;
-import posgima2.Item;
+package posgima2.item.weapon;
+
+import posgima2.item.Item;
 
 /**
  * Created by Jesse Pospisil on 1/7/2015.

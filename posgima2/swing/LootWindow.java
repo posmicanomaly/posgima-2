@@ -1,4 +1,9 @@
-package posgima2;
+package posgima2.swing;
+
+import posgima2.Game;
+import posgima2.item.Item;
+import posgima2.Player;
+import posgima2.Tile;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -32,7 +37,7 @@ public class LootWindow extends JFrame implements WindowListener{
         lootPanel = new JPanel(new GridLayout(4, 1));
         final DefaultTableModel tableModel = new DefaultTableModel();
         tableModel.addColumn("Loot?");
-        tableModel.addColumn("posgima2.Item Name");
+        tableModel.addColumn("posgima2.item.weapon.Item Name");
         lootTable = new JTable(tableModel);
         JLabel sourceLabel = new JLabel(tile.toString());
 

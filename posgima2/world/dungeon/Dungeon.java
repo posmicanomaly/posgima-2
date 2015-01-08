@@ -1,7 +1,6 @@
 package posgima2.world.dungeon;
 
-import posgima2.FieldOfView;
-import posgima2.Vector2i;
+import posgima2.misc.Vector2i;
 import posgima2.pathfinding.AStar;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;
@@ -9,8 +8,6 @@ import posgima2.swing.WindowFrame;
 import posgima2.item.weapon.Sword;
 import posgima2.world.Entity;
 import posgima2.world.Monster;
-import posgima2.world.Room;
-import posgima2.world.Tile;
 
 import java.util.ArrayList;
 
@@ -335,7 +332,7 @@ public class Dungeon {
         int height;
         int width;
         Vector2i center;
-        //posgima2.Direction dir;
+        //posgima2.misc.Direction dir;
         int maxTimeout = 50;
         int timeout = 0;
         //int offset = 0;

@@ -1,5 +1,6 @@
 package posgima2;
 
+import posgima2.game.Game;
 import posgima2.swing.WindowFrame;
 
 /**

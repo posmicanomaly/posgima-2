@@ -1,6 +1,6 @@
 package posgima2.swing;
 
-import posgima2.GameState;
+import posgima2.game.GameState;
 import posgima2.world.Player;
 
 import javax.swing.*;

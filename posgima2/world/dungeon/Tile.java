@@ -1,6 +1,7 @@
-package posgima2.world;
+package posgima2.world.dungeon;
 
 import posgima2.item.Item;
+import posgima2.world.Entity;
 
 import java.util.ArrayList;
 

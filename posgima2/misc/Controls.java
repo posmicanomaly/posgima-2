@@ -1,4 +1,4 @@
-package posgima2;
+package posgima2.misc;
 
 import java.awt.event.KeyEvent;
 

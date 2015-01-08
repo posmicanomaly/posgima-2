@@ -1,6 +1,6 @@
 package posgima2.world;
 
-import posgima2.Game;
+import posgima2.game.Game;
 
 /**
  * Created by Jesse Pospisil on 12/27/2014.

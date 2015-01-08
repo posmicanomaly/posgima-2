@@ -1,4 +1,4 @@
-package posgima2;
+package posgima2.game;
 
 import posgima2.world.dungeon.Dungeon;
 import posgima2.world.Player;

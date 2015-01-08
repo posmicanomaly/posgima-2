@@ -1,4 +1,4 @@
-package posgima2;
+package posgima2.item.container;
 
 import posgima2.item.Item;
 import posgima2.world.Entity;

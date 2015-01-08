@@ -1,10 +1,10 @@
 package posgima2.swing;
 
-import posgima2.*;
+import posgima2.game.GameState;
 import posgima2.world.dungeon.Dungeon;
 import posgima2.world.Monster;
 import posgima2.world.Player;
-import posgima2.world.Tile;
+import posgima2.world.dungeon.Tile;
 
 import javax.swing.*;
 import java.awt.*;

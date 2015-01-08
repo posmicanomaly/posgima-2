@@ -1,15 +1,18 @@
-package posgima2;
+package posgima2.game;
 
+import posgima2.misc.Vector2i;
 import posgima2.item.Item;
 import posgima2.pathfinding.AStar;
 import posgima2.swing.*;
 import posgima2.world.*;
 import posgima2.world.dungeon.Dungeon;
+import posgima2.world.dungeon.Room;
+import posgima2.world.dungeon.Tile;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-import static posgima2.Controls.*;
+import static posgima2.misc.Controls.*;
 
 /**
  * Created by Jesse Pospisil on 12/27/2014.
@@ -531,7 +534,7 @@ public class Game {
     }
 
 //    private void evaluatePlayer(posgima2.world.Player player) {
-//        posgima2.world.Tile tile = player.getTile();
+//        posgima2.world.dungeon.Tile tile = player.getTile();
 //        if(tile.getGlyph() == posgima2.swing.RenderPanel.DOOR_CLOSED) {
 //            tile.setGlyph(posgima2.swing.RenderPanel.DOOR_OPEN);
 //            posgima2.swing.WindowFrame.writeConsole("You open the door.");

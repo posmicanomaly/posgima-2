@@ -1,7 +1,7 @@
 package posgima2.pathfinding;
 
-import posgima2.world.dungeon.Dungeon;
-import posgima2.world.dungeon.Tile;
+import posgima2.world.dungeonSystem.dungeon.Dungeon;
+import posgima2.world.dungeonSystem.dungeon.Tile;
 import posgima2.misc.Vector2i;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;

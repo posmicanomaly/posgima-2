@@ -1,10 +1,10 @@
 package posgima2.swing;
 
 import posgima2.game.GameState;
-import posgima2.world.dungeon.Dungeon;
+import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.Monster;
 import posgima2.world.Player;
-import posgima2.world.dungeon.Tile;
+import posgima2.world.dungeonSystem.dungeon.Tile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +21,8 @@ public class RenderPanel extends JPanel {
     public static final char WEAPON = ')';
     public static final char SCROLL = '?';
     public static final char ITEM = '!';
-    public static final char STAIRS = '%';
+    public static final char STAIRS_DOWN = '>';
+    public static final char STAIRS_UP = '<';
     public static final char DOOR_OPEN = '/';
     public static final char DOOR_CLOSED = '+';
 
@@ -245,7 +246,8 @@ public class RenderPanel extends JPanel {
             case ITEM :
             case SCROLL :
             case WEAPON : return Color.pink;
-            case STAIRS : return Color.green;
+            case STAIRS_DOWN: return Color.WHITE;
+            case STAIRS_UP: return Color.white;
             case WATER : return Color.blue;
             case 'r': return Color.red;
             case 'g': return Color.green;

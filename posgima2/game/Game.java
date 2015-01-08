@@ -5,9 +5,10 @@ import posgima2.item.Item;
 import posgima2.pathfinding.AStar;
 import posgima2.swing.*;
 import posgima2.world.*;
-import posgima2.world.dungeon.Dungeon;
-import posgima2.world.dungeon.Room;
-import posgima2.world.dungeon.Tile;
+import posgima2.world.dungeonSystem.DungeonSystem;
+import posgima2.world.dungeonSystem.dungeon.Dungeon;
+import posgima2.world.dungeonSystem.dungeon.Room;
+import posgima2.world.dungeonSystem.dungeon.Tile;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -23,10 +24,10 @@ public class Game {
     public static final String STAGE = "Pre Alpha";
 
     /**
-     * posgima2.world.dungeon.Dungeon dimensions
+     * posgima2.world.dungeonSystem.dungeon.Dungeon dimensions
      */
-    private static final int TEST_MAP_HEIGHT = 64;
-    private static final int TEST_MAP_WIDTH = 128;
+    public static final int TEST_MAP_HEIGHT = 64;
+    public static final int TEST_MAP_WIDTH = 128;
 
     /**
      * Cardinal directions
@@ -73,6 +74,7 @@ public class Game {
     private static int MAX_MONSTERS = 0;
 
     private Player player;
+    private DungeonSystem dungeonSystem;
     private Dungeon dungeon;
 
     private LootWindow lootWindow;
@@ -89,12 +91,15 @@ public class Game {
     public Game() {
         SetupWindow.println("Setting up game");
 
-        initMap();
+        //initMap();
+        initDungeonSystem();
+        dungeon = dungeonSystem.getDungeon(0);
         Room startingRoom = dungeon.getRandomRoom();
         Vector2i center = startingRoom.getCenter();
 
         player = new Player('@');
         player.setName("AlphaTester");
+        WindowFrame.consolePanel.setPlayerName(player.toString());
 
         dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
@@ -353,7 +358,7 @@ public class Game {
                 player.meleeAttack(monster, true);
 
                 if (!monster.isAlive()) {
-                    WindowFrame.writeConsole("/combat//atk/You killed " + monster + ".");
+                    WindowFrame.writeConsole("/combat//killed/You killed " + monster + ".");
                     monster.die();
                     dungeon.getMonsters().remove(monster);
                 }
@@ -534,12 +539,16 @@ public class Game {
     }
 
 //    private void evaluatePlayer(posgima2.world.Player player) {
-//        posgima2.world.dungeon.Tile tile = player.getTile();
+//        posgima2.world.dungeonSystem.dungeon.Tile tile = player.getTile();
 //        if(tile.getGlyph() == posgima2.swing.RenderPanel.DOOR_CLOSED) {
 //            tile.setGlyph(posgima2.swing.RenderPanel.DOOR_OPEN);
 //            posgima2.swing.WindowFrame.writeConsole("You open the door.");
 //        }
 //    }
+
+    public void initDungeonSystem() {
+        dungeonSystem = new DungeonSystem(3);
+    }
 
     public void initMap() {
         dungeon = new Dungeon(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);

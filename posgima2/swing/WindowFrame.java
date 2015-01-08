@@ -14,7 +14,7 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
     static SetupWindow setupWindow;
 
     static RenderPanel renderPanel;
-    static ConsolePanel consolePanel;
+    public static ConsolePanel consolePanel;
     static StatisticsPanel statisticsPanel;
 
     static Game game;

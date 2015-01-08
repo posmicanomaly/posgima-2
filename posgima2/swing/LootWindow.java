@@ -3,7 +3,7 @@ package posgima2.swing;
 import posgima2.game.Game;
 import posgima2.item.Item;
 import posgima2.world.Player;
-import posgima2.world.dungeon.Tile;
+import posgima2.world.dungeonSystem.dungeon.Tile;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

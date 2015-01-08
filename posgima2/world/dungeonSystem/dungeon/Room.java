@@ -1,4 +1,4 @@
-package posgima2.world.dungeon;
+package posgima2.world.dungeonSystem.dungeon;
 
 import posgima2.misc.Direction;
 import posgima2.misc.Vector2i;
@@ -240,7 +240,7 @@ public class Room {
         connectedEntrances.add(new Boolean(false));
 
         charMap[entrance.getY()][entrance.getX()] = RenderPanel.DOOR_CLOSED;
-        SetupWindow.println("add entrance");
+        //SetupWindow.println("add entrance");
         return true;
     }
 

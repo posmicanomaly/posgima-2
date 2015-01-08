@@ -1,4 +1,4 @@
-package posgima2.world.dungeon;
+package posgima2.world.dungeonSystem.dungeon;
 
 import posgima2.misc.Vector2i;
 import posgima2.pathfinding.AStar;
@@ -50,6 +50,7 @@ public class Dungeon {
 
         SetupWindow.println("finishing map");
         finishMap();
+
         SetupWindow.println("creating tileMap");
         for(int y = 0; y < MAP_ROWS; y++) {
             for(int x = 0; x < MAP_COLS; x++) {

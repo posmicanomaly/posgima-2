@@ -1,8 +1,7 @@
-package posgima2.world.dungeon;
+package posgima2.world.dungeonSystem.dungeon;
 
 import posgima2.misc.Vector2i;
 import posgima2.swing.RenderPanel;
-import posgima2.world.dungeon.Tile;
 
 import java.util.ArrayList;
 

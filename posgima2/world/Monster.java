@@ -1,9 +1,9 @@
 package posgima2.world;
 
 import posgima2.item.container.Corpse;
-import posgima2.world.dungeon.FieldOfView;
+import posgima2.world.dungeonSystem.dungeon.FieldOfView;
 import posgima2.misc.Vector2i;
-import posgima2.world.dungeon.Dungeon;
+import posgima2.world.dungeonSystem.dungeon.Dungeon;
 
 import java.util.LinkedList;
 

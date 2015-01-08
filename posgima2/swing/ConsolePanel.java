@@ -19,6 +19,8 @@ public class ConsolePanel extends JPanel{
     private StyledDocument combatDoc;
     private StyleContext combatContext;
 
+    private String playerName;
+
     public ConsolePanel() {
         setBackground(Color.black);
 
@@ -59,17 +61,27 @@ public class ConsolePanel extends JPanel{
         add(combatScrollPane);
     }
 
+    public void setPlayerName(String name) {
+        this.playerName = name;
+    }
+
     public void insertText(String text) {
         Color color = Color.white;
         String message = text;
 
+        if(message.contains(playerName)) {
+            message = message.replace(playerName, "you");
+        }
         if(message.contains("/combat/")) {
             message = message.replace("/combat/", "");
-            if(message.contains("/atk/")) {
-                message = message.replace("/atk/", "");
+            if(message.contains("/killed/")) {
+                message = message.replace("/killed/", "");
+                color = Color.cyan;
+            } else if(message.startsWith("you")) {
+                //message = message.replace("/atk/", "");
                 color = Color.yellow;
-            } else if(message.contains("/def/")) {
-                message = message.replace("/def/", "");
+            } else if(message.contains("you")) {
+                //message = message.replace("/def/", "");
                 color = Color.red;
             } else {
                 color = Color.white;

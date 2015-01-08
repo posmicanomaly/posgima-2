@@ -3,7 +3,7 @@ package posgima2.world;
 import posgima2.game.Game;
 import posgima2.item.Item;
 import posgima2.swing.WindowFrame;
-import posgima2.world.dungeon.Tile;
+import posgima2.world.dungeonSystem.dungeon.Tile;
 
 import java.util.ArrayList;
 

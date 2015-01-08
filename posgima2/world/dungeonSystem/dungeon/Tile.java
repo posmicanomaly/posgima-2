@@ -1,4 +1,4 @@
-package posgima2.world.dungeon;
+package posgima2.world.dungeonSystem.dungeon;
 
 import posgima2.item.Item;
 import posgima2.world.Entity;

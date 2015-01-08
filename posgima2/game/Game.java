@@ -69,6 +69,8 @@ public class Game {
      */
     private static final int TILE_HAS_ITEMS = 1;
     private static final int TILE_HAS_NO_ITEMS = 0;
+    private static final int TILE_HAS_DUNGEON_LINK = 1;
+    private static final int TILE_HAS_NO_DUNGEON_LINK = 0;
 
     // Reassign this later, based on amount of rooms
     private static int MAX_MONSTERS = 0;
@@ -251,6 +253,7 @@ public class Game {
         int nextX = player.getX();
         boolean moveRequest = false;
         boolean itemPickupRequest = false;
+        boolean dungeonChangeRequest = false;
         switch (e.getKeyCode()) {
             /*
             Movement
@@ -277,6 +280,9 @@ public class Game {
              */
             case KEY_PICKUP:
                 itemPickupRequest = true;
+                break;
+            case KeyEvent.VK_BACK_SLASH:
+                dungeonChangeRequest = true;
                 break;
 
             /*
@@ -335,7 +341,27 @@ public class Game {
                     WindowFrame.writeConsole("There's nothing to pickup.");
                     break;
             }
+        } else if(dungeonChangeRequest) {
+            switch(processDungeonChangeRequest()) {
+                case TILE_HAS_DUNGEON_LINK:
+                    WindowFrame.writeConsole("Changed dungeon");
+                    turnTickActionOccurred = true;
+                    break;
+                case TILE_HAS_NO_DUNGEON_LINK:
+                    WindowFrame.writeConsole("no dungeon link");
+                    break;
+            }
         }
+    }
+
+    private int processDungeonChangeRequest() {
+        Tile pTile = dungeon.getTileMap()[player.getY()][player.getX()];
+        if(pTile.hasDungeonLink()) {
+            dungeon = dungeonSystem.getDungeon(pTile.getDungeonLink());
+            player.moveToTileImmediately(pTile.getTileLink());
+            return TILE_HAS_DUNGEON_LINK;
+        }
+        return TILE_HAS_NO_DUNGEON_LINK;
     }
 
     private int processPlayerItemPickupRequest() {

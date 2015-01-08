@@ -15,6 +15,9 @@ public class Tile {
     private int y;
     private int x;
 
+    private Dungeon dungeonLink;
+    private Tile tileLink;
+
     public Tile(char glyph, int y, int x) {
         this.glyph = glyph;
         entity = null;
@@ -25,6 +28,18 @@ public class Tile {
 
     public boolean hasItems() {
         return items.size() > 0;
+    }
+
+    public void setDungeonAndTileLink(Dungeon targetDungeon, Tile targetTile) {
+        this.dungeonLink = targetDungeon;
+        this.tileLink = targetTile;
+    }
+
+    public boolean hasDungeonLink() {
+        if(dungeonLink != null && tileLink != null) {
+            return true;
+        }
+        return false;
     }
 
     public boolean hasEntity() {
@@ -83,5 +98,13 @@ public class Tile {
 
     public void setGlyph(char glyph) {
         this.glyph = glyph;
+    }
+
+    public Dungeon getDungeonLink() {
+        return dungeonLink;
+    }
+
+    public Tile getTileLink() {
+        return tileLink;
     }
 }

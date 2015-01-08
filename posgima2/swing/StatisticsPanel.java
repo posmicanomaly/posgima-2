@@ -15,7 +15,7 @@ public class StatisticsPanel extends JPanel{
     public StatisticsPanel() {
         setBackground(Color.black);
 
-        statisticsTextArea = new JTextArea("posgima2.world.Player\nBarbarian\n\nHP: 15 / 16\nStr: 0\nAgi: 0\n\nNormal");
+        statisticsTextArea = new JTextArea("Player\nBarbarian\n\nHP: 15 / 16\nStr: 0\nAgi: 0\n\nNormal");
         statisticsTextArea.setFont(new Font("Consolas", Font.PLAIN, 16));
         statisticsTextArea.setForeground(Color.white);
         statisticsTextArea.setOpaque(false);

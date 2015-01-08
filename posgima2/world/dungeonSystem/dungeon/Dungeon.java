@@ -42,7 +42,7 @@ public class Dungeon {
         rooms = new ArrayList<Room>();
 
         SetupWindow.println("Creating and connecting rooms");
-        createAndConnectRooms(40);
+        createAndConnectRooms(5);
         SetupWindow.println("total rooms: " + rooms.size());
 
         SetupWindow.println("blasting rooms");

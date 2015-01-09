@@ -2,6 +2,11 @@ package posgima2.world;
 
 import posgima2.game.Game;
 import posgima2.item.Item;
+import posgima2.item.armor.Armor;
+import posgima2.item.armor.NullArmor;
+import posgima2.item.weapon.Weapon;
+import posgima2.misc.Dice;
+import posgima2.swing.RenderPanel;
 import posgima2.swing.WindowFrame;
 import posgima2.world.dungeonSystem.dungeon.Tile;
 
@@ -17,18 +22,33 @@ public abstract class Entity {
     protected int x;
     protected int currentHP;
     protected int maxHP;
+
+    protected int baseHitDie;
+    protected int attackDie;
+
+    /*
+    Strength is primary melee attribute.
+     */
     protected int strength;
+
+    protected int armorClass;
+
     protected int level;
     protected int experience;
 
-    private int agility;
-    private int dexterity;
+    protected int agility;
+    protected int dexterity;
+    protected int constitution;
+
+    protected int damageBonus;
     private Tile targetTile;
     protected boolean alive;
 
     protected boolean attackedThisTurn;
     protected ArrayList<Item> inventory;
     protected String name;
+
+    protected Armor armorSlot;
 
     public Entity(char glyph) {
         this.glyph = glyph;
@@ -37,6 +57,8 @@ public abstract class Entity {
         x = 0;
         attackedThisTurn = false;
         inventory = new ArrayList<Item>();
+        armorClass = 10;
+        armorSlot = new NullArmor(RenderPanel.ITEM);
     }
 
     public boolean move(int dir) {
@@ -126,42 +148,55 @@ public abstract class Entity {
         }
     }
 
-    private void sendCombatMessage(Entity attacker, Entity defender) {
-        WindowFrame.writeConsole("/combat/" + attacker + " hit " + defender + " for " + attacker.strength + ".");
+
+
+    /*
+    Attempt to attack the defender
+     */
+    private void attemptMeleeAttack(Entity defender) {
+        /*
+        roll 1d20 + strength for melee
+         */
+        int hitRoll = Dice.roll(Dice.D20) + this.strength;
+
+        /*
+        If hitRoll less than defender's AC or hitroll equals 1, miss
+         */
+        if (hitRoll < defender.getTotalArmorClass() || hitRoll == 1) {
+            WindowFrame.writeConsole("/combat/" + this + " misses " + defender + ".");
+        }
+        /*
+        If hitroll greater than defender's AC or hitroll equals 20, hit
+         */
+        else if(hitRoll > defender.getTotalArmorClass() || hitRoll == 20) {
+            int damageRoll = Dice.roll(this.baseHitDie) + (level / strength) + damageBonus;
+            defender.applyDamage(damageRoll);
+            this.attackedThisTurn = true;
+            WindowFrame.writeConsole("/combat/" + this + " hit " + defender + " for " + damageRoll + ".");
+        }
     }
 
-    public void meleeAttack(Entity entity, boolean defenderCanAttack) {
-        if(canAttack()) {
-            if(entity.canAttack() && defenderCanAttack) {
-                int goesFirst = (int)(Math.random() * 2);
+    public void meleeAttack(Entity target, boolean defenderCanAttack) {
+        if (canAttack()) {
+            if (target.canAttack() && defenderCanAttack) {
+                int goesFirst = (int) (Math.random() * 2);
                 switch (goesFirst) {
                     case 0:
-                        entity.applyDamage(this.strength);
-                        this.attackedThisTurn = true;
-                        sendCombatMessage(this, entity);
-                        if(entity.isAlive()) {
-                            this.applyDamage(entity.strength);
-                            entity.attackedThisTurn = true;
-                            sendCombatMessage(entity, this);
+                        attemptMeleeAttack(target);
+                        if (target.isAlive()) {
+                            target.attemptMeleeAttack(this);
                         }
                         break;
                     case 1:
-                        this.applyDamage(entity.strength);
-                        entity.attackedThisTurn = true;
-                        sendCombatMessage(entity, this);
-                        if(isAlive()) {
-                            entity.applyDamage(this.strength);
-                            this.attackedThisTurn = true;
-                            sendCombatMessage(this, entity);
+                        target.attemptMeleeAttack(this);
+                        if (isAlive()) {
+                            attemptMeleeAttack(target);
                         }
                         break;
                 }
 
             } else {
-                //posgima2.swing.WindowFrame.writeConsole("/info/" + entity + " could not defend.");
-                entity.applyDamage(this.strength);
-                attackedThisTurn = true;
-                sendCombatMessage(this, entity);
+                attemptMeleeAttack(target);
             }
         } else {
             //posgima2.swing.WindowFrame.writeConsole("/info/" + this + " could not attack.");
@@ -189,6 +224,31 @@ public abstract class Entity {
 
     public void addInventory(Item i) {
         inventory.add(i);
+        /*
+        Auto equip best armor for now
+         */
+        if(i instanceof Armor) {
+            WindowFrame.writeConsole("picked up armor");
+            Armor a = (Armor)i;
+            if(a.getArmorClass() > armorSlot.getArmorClass()) {
+                WindowFrame.writeConsole("You equipped the armor");
+                armorSlot = a;
+            }
+        } else if(i instanceof Weapon) {
+            WindowFrame.writeConsole("picked up weapon");
+            Weapon w = (Weapon)i;
+            if(w.getHitDie() > attackDie) {
+                attackDie = w.getHitDie();
+                damageBonus = w.getDamageBonus();
+                WindowFrame.writeConsole("You equipped the " + w);
+            } else if(w.getHitDie() == attackDie) {
+                if(damageBonus < w.getDamageBonus()) {
+                    attackDie = w.getHitDie();
+                    damageBonus = w.getDamageBonus();
+                    WindowFrame.writeConsole("You equipped the " + w);
+                }
+            }
+        }
     }
 
     public ArrayList<Item> getInventory() {
@@ -212,5 +272,17 @@ public abstract class Entity {
 
     public int getExperience() {
         return experience;
+    }
+
+    public int getArmorClass() {
+        return armorClass;
+    }
+
+    public int getConstitution() {
+        return constitution;
+    }
+
+    public int getTotalArmorClass() {
+        return armorClass + armorSlot.getArmorClass();
     }
 }

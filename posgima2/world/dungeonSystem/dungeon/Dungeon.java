@@ -1,5 +1,7 @@
 package posgima2.world.dungeonSystem.dungeon;
 
+import posgima2.item.armor.Plate;
+import posgima2.misc.Dice;
 import posgima2.misc.Vector2i;
 import posgima2.pathfinding.AStar;
 import posgima2.swing.ConsolePanel;
@@ -176,9 +178,13 @@ public class Dungeon {
     }
 
     private void sprinkleItems() {
-        for(int i = 0; i < 50; i++) {
-            Sword sword = new Sword(RenderPanel.WEAPON, 5, 0, 0);
+        for(int i = 0; i < rooms.size() / 2; i++) {
+            Sword sword = new Sword(RenderPanel.WEAPON, Dice.D10, 2, 5, 0, 0);
             getRandomTileOf(RenderPanel.FLOOR).addItem(sword);
+        }
+        for(int i = 0; i < rooms.size() / 2; i++) {
+            Plate plate = new Plate(RenderPanel.ITEM, 10);
+            getRandomTileOf(RenderPanel.FLOOR).addItem(plate);
         }
     }
 

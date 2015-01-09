@@ -49,7 +49,9 @@ public class StatisticsPanel extends JPanel{
         result.append("STR: ").append(p.getStrength()).append("\n");
         result.append("AGI: ").append(p.getAgility()).append("\n");
         result.append("DEX: ").append(p.getDexterity()).append("\n");
+        result.append("CON: ").append(p.getConstitution()).append("\n");
         result.append("\n");
+        result.append("AC: ").append((p.getTotalArmorClass())).append("\n");
         result.append("EXP: ").append(p.getExperience()).append("\n");
         result.append(p.getTile().getGlyph()).append("\n");
         if(p.getTile().hasItems()) {

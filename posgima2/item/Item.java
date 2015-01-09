@@ -24,4 +24,5 @@ public abstract class Item {
     public int getType() {
         return type;
     }
+
 }

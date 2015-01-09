@@ -1,6 +1,7 @@
 package posgima2.world;
 
 import posgima2.item.container.Corpse;
+import posgima2.misc.Dice;
 import posgima2.world.dungeonSystem.dungeon.FieldOfView;
 import posgima2.misc.Vector2i;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
@@ -25,11 +26,18 @@ public class Monster extends Entity{
         aggroTurnStart = 0;
         alive = true;
         this.level = level;
-        strength = level * 2;
-        maxHP = level * 5;
+        armorClass = 15;
+        baseHitDie = Dice.D4;
+        attackDie = baseHitDie;
+        damageBonus = 0;
+        strength = level * 11;
+        agility = 0;
+        dexterity = level * 13;
+        constitution = level * 12;
+
+        maxHP = (level * Dice.roll(baseHitDie)) + (constitution * level);
         currentHP = maxHP;
         age = 0;
-        this.level = level;
     }
 
     public boolean[][] getVisibility() {

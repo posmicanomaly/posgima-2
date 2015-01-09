@@ -26,8 +26,8 @@ public class Game {
     /**
      * posgima2.world.dungeonSystem.dungeon.Dungeon dimensions
      */
-    public static final int TEST_MAP_HEIGHT = 64;
-    public static final int TEST_MAP_WIDTH = 128;
+    public static final int TEST_MAP_HEIGHT = 20;
+    public static final int TEST_MAP_WIDTH = 60;
 
     /**
      * Cardinal directions
@@ -530,8 +530,8 @@ public class Game {
         /*
         Spawn a new monster if we're below the max limit.
          */
-        if(dungeon.getMonsters().size() < MAX_MONSTERS) {
-            dungeon.spawnRandomMonster(dungeon.getVisibleMap());
+        if(dungeon.getMonsters().size() < dungeon.getMaxMonsterLimit()) {
+            dungeon.spawnRandomMonster(dungeon.getExploredMap());
         }
     }
 
@@ -573,15 +573,15 @@ public class Game {
 //    }
 
     public void initDungeonSystem() {
-        dungeonSystem = new DungeonSystem(3);
+        dungeonSystem = new DungeonSystem(10);
     }
 
-    public void initMap() {
-        dungeon = new Dungeon(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);
-        //charMap = dungeon.getMap();
-        //visibleMap = dungeon.getVisibleMap();
-
-    }
+//    public void initMap() {
+//        dungeon = new Dungeon(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);
+//        //charMap = dungeon.getMap();
+//        //visibleMap = dungeon.getVisibleMap();
+//
+//    }
 
     public GameState getGameState() {
         GameState gameState = new GameState();

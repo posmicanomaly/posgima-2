@@ -41,13 +41,6 @@ public class RenderPanel extends JPanel {
     public RenderPanel() {
         setDoubleBuffered(true);
         setBackground(Color.black);
-        try {
-            GraphicsEnvironment ge =
-                    GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("fonts/square.ttf")));
-        } catch (IOException |FontFormatException e) {
-            //Handle exception
-        }
     }
 
     @Override
@@ -65,21 +58,31 @@ public class RenderPanel extends JPanel {
         /**
          * Select which row to start drawing, to keep player centered on the Y axis.
          */
-        int rowStart = currentState.getPlayer().getY() - (visibleY / 2);
-        if(rowStart < 0) {
+        int rowStart;
+        if(currentState.getDungeon().getMAP_ROWS() < visibleY) {
             rowStart = 0;
-        } else if(currentState.getMap().length - rowStart < visibleY) {
-            rowStart = currentState.getMap().length - (visibleY);
+        } else {
+            rowStart = currentState.getPlayer().getY() - (visibleY / 2);
+            if (rowStart < 0) {
+                rowStart = 0;
+            } else if (currentState.getMap().length - rowStart < visibleY) {
+                rowStart = currentState.getMap().length - (visibleY);
+            }
         }
 
         /**
          *  Select which column to start drawing, to keep player centered on the X axis
          */
-        int colStart = currentState.getPlayer().getX() - (visibleX / 2);
-        if(colStart < 0) {
+        int colStart;
+        if(currentState.getDungeon().getMAP_COLS() < visibleX) {
             colStart = 0;
-        } else if(currentState.getMap()[0].length - colStart < visibleX) {
-            colStart = currentState.getMap()[0].length - (visibleX);
+        } else {
+            colStart = currentState.getPlayer().getX() - (visibleX / 2);
+            if (colStart < 0) {
+                colStart = 0;
+            } else if (currentState.getMap()[0].length - colStart < visibleX) {
+                colStart = currentState.getMap()[0].length - (visibleX);
+            }
         }
 
         drawMap(rowStart, currentState.getMap().length, colStart, currentState.getMap()[0].length, g);

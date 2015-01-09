@@ -17,7 +17,14 @@ public class DungeonSystem {
     public DungeonSystem(int levels) {
         dungeons = new ArrayList<>();
         for (int i = 0; i < levels; i++) {
-            dungeons.add(new Dungeon(Game.TEST_MAP_HEIGHT, Game.TEST_MAP_WIDTH));
+            int height = Game.TEST_MAP_HEIGHT + (i * 2);
+            int width = Game.TEST_MAP_WIDTH +  (i * 2);
+            /*
+            13*13 is the biggest room we can make
+             */
+            int rooms = (height * width) / (13 * 13);
+
+            dungeons.add(new Dungeon(height, width, rooms));
         }
 
         connectLevels();

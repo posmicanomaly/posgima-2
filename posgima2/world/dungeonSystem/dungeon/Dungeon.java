@@ -2,6 +2,7 @@ package posgima2.world.dungeonSystem.dungeon;
 
 import posgima2.misc.Vector2i;
 import posgima2.pathfinding.AStar;
+import posgima2.swing.ConsolePanel;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;
 import posgima2.swing.WindowFrame;
@@ -28,8 +29,9 @@ public class Dungeon {
     private boolean[][] visibleMap;
     private boolean[][] exploredMap;
     private ArrayList<Monster> monsters;
+    private int maxMonsterLimit;
 
-    public Dungeon(int rows, int cols) {
+    public Dungeon(int rows, int cols, int roomAmount) {
         this.MAP_ROWS = rows;
         this.MAP_COLS = cols;
         charMap = new char[rows][cols];
@@ -42,7 +44,7 @@ public class Dungeon {
         rooms = new ArrayList<Room>();
 
         SetupWindow.println("Creating and connecting rooms");
-        createAndConnectRooms(5);
+        createAndConnectRooms(roomAmount);
         SetupWindow.println("total rooms: " + rooms.size());
 
         SetupWindow.println("blasting rooms");
@@ -52,8 +54,8 @@ public class Dungeon {
         finishMap();
 
         SetupWindow.println("creating tileMap");
-        for(int y = 0; y < MAP_ROWS; y++) {
-            for(int x = 0; x < MAP_COLS; x++) {
+        for (int y = 0; y < MAP_ROWS; y++) {
+            for (int x = 0; x < MAP_COLS; x++) {
                 Tile tile = new Tile(charMap[y][x], y, x);
                 tileMap[y][x] = tile;
             }
@@ -62,6 +64,7 @@ public class Dungeon {
         SetupWindow.println("sprinkling items");
         sprinkleItems();
         SetupWindow.println("sprinkling monsters");
+        setMaxMonsterLimit(rooms.size());
         sprinkleMonsters();
     }
 
@@ -149,7 +152,7 @@ public class Dungeon {
     }
 
     private void sprinkleMonsters() {
-        for(int i = 0; i < rooms.size(); i++) {
+        for(int i = 0; i < getMaxMonsterLimit(); i++) {
             Tile tile = null;
             do {
                 tile = getRandomTileOf(RenderPanel.FLOOR);
@@ -178,25 +181,50 @@ public class Dungeon {
     }
 
     public void spawnRandomMonster(boolean[][] invalidList) {
+        int times = 0;
+        int timeout = 15;
         Tile tile = null;
-        do{
+        while(times < timeout) {
             tile = getRandomTileOf(RenderPanel.FLOOR);
-        } while(invalidList[tile.getY()][tile.getX()] && tile.hasEntity());
-        int m = (int)(Math.random() * 5);
-        char glyph = 'x';
-        String name = "x";
-        switch(m) {
-            case 0: glyph = 'r'; name = "large rat"; break;
-            case 1: glyph = 'g'; name = "goblin"; break;
-            case 2: glyph = 'D'; name = "dragon"; break;
-            case 3: glyph = 'T'; name = "troll"; break;
-            case 4: glyph = 'b'; name = "bat"; break;
+            if(!invalidList[tile.getY()][tile.getX()]) {
+                if(!tile.hasEntity()) {
+                    break;
+                }
+            }
+            times++;
+            tile = null;
         }
-        Monster monster = new Monster(glyph);
-        monster.setName(name);
-        monsters.add(monster);
-        tile.addEntity(monster);
-        //System.out.println("spawned mob");
+        if(tile != null) {
+            int m = (int) (Math.random() * 5);
+            char glyph = 'x';
+            String name = "x";
+            switch (m) {
+                case 0:
+                    glyph = 'r';
+                    name = "large rat";
+                    break;
+                case 1:
+                    glyph = 'g';
+                    name = "goblin";
+                    break;
+                case 2:
+                    glyph = 'D';
+                    name = "dragon";
+                    break;
+                case 3:
+                    glyph = 'T';
+                    name = "troll";
+                    break;
+                case 4:
+                    glyph = 'b';
+                    name = "bat";
+                    break;
+            }
+            Monster monster = new Monster(glyph);
+            monster.setName(name);
+            monsters.add(monster);
+            tile.addEntity(monster);
+        }
     }
 
     private Monster createRandomMonster() {
@@ -340,7 +368,7 @@ public class Dungeon {
         do {
             if(timeout == maxTimeout)
                 return null;
-            int roomSize = (int)(Math.random() * 4);
+            int roomSize = (int)(Math.random() * 5);
             height = 5;
             width = 5;
             switch (roomSize) {
@@ -360,6 +388,9 @@ public class Dungeon {
                     height = 13;
                     width = 13;
                     break;
+                case 4:
+                    height = 5;
+                    width = 5;
             }
             int x = (int) (Math.random() * MAP_COLS);
             int y = (int) (Math.random() * MAP_ROWS);
@@ -440,5 +471,13 @@ public class Dungeon {
 
     public int getMAP_COLS() {
         return MAP_COLS;
+    }
+
+    public int getMaxMonsterLimit() {
+        return maxMonsterLimit;
+    }
+
+    public void setMaxMonsterLimit(int maxMonsterLimit) {
+        this.maxMonsterLimit = maxMonsterLimit;
     }
 }

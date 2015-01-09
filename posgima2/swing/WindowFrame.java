@@ -23,10 +23,10 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         super(title);
         setupWindow = new SetupWindow();
 
-        int consoleHeight = (int) (size.getHeight() * .25);
+        int consoleHeight = 160;
         int consoleWidth = (int) (size.getWidth() * .80);
 
-        int statisticsWidth = (int) (size.getHeight() * .20);
+        int statisticsWidth = 160;
         int statisticsHeight = (int) (size.getHeight() * .75);
 
         int renderHeight = (int) (size.getHeight() * .75);
@@ -72,7 +72,7 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         gbc.gridy = 1;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 0;
+        gbc.weightx = 1;
         gbc.weighty = 0;
         add(consolePanel, gbc);
 
@@ -86,8 +86,9 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         //setPreferredSize(size);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
-        //setResizable(false);
+
         pack();
+        setResizable(false);
         this.setLocation((dim.width / 2) - (getSize().width / 2), (dim.height / 2) - (this.getSize().height / 2));
 
         game = new Game();

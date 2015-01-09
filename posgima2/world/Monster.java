@@ -51,12 +51,12 @@ public class Monster extends Entity{
         }
     }
 
-    public boolean die() {
+    @Override
+    public void die() {
         alive = false;
         this.tile.addItem(new Corpse('}', this));
         this.tile.remove(this);
         //posgima2.swing.WindowFrame.setupWindow.println(this + " died.");
-        return true;
     }
 
     public void setAggro(boolean b, int turn) {

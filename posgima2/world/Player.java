@@ -25,6 +25,11 @@ public class Player extends Entity{
         state = Game.STATE_READY;
     }
 
+    @Override
+    public void die() {
+        WindowFrame.writeConsole("Such a sad thing that your journey has ended here.");
+    }
+
     private void rollAttributes() {
         strength = Dice.roll(3, Dice.D6);
         agility = Dice.roll(3, Dice.D6);
@@ -32,7 +37,7 @@ public class Player extends Entity{
         constitution = Dice.roll(3, Dice.D6);
         switch(baseHitDie) {
             case Dice.D10:
-                maxHP = 10 + constitution;
+                maxHP = 10 + constitution + 99999;
         }
     }
 
@@ -75,4 +80,5 @@ public class Player extends Entity{
     public boolean getJustLooted() {
         return justLooted;
     }
+
 }

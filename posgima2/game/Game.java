@@ -1,5 +1,6 @@
 package posgima2.game;
 
+import posgima2.combat.Melee;
 import posgima2.misc.Vector2i;
 import posgima2.item.Item;
 import posgima2.pathfinding.AStar;
@@ -383,11 +384,12 @@ public class Game {
                 //System.out.println("passable");
             } else if (dungeon.hasMonster(nextY, nextX)) {
                 Monster monster = dungeon.getMonsterAt(nextY, nextX);
-                player.meleeAttack(monster, true);
+                Melee.meleeCombat(player, monster, true);
+                //player.meleeAttack(monster, true);
 
                 if (!monster.isAlive()) {
                     WindowFrame.writeConsole("/combat//killed/You killed " + monster + ".");
-                    monster.die();
+                    //monster.die();
                     player.modifyExperience(monster.getLevel() * Game.XP_RATE);
                     dungeon.getMonsters().remove(monster);
                 }
@@ -542,7 +544,8 @@ public class Game {
         Vector2i next = m.getMoveQueue().remove();
         if(hasPlayer(next.getY(), next.getX())) {
             //posgima2.swing.WindowFrame.writeConsole("/combat//def/" + m + " hits you");
-            m.meleeAttack(player, false);
+            //m.meleeAttack(player, false);
+            Melee.meleeCombat(m, player, false);
             if(!player.isAlive()) {
                 WindowFrame.writeConsole("/warning/You died.");
                 player.setState(STATE_GAME_OVER);

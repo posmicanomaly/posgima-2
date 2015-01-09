@@ -234,11 +234,16 @@ public class RenderPanel extends JPanel {
     }
 
     private void drawMonster(Monster monster, int renderY, int renderX, Graphics g) {
-        g.setColor(getGlyphColor(monster.getGlyph()));
-        if(monster.isAlive())
-            g.drawChars(new char[]{monster.getGlyph()}, 0, 1, renderX, renderY);
-        else {
-            g.drawChars(new char[]{'}'}, 0, 1, renderX, renderY);
+        if(monster == null) {
+            g.setColor(Color.white);
+            g.drawChars(new char[]{'N'}, 0, 1, renderX, renderY);
+        } else {
+            g.setColor(getGlyphColor(monster.getGlyph()));
+            if (monster.isAlive())
+                g.drawChars(new char[]{monster.getGlyph()}, 0, 1, renderX, renderY);
+            else {
+                g.drawChars(new char[]{'}'}, 0, 1, renderX, renderY);
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package posgima2.world;
 
+import posgima2.combat.Melee;
 import posgima2.game.Game;
 import posgima2.item.Item;
 import posgima2.item.armor.Armor;
@@ -22,33 +23,25 @@ public abstract class Entity {
     protected int x;
     protected int currentHP;
     protected int maxHP;
-
     protected int baseHitDie;
     protected int attackDie;
-
     /*
     Strength is primary melee attribute.
      */
     protected int strength;
-
     protected int armorClass;
-
     protected int level;
     protected int experience;
-
     protected int agility;
     protected int dexterity;
     protected int constitution;
-
     protected int damageBonus;
-    private Tile targetTile;
     protected boolean alive;
-
     protected boolean attackedThisTurn;
     protected ArrayList<Item> inventory;
     protected String name;
-
     protected Armor armorSlot;
+    private Tile targetTile;
 
     public Entity(char glyph) {
         this.glyph = glyph;
@@ -59,6 +52,22 @@ public abstract class Entity {
         inventory = new ArrayList<Item>();
         armorClass = 10;
         armorSlot = new NullArmor(RenderPanel.ITEM);
+    }
+
+    public int getBaseHitDie() {
+        return baseHitDie;
+    }
+
+    public int getAttackDie() {
+        return attackDie;
+    }
+
+    public int getDamageBonus() {
+        return damageBonus;
+    }
+
+    public Armor getArmorSlot() {
+        return armorSlot;
     }
 
     public boolean move(int dir) {
@@ -85,32 +94,32 @@ public abstract class Entity {
         return x;
     }
 
-    public int getY() {
-        return y;
-    }
-
-    public Tile getTile() {
-        return tile;
-    }
-
-    public char getGlyph() {
-        return glyph;
-    }
-
     public void setX(int x) {
         this.x = x;
+    }
+
+    public int getY() {
+        return y;
     }
 
     public void setY(int y) {
         this.y = y;
     }
 
-    public void moveToTileImmediately(Tile tile) {
-        tile.addEntity(this);
+    public Tile getTile() {
+        return tile;
     }
 
     public void setTile(Tile tile) {
         this.tile = tile;
+    }
+
+    public char getGlyph() {
+        return glyph;
+    }
+
+    public void moveToTileImmediately(Tile tile) {
+        tile.addEntity(this);
     }
 
     public int getCurrentHP() {
@@ -133,78 +142,53 @@ public abstract class Entity {
         return dexterity;
     }
 
-    public void setTargetTile(Tile targetTile) {
-        this.targetTile = targetTile;
-    }
-
     public Tile getTargetTile() {
         return targetTile;
     }
 
-    private void applyDamage(int damage) {
+    public void setTargetTile(Tile targetTile) {
+        this.targetTile = targetTile;
+    }
+
+    public void applyDamage(int damage) {
         currentHP -= damage;
         if(currentHP < 1) {
             alive = false;
         }
     }
 
+//    public void meleeAttack(Entity attacker, Entity target, boolean defenderCanAttack) {
+//        /*
+//        First check if attacker can attack
+//         */
+//        if (attacker.canAttack()) {
+//            if (target.canAttack() && defenderCanAttack) {
+//                int goesFirst = (int) (Math.random() * 2);
+//                switch (goesFirst) {
+//                    case 0:
+//                        Melee.attemptMeleeAttack(attacker, target);
+//                        if (target.isAlive()) {
+//                            Melee.attemptMeleeAttack(target, attacker);
+//                        }
+//                        break;
+//                    case 1:
+//                        Melee.attemptMeleeAttack(target, attacker);
+//                        if (isAlive()) {
+//                            Melee.attemptMeleeAttack(attacker, target);
+//                        }
+//                        break;
+//                }
+//
+//            } else {
+//                Melee.attemptMeleeAttack();
+//            }
+//        } else {
+//            //posgima2.swing.WindowFrame.writeConsole("/info/" + this + " could not attack.");
+//        }
+//    }
 
-
-    /*
-    Attempt to attack the defender
-     */
-    private void attemptMeleeAttack(Entity defender) {
-        /*
-        roll 1d20 + strength for melee
-         */
-        int hitRoll = Dice.roll(Dice.D20) + this.strength;
-
-        /*
-        If hitRoll less than defender's AC or hitroll equals 1, miss
-         */
-        if (hitRoll < defender.getTotalArmorClass() || hitRoll == 1) {
-            WindowFrame.writeConsole("/combat/" + this + " misses " + defender + ".");
-        }
-        /*
-        If hitroll greater than defender's AC or hitroll equals 20, hit
-         */
-        else if(hitRoll > defender.getTotalArmorClass() || hitRoll == 20) {
-            int damageRoll = Dice.roll(this.baseHitDie) + (level / strength) + damageBonus;
-            defender.applyDamage(damageRoll);
-            this.attackedThisTurn = true;
-            WindowFrame.writeConsole("/combat/" + this + " hit " + defender + " for " + damageRoll + ".");
-        }
-    }
-
-    public void meleeAttack(Entity target, boolean defenderCanAttack) {
-        if (canAttack()) {
-            if (target.canAttack() && defenderCanAttack) {
-                int goesFirst = (int) (Math.random() * 2);
-                switch (goesFirst) {
-                    case 0:
-                        attemptMeleeAttack(target);
-                        if (target.isAlive()) {
-                            target.attemptMeleeAttack(this);
-                        }
-                        break;
-                    case 1:
-                        target.attemptMeleeAttack(this);
-                        if (isAlive()) {
-                            attemptMeleeAttack(target);
-                        }
-                        break;
-                }
-
-            } else {
-                attemptMeleeAttack(target);
-            }
-        } else {
-            //posgima2.swing.WindowFrame.writeConsole("/info/" + this + " could not attack.");
-        }
-    }
-
-    private boolean canAttack() {
-        return !attackedThisTurn;
+    public boolean canAttack() {
+        return !attackedThisTurn && isAlive();
     }
 
 
@@ -285,4 +269,11 @@ public abstract class Entity {
     public int getTotalArmorClass() {
         return armorClass + armorSlot.getArmorClass();
     }
+
+    public void setAttackedThisTurn(boolean b) {
+        attackedThisTurn = b;
+    }
+
+    public abstract void die();
+
 }

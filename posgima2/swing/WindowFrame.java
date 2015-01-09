@@ -19,9 +19,18 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
 
     static Game game;
 
-    public WindowFrame(String title) throws HeadlessException {
+    public WindowFrame(String title, Dimension size) throws HeadlessException {
         super(title);
         setupWindow = new SetupWindow();
+
+        int consoleHeight = (int) (size.getHeight() * .25);
+        int consoleWidth = (int) (size.getWidth() * .80);
+
+        int statisticsWidth = (int) (size.getHeight() * .20);
+        int statisticsHeight = (int) (size.getHeight() * .75);
+
+        int renderHeight = (int) (size.getHeight() * .75);
+        int renderWidth = (int) (size.getWidth() * .85);
 
 
         //pane = new JPanel(new GridBagLayout());
@@ -33,32 +42,39 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         getContentPane().setBackground(Color.black);
         //getContentPane().add(pane);
         renderPanel = new RenderPanel();
+        //renderPanel.setPreferredSize(new Dimension(renderWidth, renderHeight));
         consolePanel = new ConsolePanel();
+        consolePanel.setPreferredSize(new Dimension(consoleWidth, consoleHeight));
         statisticsPanel = new StatisticsPanel();
+        statisticsPanel.setPreferredSize(new Dimension(statisticsWidth, statisticsHeight));
 
         GridBagConstraints gbc = new GridBagConstraints();
 
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        add(statisticsPanel, gbc);
+
         gbc.gridx = 1;
         gbc.gridy = 0;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         //gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-        gbc.weightx = .95;
-        gbc.weighty = .8;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
         add(renderPanel, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = .95;
-        gbc.weighty = .2;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
         add(consolePanel, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = .05;
-        gbc.weighty = .8;
-        add(statisticsPanel, gbc);
 
         //pack();
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor(this);
@@ -67,10 +83,10 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
 
 
 
-        setPreferredSize(new Dimension(1366, 768));
+        //setPreferredSize(size);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 
-        setResizable(false);
+        //setResizable(false);
         pack();
         this.setLocation((dim.width / 2) - (getSize().width / 2), (dim.height / 2) - (this.getSize().height / 2));
 

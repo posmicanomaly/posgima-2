@@ -15,7 +15,7 @@ public class StatisticsPanel extends JPanel{
     public StatisticsPanel() {
         setBackground(Color.black);
 
-        statisticsTextArea = new JTextArea("Player\nBarbarian\n\nHP: 15 / 16\nStr: 0\nAgi: 0\n\nNormal");
+        statisticsTextArea = new JTextArea();
         statisticsTextArea.setFont(new Font("Consolas", Font.PLAIN, 16));
         statisticsTextArea.setForeground(Color.white);
         statisticsTextArea.setOpaque(false);
@@ -54,7 +54,7 @@ public class StatisticsPanel extends JPanel{
             if(p.getTile().getItems().size() > 1) {
                 result.append("items lay here").append("\n");
             } else {
-                result.append(p.getTile().getItems().get(0)).append(" on ground\n");
+                result.append("item on ground\n");
             }
         } else {
             result.append("\n");

@@ -36,6 +36,7 @@ public class StatisticsPanel extends JPanel{
         Player player = gameState.getPlayer();
         StringBuilder sb = new StringBuilder(16 * 6);
         sb.append(player).append("\n");
+        sb.append("Level ").append(player.getLevel()).append("\n");
         sb.append("Barbarian").append("\n\n");
         sb.append(getStatsDisplayString(gameState));
         statisticsTextArea.setText(sb.toString());
@@ -49,6 +50,7 @@ public class StatisticsPanel extends JPanel{
         result.append("AGI: ").append(p.getAgility()).append("\n");
         result.append("DEX: ").append(p.getDexterity()).append("\n");
         result.append("\n");
+        result.append("EXP: ").append(p.getExperience()).append("\n");
         result.append(p.getTile().getGlyph()).append("\n");
         if(p.getTile().hasItems()) {
             if(p.getTile().getItems().size() > 1) {

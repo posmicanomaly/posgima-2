@@ -18,6 +18,9 @@ public abstract class Entity {
     protected int currentHP;
     protected int maxHP;
     protected int strength;
+    protected int level;
+    protected int experience;
+
     private int agility;
     private int dexterity;
     private Tile targetTile;
@@ -53,6 +56,8 @@ public abstract class Entity {
         }
         return true;
     }
+
+
 
     public int getX() {
         return x;
@@ -199,5 +204,13 @@ public abstract class Entity {
         if(name != null)
             return name;
         return String.valueOf(hashCode());
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public int getExperience() {
+        return experience;
     }
 }

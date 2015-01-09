@@ -18,16 +18,18 @@ public class Monster extends Entity{
     private LinkedList<Vector2i> moveQueue;
     private int age;
 
-    public Monster(char glyph) {
+    public Monster(char glyph, int level) {
         super(glyph);
         moveQueue = new LinkedList<Vector2i>();
         aggroPlayer = false;
         aggroTurnStart = 0;
         alive = true;
-        strength = 1;
-        maxHP = 7;
+        this.level = level;
+        strength = level * 2;
+        maxHP = level * 5;
         currentHP = maxHP;
         age = 0;
+        this.level = level;
     }
 
     public boolean[][] getVisibility() {

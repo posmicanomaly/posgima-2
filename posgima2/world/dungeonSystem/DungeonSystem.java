@@ -24,7 +24,11 @@ public class DungeonSystem {
              */
             int rooms = (height * width) / (13 * 13);
 
-            dungeons.add(new Dungeon(height, width, rooms));
+            /*
+            Difficulty is i + 1 because we can't have level 0 monsters, and this is just the level of monsters that
+            spawn currently.
+             */
+            dungeons.add(new Dungeon(height, width, rooms, i + 1));
         }
 
         connectLevels();

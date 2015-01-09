@@ -30,8 +30,9 @@ public class Dungeon {
     private boolean[][] exploredMap;
     private ArrayList<Monster> monsters;
     private int maxMonsterLimit;
+    private int difficulty;
 
-    public Dungeon(int rows, int cols, int roomAmount) {
+    public Dungeon(int rows, int cols, int roomAmount, int difficulty) {
         this.MAP_ROWS = rows;
         this.MAP_COLS = cols;
         charMap = new char[rows][cols];
@@ -65,6 +66,7 @@ public class Dungeon {
         sprinkleItems();
         SetupWindow.println("sprinkling monsters");
         setMaxMonsterLimit(rooms.size());
+        this.difficulty = difficulty;
         sprinkleMonsters();
     }
 
@@ -184,17 +186,17 @@ public class Dungeon {
         int times = 0;
         int timeout = 15;
         Tile tile = null;
-        while(times < timeout) {
+        while (times < timeout) {
             tile = getRandomTileOf(RenderPanel.FLOOR);
-            if(!invalidList[tile.getY()][tile.getX()]) {
-                if(!tile.hasEntity()) {
+            if (!invalidList[tile.getY()][tile.getX()]) {
+                if (!tile.hasEntity()) {
                     break;
                 }
             }
             times++;
             tile = null;
         }
-        if(tile != null) {
+        if (tile != null) {
             int m = (int) (Math.random() * 5);
             char glyph = 'x';
             String name = "x";
@@ -220,7 +222,7 @@ public class Dungeon {
                     name = "bat";
                     break;
             }
-            Monster monster = new Monster(glyph);
+            Monster monster = new Monster(glyph, getDifficulty());
             monster.setName(name);
             monsters.add(monster);
             tile.addEntity(monster);
@@ -238,7 +240,7 @@ public class Dungeon {
             case 3: glyph = 'T'; name = "troll"; break;
             case 4: glyph = 'b'; name = "bat"; break;
         }
-        Monster monster = new Monster(glyph);
+        Monster monster = new Monster(glyph, getDifficulty());
         monster.setName(name);
         return monster;
     }
@@ -479,5 +481,9 @@ public class Dungeon {
 
     public void setMaxMonsterLimit(int maxMonsterLimit) {
         this.maxMonsterLimit = maxMonsterLimit;
+    }
+
+    public int getDifficulty() {
+        return difficulty;
     }
 }

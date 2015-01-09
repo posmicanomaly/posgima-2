@@ -71,6 +71,8 @@ public class Game {
     private static final int TILE_HAS_NO_ITEMS = 0;
     private static final int TILE_HAS_DUNGEON_LINK = 1;
     private static final int TILE_HAS_NO_DUNGEON_LINK = 0;
+    private static final int XP_RATE = 30;
+    private static final int REGEN_RATE = 15;
 
     // Reassign this later, based on amount of rooms
     private static int MAX_MONSTERS = 0;
@@ -221,12 +223,12 @@ public class Game {
      * Process regen, etc
      */
     private void endTurn() {
-        if(turns > 1 && turns % 30 == 0) {
+        if(turns > 1 && turns % REGEN_RATE == 0) {
             player.regen();
         }
         for(Monster m : dungeon.getMonsters()) {
             m.addAge(1);
-            if(m.getAge() % 30 == 0) {
+            if(m.getAge() % REGEN_RATE == 0) {
                 m.regen();
             }
         }
@@ -386,6 +388,7 @@ public class Game {
                 if (!monster.isAlive()) {
                     WindowFrame.writeConsole("/combat//killed/You killed " + monster + ".");
                     monster.die();
+                    player.modifyExperience(monster.getLevel() * Game.XP_RATE);
                     dungeon.getMonsters().remove(monster);
                 }
 

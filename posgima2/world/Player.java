@@ -1,7 +1,10 @@
 package posgima2.world;
 
 import posgima2.game.Game;
+import posgima2.item.armor.Plate;
+import posgima2.item.weapon.Sword;
 import posgima2.misc.Dice;
+import posgima2.swing.RenderPanel;
 import posgima2.swing.WindowFrame;
 
 /**
@@ -9,6 +12,7 @@ import posgima2.swing.WindowFrame;
  */
 public class Player extends Entity{
 
+    private final int unarmedDie;
     private int state;
     private boolean justLooted;
 
@@ -16,29 +20,32 @@ public class Player extends Entity{
         super(glyph);
         alive = true;
         level = 1;
+        ttk = 1;
         baseHitDie = Dice.D10;
-        attackDie = baseHitDie;
+        unarmedDie = Dice.D1;
+        attackDie = unarmedDie;
+        armorClass = 1;
         rollAttributes();
         currentHP = maxHP;
         experience = 0;
+
+        //addInventory(new Sword(RenderPanel.WEAPON, Dice.D4, 0, 0, 0, 0), true);
+        //addInventory(new Plate(RenderPanel.ITEM, 5), true);
 
         state = Game.STATE_READY;
     }
 
     @Override
     public void die() {
-        WindowFrame.writeConsole("Such a sad thing that your journey has ended here.");
+        //WindowFrame.writeConsole("Such a sad thing that your journey has ended here.");
     }
 
     private void rollAttributes() {
-        strength = Dice.roll(3, Dice.D6);
-        agility = Dice.roll(3, Dice.D6);
-        dexterity = Dice.roll(3, Dice.D6);
-        constitution = Dice.roll(3, Dice.D6);
-        switch(baseHitDie) {
-            case Dice.D10:
-                maxHP = 10 + constitution + 99999;
-        }
+        strength = 10;
+        agility = 10;
+        dexterity = 10;
+        constitution = 10;
+        maxHP = 16;
     }
 
     public void modifyExperience(int amount) {
@@ -48,6 +55,9 @@ public class Player extends Entity{
         }
         while(checkLevelUp()) {
             levelUp();
+            WindowFrame.writeConsole("/info/You level up! You are now level " + level);
+            WindowFrame.writeConsole("/success/Strength increased to " + strength);
+            WindowFrame.writeConsole("/success/Maximum HP increased to " + maxHP);
         }
     }
 
@@ -59,10 +69,11 @@ public class Player extends Entity{
 
     public void levelUp() {
         level++;
+        strength += 2;
+        constitution += 2;
+        agility += 2;
+        dexterity += 2;
         maxHP += Dice.roll(baseHitDie) + constitution;
-        WindowFrame.writeConsole("/info/You level up! You are now level " + level);
-        //WindowFrame.writeConsole("/success/Strength increased to " + strength);
-        WindowFrame.writeConsole("/success/Maximum HP increased to " + maxHP);
     }
 
     public int getState() {

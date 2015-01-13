@@ -1,7 +1,8 @@
-package posgima2.world;
+package posgima2.world.monster;
 
 import posgima2.item.container.Corpse;
 import posgima2.misc.Dice;
+import posgima2.world.Entity;
 import posgima2.world.dungeonSystem.dungeon.FieldOfView;
 import posgima2.misc.Vector2i;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
@@ -11,13 +12,13 @@ import java.util.LinkedList;
 /**
  * Created by Jesse Pospisil on 1/1/2015.
  */
-public class Monster extends Entity{
+public abstract class Monster extends Entity {
     private boolean[][] visibility;
     private boolean aggroPlayer;
     private int aggroTurnStart;
 
     private LinkedList<Vector2i> moveQueue;
-    private int age;
+    protected int age;
 
     public Monster(char glyph, int level) {
         super(glyph);
@@ -26,18 +27,8 @@ public class Monster extends Entity{
         aggroTurnStart = 0;
         alive = true;
         this.level = level;
-        armorClass = 15;
-        baseHitDie = Dice.D4;
-        attackDie = baseHitDie;
-        damageBonus = 0;
-        strength = level * 11;
-        agility = 0;
-        dexterity = level * 13;
-        constitution = level * 12;
-
-        maxHP = (level * Dice.roll(baseHitDie)) + (constitution * level);
-        currentHP = maxHP;
         age = 0;
+        ttk = 1;
     }
 
     public boolean[][] getVisibility() {
@@ -54,8 +45,12 @@ public class Monster extends Entity{
     @Override
     public void die() {
         alive = false;
-        this.tile.addItem(new Corpse('}', this));
-        this.tile.remove(this);
+        if(tile != null) {
+            this.tile.addItem(new Corpse('}', this));
+            this.tile.remove(this);
+        } else {
+            //System.out.println("no tile");
+        }
         //posgima2.swing.WindowFrame.setupWindow.println(this + " died.");
     }
 

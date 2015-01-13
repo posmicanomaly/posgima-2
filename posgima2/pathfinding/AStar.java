@@ -118,6 +118,21 @@ public class AStar {
         return getCostOfGlyph(tile.getGlyph());
     }
 
+    private boolean isPassableInPlay(int y, int x) {
+        char glyph = dungeon.getTileMap()[y][x].getGlyph();
+        switch(glyph) {
+            case RenderPanel.DOOR_CLOSED: return false;
+            case RenderPanel.WALL: return false;
+        }
+        /*
+        This was meant to make monsters find an alternate route, but needs further development
+         */
+        //if(dungeon.hasMonster(y, x)) {
+        //    return false;
+        //}
+        return true;
+    }
+
     private ArrayList<AStarNode> getSurroundingNodesWithinRange(AStarNode current, Vector2i start, Vector2i end) {
         ArrayList<AStarNode> nodes = new ArrayList<>();
 
@@ -131,17 +146,30 @@ public class AStar {
         int minX = start.getX() - xd * 4;
         int maxX = start.getX() + xd * 4;
 
-        if(current.y - 1 > 0 && current.y - 1 > minY)
-            nodes.add(new AStarNode(current.y - 1, current.x));
+        /*
+        By not adding non-passable nodes, I think we can ditch the "range" portion of this method originally added
+        because of speed issues.
+         */
+        //up
+        if(current.y - 1 > 0)// && current.y - 1 > minY)
+            if (isPassableInPlay(current.y - 1, current.x)) {
+                nodes.add(new AStarNode(current.y - 1, current.x));
+            }
         //down
-        if(current.y + 1 < dungeon.getMap().length && current.y + 1 < maxY)
-            nodes.add(new AStarNode(current.y + 1, current.x));
+        if(current.y + 1 < dungeon.getMap().length)// && current.y + 1 < maxY)
+            if (isPassableInPlay(current.y + 1, current.x)) {
+                nodes.add(new AStarNode(current.y + 1, current.x));
+            }
         //left
-        if(current.x - 1 > 0 && current.x - 1 > minX)
-            nodes.add(new AStarNode(current.y, current.x - 1));
+        if(current.x - 1 > 0)// && current.x - 1 > minX)
+            if (isPassableInPlay(current.y, current.x - 1)) {
+                nodes.add(new AStarNode(current.y, current.x - 1));
+            }
         //right
-        if(current.x + 1 < dungeon.getMap()[0].length && current.x + 1 < maxX)
-            nodes.add(new AStarNode(current.y, current.x + 1));
+        if(current.x + 1 < dungeon.getMap()[0].length)// && current.x + 1 < maxX)
+            if (isPassableInPlay(current.y, current.x + 1)) {
+                nodes.add(new AStarNode(current.y, current.x + 1));
+            }
 
         return nodes;
     }

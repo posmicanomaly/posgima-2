@@ -2,14 +2,12 @@ package posgima2.swing;
 
 import posgima2.game.GameState;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
-import posgima2.world.Monster;
+import posgima2.world.monster.Monster;
 import posgima2.world.Player;
 import posgima2.world.dungeonSystem.dungeon.Tile;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by Jesse Pospisil on 12/26/2014.
@@ -89,7 +87,7 @@ public class RenderPanel extends JPanel {
     }
 
 //    private void drawMonsters(int rowStart, int rowEnd, int colStart, int colEnd, Graphics g) {
-//        for(posgima2.world.Monster m : currentState.getDungeon().getMonsters()) {
+//        for(posgima2.world.monster.Monster m : currentState.getDungeon().getMonsters()) {
 //            g.setColor(getGlyphColor(m.getGlyph()));
 //            g.drawChars(new char[]{m.getGlyph()}, 0, 1, m.getX() * fontSize, m.getY() * fontSize);
 //        }

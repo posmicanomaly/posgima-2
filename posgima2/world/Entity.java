@@ -1,12 +1,12 @@
 package posgima2.world;
 
-import posgima2.combat.Melee;
 import posgima2.game.Game;
 import posgima2.item.Item;
 import posgima2.item.armor.Armor;
 import posgima2.item.armor.NullArmor;
+import posgima2.item.potion.Potion;
+import posgima2.item.weapon.NullWeapon;
 import posgima2.item.weapon.Weapon;
-import posgima2.misc.Dice;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.WindowFrame;
 import posgima2.world.dungeonSystem.dungeon.Tile;
@@ -26,6 +26,10 @@ public abstract class Entity {
     protected int baseHitDie;
     protected int attackDie;
     /*
+    ttk or time to kill, is a measure of base toughness in attack and hp
+     */
+    protected double ttk;
+    /*
     Strength is primary melee attribute.
      */
     protected int strength;
@@ -40,7 +44,18 @@ public abstract class Entity {
     protected boolean attackedThisTurn;
     protected ArrayList<Item> inventory;
     protected String name;
-    protected Armor armorSlot;
+    /*
+    Equipment slots
+     */
+    protected Armor chestSlot;
+    protected Armor headSlot;
+    protected Armor handSlot;
+    protected Armor legSlot;
+    protected Armor armSlot;
+
+    protected Weapon mainHand;
+    protected Weapon offHand;
+
     private Tile targetTile;
 
     public Entity(char glyph) {
@@ -51,7 +66,14 @@ public abstract class Entity {
         attackedThisTurn = false;
         inventory = new ArrayList<Item>();
         armorClass = 10;
-        armorSlot = new NullArmor(RenderPanel.ITEM);
+        chestSlot = new NullArmor(RenderPanel.ITEM);
+        headSlot = new NullArmor(RenderPanel.ITEM);
+        handSlot = new NullArmor(RenderPanel.ITEM);
+        legSlot = new NullArmor(RenderPanel.ITEM);
+        armSlot = new NullArmor(RenderPanel.ITEM);
+
+        mainHand = new NullWeapon(RenderPanel.WEAPON);
+        offHand = new NullWeapon(RenderPanel.WEAPON);
     }
 
     public int getBaseHitDie() {
@@ -66,8 +88,8 @@ public abstract class Entity {
         return damageBonus;
     }
 
-    public Armor getArmorSlot() {
-        return armorSlot;
+    public Armor getChestSlot() {
+        return chestSlot;
     }
 
     public boolean move(int dir) {
@@ -206,30 +228,74 @@ public abstract class Entity {
         }
     }
 
-    public void addInventory(Item i) {
+    public void addInventory(Item i, boolean silent) {
         inventory.add(i);
         /*
         Auto equip best armor for now
          */
         if(i instanceof Armor) {
-            WindowFrame.writeConsole("picked up armor");
+            if(!silent) {
+                WindowFrame.writeConsole("picked up armor");
+            }
             Armor a = (Armor)i;
-            if(a.getArmorClass() > armorSlot.getArmorClass()) {
-                WindowFrame.writeConsole("You equipped the armor");
-                armorSlot = a;
+            boolean equipped = false;
+            switch(a.getSlot()) {
+                case Armor.SLOT_CHEST:
+                    if(a.getArmorClass() > chestSlot.getArmorClass()) {
+                        chestSlot = a;
+                        equipped = true;
+                    }
+                    break;
+                case Armor.SLOT_ARM:
+                    if(a.getArmorClass() > armSlot.getArmorClass()) {
+                        armSlot = a;
+                        equipped = true;
+                    }
+                    break;
+                case Armor.SLOT_HAND:
+                    if(a.getArmorClass() > handSlot.getArmorClass()) {
+                        handSlot = a;
+                        equipped = true;
+                    }
+                    break;
+                case Armor.SLOT_HEAD:
+                    if(a.getArmorClass() > headSlot.getArmorClass()) {
+                        headSlot = a;
+                        equipped = true;
+                    }
+                    break;
+                case Armor.SLOT_LEG:
+                    if(a.getArmorClass() > legSlot.getArmorClass()) {
+                        legSlot = a;
+                        equipped = true;
+                    }
+                    break;
+            }
+            if(equipped) {
+                if(!silent) {
+                    WindowFrame.writeConsole("You equipped the " + a);
+                }
             }
         } else if(i instanceof Weapon) {
-            WindowFrame.writeConsole("picked up weapon");
+            if(!silent) {
+                WindowFrame.writeConsole("picked up weapon");
+            }
             Weapon w = (Weapon)i;
             if(w.getHitDie() > attackDie) {
                 attackDie = w.getHitDie();
+                mainHand = w;
                 damageBonus = w.getDamageBonus();
-                WindowFrame.writeConsole("You equipped the " + w);
+                if(!silent) {
+                    WindowFrame.writeConsole("You equipped the " + w);
+                }
             } else if(w.getHitDie() == attackDie) {
                 if(damageBonus < w.getDamageBonus()) {
                     attackDie = w.getHitDie();
+                    mainHand = w;
                     damageBonus = w.getDamageBonus();
-                    WindowFrame.writeConsole("You equipped the " + w);
+                    if(!silent) {
+                        WindowFrame.writeConsole("You equipped the " + w);
+                    }
                 }
             }
         }
@@ -267,7 +333,14 @@ public abstract class Entity {
     }
 
     public int getTotalArmorClass() {
-        return armorClass + armorSlot.getArmorClass();
+        int totalAC = armorClass;
+        totalAC += chestSlot.getArmorClass();
+        totalAC += armSlot.getArmorClass();
+        totalAC += handSlot.getArmorClass();
+        totalAC += legSlot.getArmorClass();
+        totalAC += headSlot.getArmorClass();
+
+        return totalAC;
     }
 
     public void setAttackedThisTurn(boolean b) {
@@ -276,4 +349,16 @@ public abstract class Entity {
 
     public abstract void die();
 
+    public double getTtk() {
+        return ttk;
+    }
+
+    public Potion getNextPotionTest() {
+        for(Item i : inventory) {
+            if(i instanceof Potion) {
+                return (Potion) i;
+            }
+        }
+        return null;
+    }
 }

@@ -13,6 +13,7 @@ public abstract class Item {
 
     protected char glyph;
     protected int type;
+    protected String name;
 
     public Item(char glyph) {
         this.glyph = glyph;
@@ -25,4 +26,7 @@ public abstract class Item {
         return type;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 }

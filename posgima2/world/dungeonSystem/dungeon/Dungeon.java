@@ -1,16 +1,21 @@
 package posgima2.world.dungeonSystem.dungeon;
 
+import posgima2.game.ItemGenerator;
+import posgima2.item.Item;
+import posgima2.item.armor.Armor;
 import posgima2.item.armor.Plate;
+import posgima2.item.potion.Potion;
+import posgima2.item.weapon.Weapon;
 import posgima2.misc.Dice;
 import posgima2.misc.Vector2i;
 import posgima2.pathfinding.AStar;
-import posgima2.swing.ConsolePanel;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;
 import posgima2.swing.WindowFrame;
 import posgima2.item.weapon.Sword;
 import posgima2.world.Entity;
-import posgima2.world.Monster;
+import posgima2.world.monster.Goblin;
+import posgima2.world.monster.Monster;
 
 import java.util.ArrayList;
 
@@ -42,6 +47,7 @@ public class Dungeon {
         visibleMap = new boolean[rows][cols];
         exploredMap = new boolean[rows][cols];
         monsters = new ArrayList<Monster>();
+        this.difficulty = difficulty;
         fillMap(VOID);
 
         rooms = new ArrayList<Room>();
@@ -68,7 +74,7 @@ public class Dungeon {
         sprinkleItems();
         SetupWindow.println("sprinkling monsters");
         setMaxMonsterLimit(rooms.size());
-        this.difficulty = difficulty;
+
         sprinkleMonsters();
     }
 
@@ -109,7 +115,9 @@ public class Dungeon {
         // todo: refactor to only check for monster, not any entity
         if(tileMap[y][x].getEntity() != null)
         {
-            return true;
+            if(tileMap[y][x].getEntity() instanceof Monster)
+                return true;
+            return false;
         }
 
         return false;
@@ -178,13 +186,17 @@ public class Dungeon {
     }
 
     private void sprinkleItems() {
-        for(int i = 0; i < rooms.size() / 2; i++) {
-            Sword sword = new Sword(RenderPanel.WEAPON, Dice.D10, 2, 5, 0, 0);
+        for(int i = 0; i < rooms.size() / 4; i++) {
+            Weapon sword = ItemGenerator.createWeapon(this.difficulty);
             getRandomTileOf(RenderPanel.FLOOR).addItem(sword);
         }
-        for(int i = 0; i < rooms.size() / 2; i++) {
-            Plate plate = new Plate(RenderPanel.ITEM, 10);
+        for(int i = 0; i < rooms.size() / 4; i++) {
+            Armor plate = ItemGenerator.createArmor(this.difficulty, ItemGenerator.randomArmorSlot());
             getRandomTileOf(RenderPanel.FLOOR).addItem(plate);
+        }
+        for(int i = 0; i < rooms.size() / 4; i++) {
+            Potion potion = ItemGenerator.createPotion(this.difficulty);
+            getRandomTileOf(RenderPanel.FLOOR).addItem(potion);
         }
     }
 
@@ -228,8 +240,7 @@ public class Dungeon {
                     name = "bat";
                     break;
             }
-            Monster monster = new Monster(glyph, getDifficulty());
-            monster.setName(name);
+            Monster monster = new Goblin(getDifficulty());
             monsters.add(monster);
             tile.addEntity(monster);
         }
@@ -246,8 +257,7 @@ public class Dungeon {
             case 3: glyph = 'T'; name = "troll"; break;
             case 4: glyph = 'b'; name = "bat"; break;
         }
-        Monster monster = new Monster(glyph, getDifficulty());
-        monster.setName(name);
+        Monster monster = new Goblin(getDifficulty());
         return monster;
     }
 

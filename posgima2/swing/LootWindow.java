@@ -56,7 +56,7 @@ public class LootWindow extends JFrame implements WindowListener{
                     itemsLooting.add(tile.getItems().get(i));
                 }
                 for(Item i : itemsLooting) {
-                    player.addInventory(i);
+                    player.addInventory(i, false);
                     tile.getItems().remove(i);
                 }
 

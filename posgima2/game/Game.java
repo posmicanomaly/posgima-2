@@ -1,6 +1,9 @@
 package posgima2.game;
 
 import posgima2.combat.Melee;
+import posgima2.item.armor.Armor;
+import posgima2.item.potion.Potion;
+import posgima2.item.weapon.Weapon;
 import posgima2.misc.Vector2i;
 import posgima2.item.Item;
 import posgima2.pathfinding.AStar;
@@ -10,6 +13,7 @@ import posgima2.world.dungeonSystem.DungeonSystem;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.dungeonSystem.dungeon.Room;
 import posgima2.world.dungeonSystem.dungeon.Tile;
+import posgima2.world.monster.Monster;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -73,7 +77,7 @@ public class Game {
     private static final int TILE_HAS_DUNGEON_LINK = 1;
     private static final int TILE_HAS_NO_DUNGEON_LINK = 0;
     private static final int XP_RATE = 30;
-    private static final int REGEN_RATE = 15;
+    private static final int REGEN_RATE = 50;
 
     // Reassign this later, based on amount of rooms
     private static int MAX_MONSTERS = 0;
@@ -105,6 +109,12 @@ public class Game {
         player = new Player('@');
         player.setName("AlphaTester");
         WindowFrame.consolePanel.setPlayerName(player.toString());
+        player.addInventory(ItemGenerator.createWeapon(player.getLevel()), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_CHEST), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_ARM), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HAND), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_LEG), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HEAD), false);
 
         dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
@@ -224,7 +234,11 @@ public class Game {
      * Process regen, etc
      */
     private void endTurn() {
-        if(turns > 1 && turns % REGEN_RATE == 0) {
+        int playerRegenRate = REGEN_RATE - player.getConstitution();
+        if(playerRegenRate < 1) {
+            playerRegenRate = 1;
+        }
+        if(turns > 1 && turns % playerRegenRate == 0) {
             player.regen();
         }
         for(Monster m : dungeon.getMonsters()) {
@@ -257,6 +271,7 @@ public class Game {
         boolean moveRequest = false;
         boolean itemPickupRequest = false;
         boolean dungeonChangeRequest = false;
+        boolean quaffRequest = false;
         switch (e.getKeyCode()) {
             /*
             Movement
@@ -296,8 +311,11 @@ public class Game {
                 WindowFrame.writeConsole("/success/map fully explored");
                 break;
             case KeyEvent.VK_PERIOD:
-                WindowFrame.writeConsole("idle");
+                //WindowFrame.writeConsole("idle");
                 turnTickActionOccurred = true;
+                break;
+            case KeyEvent.VK_Q:
+                quaffRequest = true;
                 break;
             case KEY_CHARACTER:
                 if (characterWindow.isVisible()) {
@@ -354,6 +372,15 @@ public class Game {
                     WindowFrame.writeConsole("no dungeon link");
                     break;
             }
+        } else if(quaffRequest) {
+            Potion potion = player.getNextPotionTest();
+            if(potion != null) {
+                potion.applyEffects(player);
+                turnTickActionOccurred = true;
+                WindowFrame.writeConsole("You quaff the potion");
+            } else {
+                WindowFrame.writeConsole("You have no potions");
+            }
         }
     }
 
@@ -376,43 +403,103 @@ public class Game {
         }
     }
 
+    private int playerCombat(Monster monster) {
+        /*
+        perform melee combat round with player and monster, with defenderCanAttack set to true
+         */
+        Melee.meleeCombat(player, monster, true);
+
+        /*
+        Post combat check if monster is dead.
+         */
+        if (!monster.isAlive()) {
+            // Announce
+            WindowFrame.writeConsole("/combat//killed/You killed " + monster + ".");
+
+            /*
+            Compute proper experience reward based on dungeon level difficulty
+             */
+            int level = dungeon.getDifficulty();
+            int exp = (level * (100 * (level * level))) / (dungeon.getMaxMonsterLimit());
+
+            // If player is lower level than the intended difficulty, increase the reward
+            if(player.getLevel() < dungeon.getDifficulty()) {
+                exp = (int)(exp * 1.5);
+            }
+            // Else reduce the reward
+            else if(player.getLevel() > dungeon.getDifficulty()) {
+                exp = exp / 4;
+            }
+
+            player.modifyExperience(exp);
+
+            // Announce
+            WindowFrame.writeConsole("/success/You gained " + exp + " points of experience.");
+
+            // Remove the dead monster from dungeon
+            dungeon.getMonsters().remove(monster);
+        }
+
+        /*
+        Check if player died
+         */
+        if(!player.isAlive()) {
+            WindowFrame.writeConsole("/warning/You died.");
+            player.setState(STATE_GAME_OVER);
+        }
+        return PLAYER_COMBAT;
+    }
+
     private int processPlayerMoveRequest(int nextY, int nextX) {
+        /*
+        In range check
+         */
         if (dungeon.inRange(nextY, nextX)) {
+            /*
+            Check if next tile is passable, and move if it is
+             */
             if (dungeon.isPassable(nextX, nextY)) {
                 player.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
+                // Set flag for player having just moved
                 return PLAYER_MOVED;
-                //System.out.println("passable");
-            } else if (dungeon.hasMonster(nextY, nextX)) {
+            }
+
+            /*
+            Check if next tile has a monster that is preventing tile from passing isPassable
+             */
+            else if (dungeon.hasMonster(nextY, nextX)) {
                 Monster monster = dungeon.getMonsterAt(nextY, nextX);
-                Melee.meleeCombat(player, monster, true);
-                //player.meleeAttack(monster, true);
+                // Fight the monster, return the result which will be PLAYER_COMBAT
+                return playerCombat(monster);
+            }
 
-                if (!monster.isAlive()) {
-                    WindowFrame.writeConsole("/combat//killed/You killed " + monster + ".");
-                    //monster.die();
-                    player.modifyExperience(monster.getLevel() * Game.XP_RATE);
-                    dungeon.getMonsters().remove(monster);
-                }
-
-                if(!player.isAlive()) {
-                    WindowFrame.writeConsole("/warning/You died.");
-                    player.setState(STATE_GAME_OVER);
-                }
-                return PLAYER_COMBAT;
-                //System.out.println("has entity");
-            } else {
+            /*
+            If it failed isPassable, and there's no monster, check if it's a wall or door
+             */
+            else {
                 switch(dungeon.getTileMap()[nextY][nextX].getGlyph()) {
+                    // Walked into a wall
                     case RenderPanel.WALL:
                         return PLAYER_HIT_WALL;
+                    // Walked into a closed door
                     case RenderPanel.DOOR_CLOSED:
+                        // Set the "player" state as STATE_DOOR_CLOSED
                         player.setState(STATE_DOOR_CLOSED);
+                        // Set the tile the door is on as the player's target
                         player.setTargetTile(dungeon.getTileMap()[nextY][nextX]);
+                        // Set the "game" state as PLAYER_HIT_CLOSED_DOOR to fire off the proper menu and accept
+                        // correct keys
                         return PLAYER_HIT_CLOSED_DOOR;
+                    // Error case
                     default:
                         return ERROR_PLAYER_MOVE;
                 }
             }
-        } else {
+        }
+        /*
+        Trying to move beyond the map limits
+         */
+        else {
             return ERROR_OUT_OF_MAP_RANGE;
         }
     }
@@ -427,12 +514,14 @@ public class Game {
                 (player.getY(), player.getX()), false, true);
         m.getMoveQueue().clear();
 
-        // i = size - 2 because we throw away the first move, because its the current location.
-        for(int i = shortestPath.size() - 2; i >= 0; i--) {
-            // System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
-            m.getMoveQueue().add(shortestPath.get(i));
+        if(shortestPath != null) {
+            // i = size - 2 because we throw away the first move, because its the current location.
+            for (int i = shortestPath.size() - 2; i >= 0; i--) {
+                // System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
+                m.getMoveQueue().add(shortestPath.get(i));
+            }
+            // System.out.println("process monsters took " + (System.currentTimeMillis() - time));
         }
-        // System.out.println("process monsters took " + (System.currentTimeMillis() - time));
     }
 
     private void processMonsters() {
@@ -541,53 +630,56 @@ public class Game {
     }
 
     private void processMonsterMoveQueue(Monster m) {
+        // Get the next location in monster's moveQueue
         Vector2i next = m.getMoveQueue().remove();
+
+        /*
+        If location has a player
+         */
         if(hasPlayer(next.getY(), next.getX())) {
-            //posgima2.swing.WindowFrame.writeConsole("/combat//def/" + m + " hits you");
-            //m.meleeAttack(player, false);
-            Melee.meleeCombat(m, player, false);
+            // If player is alive
+            if(player.isAlive()) {
+                // Start melee combat round with player, with defenderCanAttack set to false so player cannot fight back
+                Melee.meleeCombat(m, player, false);
+            }
+
+            // If player died during combat
             if(!player.isAlive()) {
+                // Announce
                 WindowFrame.writeConsole("/warning/You died.");
+                // Set game state STATE_GAME_OVER
                 player.setState(STATE_GAME_OVER);
             }
             /*
             Clear the move queue now, so we don't teleport to the next spot.
              */
             m.getMoveQueue().clear();
-        } else if(dungeon.isPassable(next.getX(), next.getY())) {
-            //m.move(direction);
-            if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() != RenderPanel.DOOR_CLOSED)
-                m.moveToTileImmediately(dungeon.getTileMap()[next.getY()][next.getX()]);
-            else {
-                // re add it for now
-                m.getMoveQueue().addFirst(next);
-            }
         }
-        //System.out.println("move " + direction);
+        /*
+        If no player, check if its a passable tile.
+         */
+        else if(dungeon.isPassable(next.getX(), next.getY())) {
+            /*
+            Hack:
+            As long as its not a closed door
+             */
+            //if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() != RenderPanel.DOOR_CLOSED)
+                m.moveToTileImmediately(dungeon.getTileMap()[next.getY()][next.getX()]);
+        }
+        else {
+            // tile not passable, calculate a new route for next time
+            WindowFrame.writeConsole(m + " couldn't move");
+            m.getMoveQueue().clear();
+        }
     }
 
     private boolean hasPlayer(int y, int x) {
         return y == player.getY() && x == player.getX();
     }
 
-//    private void evaluatePlayer(posgima2.world.Player player) {
-//        posgima2.world.dungeonSystem.dungeon.Tile tile = player.getTile();
-//        if(tile.getGlyph() == posgima2.swing.RenderPanel.DOOR_CLOSED) {
-//            tile.setGlyph(posgima2.swing.RenderPanel.DOOR_OPEN);
-//            posgima2.swing.WindowFrame.writeConsole("You open the door.");
-//        }
-//    }
-
     public void initDungeonSystem() {
         dungeonSystem = new DungeonSystem(10);
     }
-
-//    public void initMap() {
-//        dungeon = new Dungeon(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);
-//        //charMap = dungeon.getMap();
-//        //visibleMap = dungeon.getVisibleMap();
-//
-//    }
 
     public GameState getGameState() {
         GameState gameState = new GameState();

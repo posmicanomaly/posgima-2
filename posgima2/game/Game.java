@@ -168,11 +168,11 @@ public class Game {
             apparently.
              */
             case STATE_LOOTED:
-                StringBuilder inventoryMessage = new StringBuilder("inventory: ");
-                for (Item i : player.getInventory()) {
-                    inventoryMessage.append("[").append(i).append("] ");
-                }
-                WindowFrame.writeConsole(inventoryMessage.toString());
+//                StringBuilder inventoryMessage = new StringBuilder("inventory: ");
+//                for (Item i : player.getInventory()) {
+//                    inventoryMessage.append("[").append(i).append("] ");
+//                }
+//                WindowFrame.writeConsole(inventoryMessage.toString());
                 turnTickActionOccurred = true;
                 player.setState(STATE_READY);
                 break;
@@ -392,6 +392,7 @@ public class Game {
             Potion potion = player.getNextPotionTest();
             if(potion != null) {
                 potion.applyEffects(player);
+                player.getInventory().remove(potion);
                 turnTickActionOccurred = true;
                 WindowFrame.writeConsole("You quaff the potion");
             } else {

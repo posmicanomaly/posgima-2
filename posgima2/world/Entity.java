@@ -298,6 +298,10 @@ public abstract class Entity {
                     }
                 }
             }
+        } else {
+            if(!silent) {
+                WindowFrame.writeConsole("You picked up the " + i);
+            }
         }
     }
 

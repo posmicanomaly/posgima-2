@@ -102,13 +102,13 @@ public class PlayerVsMonster {
     }
 
     private static void addMonsterInventory(Monster m) {
-        Plate chest = new Plate('-', 1, Armor.SLOT_CHEST);
-        Plate head = new Plate('-', 1, Armor.SLOT_HEAD);
-        Plate arm = new Plate('-', 1, Armor.SLOT_ARM);
-        Plate hand = new Plate('-', 1, Armor.SLOT_HAND);
-        Plate leg = new Plate('-', 1, Armor.SLOT_LEG);
+        Plate chest = new Plate(1, Armor.SLOT_CHEST);
+        Plate head = new Plate(1, Armor.SLOT_HEAD);
+        Plate arm = new Plate(1, Armor.SLOT_ARM);
+        Plate hand = new Plate(1, Armor.SLOT_HAND);
+        Plate leg = new Plate(1, Armor.SLOT_LEG);
 
-        Sword mainH = new Sword('+', Dice.D4, 0, 0, 0, 0);
+        Sword mainH = new Sword(Dice.D4, 0, 0, 0, 0);
         //m.addInventory(chest, true);
         //m.addInventory(head, true);
         //m.addInventory(arm, true);

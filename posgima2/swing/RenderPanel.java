@@ -16,13 +16,15 @@ public class RenderPanel extends JPanel {
     public static final char WALL = '#';
     public static final char FLOOR = '.';//'\u00b7'; // middle dot
     public static final char WATER = '~';
-    public static final char WEAPON = ')';
+    public static final char WEAPON = '-';
     public static final char SCROLL = '?';
     public static final char ITEM = '!';
     public static final char STAIRS_DOWN = '>';
     public static final char STAIRS_UP = '<';
     public static final char DOOR_OPEN = '/';
     public static final char DOOR_CLOSED = '+';
+    public static final char CORPSE = '%';
+    public static final char ARMOR = ';';
 
     // Used to dim colors "explored" but not "visible"
     private static final int DIM_DIVISOR = 2;
@@ -252,6 +254,8 @@ public class RenderPanel extends JPanel {
             case ITEM :
             case SCROLL :
             case WEAPON : return Color.pink;
+            case ARMOR: return Color.pink;
+            case CORPSE: return Color.red;
             case STAIRS_DOWN: return Color.WHITE;
             case STAIRS_UP: return Color.white;
             case WATER : return Color.blue;

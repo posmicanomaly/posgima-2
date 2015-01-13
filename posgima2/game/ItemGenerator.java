@@ -24,7 +24,7 @@ public abstract class ItemGenerator {
             case 4: hit = Dice.D10; name = "exquisite sword"; break;
             default: hit = Dice.D4; name = "default sword";
         }
-        Weapon sword = new Sword(RenderPanel.WEAPON, hit, 0, 0, 0, 0);
+        Weapon sword = new Sword(hit, 0, 0, 0, 0);
         sword.setName(name);
         return sword;
     }
@@ -35,7 +35,7 @@ public abstract class ItemGenerator {
 
     public static Armor createArmor(int level, int slot) {
         int ac = level;
-        Armor armor = new Plate(RenderPanel.ITEM, ac, slot);
+        Armor armor = new Plate(ac, slot);
         String name;
         switch(level) {
             case 1: name = "rusty"; break;

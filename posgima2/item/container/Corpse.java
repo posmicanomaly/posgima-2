@@ -12,7 +12,12 @@ public class Corpse extends Item {
     private ArrayList<Item> items;
     public Corpse(char c, Entity monster) {
         super(c);
+        name = monster.toString() + "'s corpse";
         items = new ArrayList<Item>();
         // todo: monster inventory to corpse + bare corpse
+    }
+
+    public String toString() {
+        return name;
     }
 }

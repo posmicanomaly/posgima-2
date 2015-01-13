@@ -3,6 +3,7 @@ package posgima2.world.monster;
 import posgima2.item.Item;
 import posgima2.item.container.Corpse;
 import posgima2.misc.Dice;
+import posgima2.swing.RenderPanel;
 import posgima2.world.Entity;
 import posgima2.world.dungeonSystem.dungeon.FieldOfView;
 import posgima2.misc.Vector2i;
@@ -47,7 +48,8 @@ public abstract class Monster extends Entity {
     public void die() {
         alive = false;
         if(tile != null) {
-            this.tile.addItem(new Corpse('}', this));
+            Item corpse = new Corpse(RenderPanel.CORPSE, this);
+            this.tile.addItem(corpse);
             for(Item i : inventory) {
                 this.tile.addItem(i);
             }

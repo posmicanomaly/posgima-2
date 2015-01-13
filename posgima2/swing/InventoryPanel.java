@@ -10,40 +10,29 @@ import java.awt.*;
 /**
  * Created by Jesse Pospisil on 1/7/2015.
  */
-public class InventoryWindow extends JFrame {
-    private JPanel inventoryPanel;
+public class InventoryPanel extends InfoWindow{
     private JTable inventoryTable;
     private DefaultTableModel inventoryModel;
     private Player player;
 
-    public InventoryWindow(Player player) {
+    public InventoryPanel(Player player) {
+        super(new GridLayout(2, 1));
         this.player = player;
         JLabel inventoryLabel = new JLabel(player + " Inventory");
         inventoryModel = new DefaultTableModel();
         inventoryTable = new JTable(inventoryModel);
         update();
-        inventoryPanel = new JPanel(new GridLayout(4, 1));
-        inventoryPanel.add(inventoryLabel);
-        inventoryPanel.add(inventoryTable);
-        add(inventoryPanel);
-        pack();
+
+        add(inventoryLabel);
+        add(inventoryTable);
     }
 
     public void update() {
         inventoryModel = new DefaultTableModel();
-        inventoryModel.addColumn("posgima2.item.weapon.Item");
+        inventoryModel.addColumn("Item");
         for(Item i : player.getInventory()) {
             inventoryModel.addRow(new Object[]{i.toString()});
         }
         inventoryTable.setModel(inventoryModel);
-        pack();
-    }
-
-    public void showWindow() {
-        setVisible(true);
-    }
-
-    public void hideWindow() {
-        setVisible(false);
     }
 }

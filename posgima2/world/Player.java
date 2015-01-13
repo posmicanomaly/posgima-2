@@ -1,6 +1,7 @@
 package posgima2.world;
 
 import posgima2.game.Game;
+import posgima2.item.armor.Armor;
 import posgima2.item.armor.Plate;
 import posgima2.item.weapon.Sword;
 import posgima2.misc.Dice;

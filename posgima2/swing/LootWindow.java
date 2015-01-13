@@ -77,6 +77,10 @@ public class LootWindow extends JFrame implements WindowListener{
         lootPanel.add(cancelButton);
         add(lootPanel);
         pack();
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        setResizable(false);
+        this.setLocation((dim.width / 2) - (getSize().width / 2), (dim.height / 2) - (this.getSize().height / 2));
+
         setVisible(true);
     }
 

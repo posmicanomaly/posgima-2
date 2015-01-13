@@ -3,7 +3,6 @@ package posgima2.game;
 import posgima2.combat.Melee;
 import posgima2.item.armor.Armor;
 import posgima2.item.potion.Potion;
-import posgima2.item.weapon.Weapon;
 import posgima2.misc.Vector2i;
 import posgima2.item.Item;
 import posgima2.pathfinding.AStar;
@@ -49,11 +48,10 @@ public class Game {
     public static final int STATE_CANCEL = -1;
     public static final int STATE_READY = 0;
     public static final int STATE_DOOR_CLOSED = 1;
-    private static final int STATE_GAME_OVER = 2;
     public static final int STATE_ITEM_PICKUP = 3;
-    private static final int STATE_LOOTING = 4;
     public static final int STATE_LOOTED = 5;
-
+    private static final int STATE_GAME_OVER = 2;
+    private static final int STATE_LOOTING = 4;
     /**
      * PLAYER_x
      * Flags set in movement
@@ -87,8 +85,10 @@ public class Game {
     private Dungeon dungeon;
 
     private LootWindow lootWindow;
-    private CharacterWindow characterWindow;
-    private InventoryWindow inventoryWindow;
+    private CharacterPanel characterPanel;
+    private InventoryPanel inventoryPanel;
+    private PopupWindow inventoryPopup;
+    private PopupWindow characterPopup;
 
     /**
      * Set true if a major move was performed, like moving, or quaffing, opening a door
@@ -124,8 +124,10 @@ public class Game {
         MAX_MONSTERS = dungeon.getMonsters().size() * 2;
 
         turns = 0;
-        characterWindow = new CharacterWindow(player);
-        inventoryWindow = new InventoryWindow(player);
+        characterPanel = new CharacterPanel(player);
+        inventoryPanel = new InventoryPanel(player);
+        inventoryPopup = new PopupWindow(inventoryPanel);
+        characterPopup = new PopupWindow(characterPanel);
     }
 
     /**
@@ -211,8 +213,8 @@ public class Game {
             turns++;
         }
 
-        inventoryWindow.update();
-        characterWindow.update();
+        inventoryPopup.update();
+        characterPopup.update();
 
         return getGameState();
     }
@@ -306,29 +308,39 @@ public class Game {
             /*
             Other
              */
+
+            // DEBUG set current level fully explored
             case KeyEvent.VK_P:
                 dungeon.setFullyExplored();
                 WindowFrame.writeConsole("/success/map fully explored");
                 break;
+
+            // Idle, wait, stand still
             case KeyEvent.VK_PERIOD:
                 //WindowFrame.writeConsole("idle");
                 turnTickActionOccurred = true;
                 break;
+
+            // Quaff potion
             case KeyEvent.VK_Q:
                 quaffRequest = true;
                 break;
+
+            // Open character window
             case KEY_CHARACTER:
-                if (characterWindow.isVisible()) {
-                    characterWindow.hideWindow();
+                if (characterPopup.isVisible()) {
+                    characterPopup.hideWindow();
                 } else {
-                    characterWindow.showWindow();
+                    characterPopup.showWindow();
                 }
                 break;
+
+            // Open inventory window
             case KEY_INVENTORY:
-                if(inventoryWindow.isVisible()) {
-                    inventoryWindow.hideWindow();
+                if(inventoryPopup.isVisible()) {
+                    inventoryPopup.hideWindow();
                 } else {
-                    inventoryWindow.showWindow();
+                    inventoryPopup.showWindow();
                 }
         }
 

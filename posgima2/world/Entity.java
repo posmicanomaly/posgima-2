@@ -361,4 +361,24 @@ public abstract class Entity {
         }
         return null;
     }
+
+    public Armor getHeadSlot() {
+        return headSlot;
+    }
+
+    public Armor getArmSlot() {
+        return armSlot;
+    }
+
+    public Armor getLegSlot() {
+        return legSlot;
+    }
+
+    public Armor getHandSlot() {
+        return handSlot;
+    }
+
+    public Weapon getMainHand() {
+        return mainHand;
+    }
 }

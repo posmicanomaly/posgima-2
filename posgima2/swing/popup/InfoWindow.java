@@ -1,4 +1,4 @@
-package posgima2.swing;
+package posgima2.swing.popup;
 
 import javax.swing.*;
 import java.awt.*;

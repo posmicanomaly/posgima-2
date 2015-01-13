@@ -1,6 +1,5 @@
-package posgima2.swing;
+package posgima2.swing.popup;
 
-import posgima2.item.Item;
 import posgima2.world.Player;
 
 import javax.swing.*;
@@ -14,15 +13,17 @@ public class CharacterPanel extends InfoWindow {
     private Player player;
     private DefaultTableModel equipmentModel;
     private JTable equipmentTable;
+    private JScrollPane equipmentTableScrollPane;
     public CharacterPanel(Player player) {
         super(new GridLayout(2, 1));
         this.player = player;
         equipmentModel = new DefaultTableModel();
         equipmentTable = new JTable(equipmentModel);
+        equipmentTableScrollPane = new JScrollPane(equipmentTable);
         update();
         JLabel playerLabel = new JLabel(player.toString());
         add(playerLabel);
-        add(equipmentTable);
+        add(equipmentTableScrollPane);
     }
 
     public void update() {

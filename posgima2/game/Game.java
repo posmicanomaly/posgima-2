@@ -2,11 +2,15 @@ package posgima2.game;
 
 import posgima2.combat.Melee;
 import posgima2.item.armor.Armor;
+import posgima2.item.container.Corpse;
 import posgima2.item.potion.Potion;
 import posgima2.misc.Vector2i;
 import posgima2.item.Item;
 import posgima2.pathfinding.AStar;
 import posgima2.swing.*;
+import posgima2.swing.popup.CharacterPanel;
+import posgima2.swing.popup.InventoryPanel;
+import posgima2.swing.popup.PopupWindow;
 import posgima2.world.*;
 import posgima2.world.dungeonSystem.DungeonSystem;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
@@ -676,12 +680,29 @@ public class Game {
             As long as its not a closed door
              */
             //if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() != RenderPanel.DOOR_CLOSED)
-                m.moveToTileImmediately(dungeon.getTileMap()[next.getY()][next.getX()]);
+            m.moveToTileImmediately(dungeon.getTileMap()[next.getY()][next.getX()]);
+            if(m.getTile().hasItems()) {
+                monsterLootItems(m, m.getTile());
+            }
         }
         else {
             // tile not passable, calculate a new route for next time
             WindowFrame.writeConsole(m + " couldn't move");
             m.getMoveQueue().clear();
+        }
+    }
+
+    private void monsterLootItems(Monster m, Tile t) {
+        ArrayList<Item> itemsToLoot = new ArrayList<>();
+        for(Item i : t.getItems()) {
+            if(i instanceof Corpse) {
+                continue;
+            }
+            itemsToLoot.add(i);
+        }
+        for(Item i : itemsToLoot) {
+            m.addInventory(i, true);
+            t.getItems().remove(i);
         }
     }
 

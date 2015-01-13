@@ -1,4 +1,4 @@
-package posgima2.swing;
+package posgima2.swing.popup;
 
 import posgima2.item.Item;
 import posgima2.world.Player;
@@ -12,6 +12,7 @@ import java.awt.*;
  */
 public class InventoryPanel extends InfoWindow{
     private JTable inventoryTable;
+    private JScrollPane inventoryTableScrollPane;
     private DefaultTableModel inventoryModel;
     private Player player;
 
@@ -21,10 +22,11 @@ public class InventoryPanel extends InfoWindow{
         JLabel inventoryLabel = new JLabel(player + " Inventory");
         inventoryModel = new DefaultTableModel();
         inventoryTable = new JTable(inventoryModel);
+        inventoryTableScrollPane = new JScrollPane(inventoryTable);
         update();
 
         add(inventoryLabel);
-        add(inventoryTable);
+        add(inventoryTableScrollPane);
     }
 
     public void update() {

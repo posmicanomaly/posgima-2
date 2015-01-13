@@ -99,9 +99,9 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
 
     }
 
-    public static void Update() {
+    public static void update() {
         //long time = System.currentTimeMillis();
-        renderPanel.Update();
+        renderPanel.update();
 
         //setupWindow.println("update took " + (System.currentTimeMillis() - time));
     }
@@ -144,19 +144,14 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
     @Override
     public boolean postProcessKeyEvent(KeyEvent e) {
         if(e.getID() == KeyEvent.KEY_PRESSED) {
-            //consolePanel.insertText("/warning/key_pressed: " + e.getKeyCode() + "\n");
+            //WindowFrame.writeConsole("/warning/key_pressed: " + e.getKeyCode() + "\n");
             long time = System.currentTimeMillis();
             GameState nextState = game.Update(e);
-            //setupWindow.println("game.Update() took " + (System.currentTimeMillis() - time));
-            //consolePanel.insertText(nextState.getMessage() + "\n");
-            //consolePanel.insertText("/info/x: " + nextState.getPlayer().getX() + "  y: " + nextState.getPlayer().getY
-            //        () + "\n");
             statisticsPanel.update(nextState);
             renderPanel.updateGameState(nextState);
-            Update();
+            update();
             return true;
         } else if(e.getID() == KeyEvent.KEY_RELEASED) {
-            //consolePanel.insertText("/success/key_released: " + e.getKeyCode() + "\n");
             return true;
         }
         return false;
@@ -169,7 +164,7 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         GameState nextState = game.Update(null);
         statisticsPanel.update(nextState);
         renderPanel.updateGameState(nextState);
-        Update();
+        update();
     }
 
     public static void writeConsole(String string) {

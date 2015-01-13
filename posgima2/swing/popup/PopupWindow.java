@@ -1,4 +1,4 @@
-package posgima2.swing;
+package posgima2.swing.popup;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +11,8 @@ public class PopupWindow extends JFrame {
 
     public PopupWindow(InfoWindow contentPanel) {
         setLayout(new BorderLayout());
+        setPreferredSize(new Dimension(800, 600));
+        //setMaximumSize(getPreferredSize());
         this.contentPanel = contentPanel;
         add(this.contentPanel);
         pack();

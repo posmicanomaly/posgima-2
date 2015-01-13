@@ -268,7 +268,7 @@ public class RenderPanel extends JPanel {
         currentState = state;
     }
 
-    public void Update() {
+    public void update() {
         repaint();
     }
 }

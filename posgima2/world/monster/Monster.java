@@ -1,5 +1,6 @@
 package posgima2.world.monster;
 
+import posgima2.item.Item;
 import posgima2.item.container.Corpse;
 import posgima2.misc.Dice;
 import posgima2.world.Entity;
@@ -47,6 +48,9 @@ public abstract class Monster extends Entity {
         alive = false;
         if(tile != null) {
             this.tile.addItem(new Corpse('}', this));
+            for(Item i : inventory) {
+                this.tile.addItem(i);
+            }
             this.tile.remove(this);
         } else {
             //System.out.println("no tile");

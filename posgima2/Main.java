@@ -13,7 +13,7 @@ public class Main {
         WindowFrame windowFrame = new WindowFrame("Posgima-2 - " + Game.STAGE + " " + Game.VERSION, new Dimension
                 (1366, 768));
 //        while(true) {
-//            windowFrame.Update();
+//            windowFrame.update();
 //            try {
 //                Thread.sleep(17);
 //            } catch (InterruptedException e) {

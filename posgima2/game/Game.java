@@ -113,18 +113,15 @@ public class Game {
         player = new Player('@');
         player.setName("AlphaTester");
         WindowFrame.consolePanel.setPlayerName(player.toString());
-        player.addInventory(ItemGenerator.createWeapon(player.getLevel()), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_CHEST), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_ARM), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HAND), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_LEG), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HEAD), false);
+
+        addPlayerStartingGear(player);
 
         dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
 
         SetupWindow.println("player " + player.getY() + " " + player.getX());
 
+        // TODO: Check this, as its important for proper EXP distribution per level
         MAX_MONSTERS = dungeon.getMonsters().size() * 2;
 
         turns = 0;
@@ -132,6 +129,15 @@ public class Game {
         inventoryPanel = new InventoryPanel(player);
         inventoryPopup = new PopupWindow(inventoryPanel);
         characterPopup = new PopupWindow(characterPanel);
+    }
+
+    private void addPlayerStartingGear(Player player) {
+        player.addInventory(ItemGenerator.createWeapon(player.getLevel()), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_CHEST), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_ARM), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HAND), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_LEG), false);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HEAD), false);
     }
 
     /**
@@ -168,11 +174,6 @@ public class Game {
             apparently.
              */
             case STATE_LOOTED:
-//                StringBuilder inventoryMessage = new StringBuilder("inventory: ");
-//                for (Item i : player.getInventory()) {
-//                    inventoryMessage.append("[").append(i).append("] ");
-//                }
-//                WindowFrame.writeConsole(inventoryMessage.toString());
                 turnTickActionOccurred = true;
                 player.setState(STATE_READY);
                 break;

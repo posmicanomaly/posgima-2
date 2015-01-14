@@ -196,7 +196,7 @@ public class RenderPanel extends JPanel {
         /*
         Extract the RGB values from color
          */
-        int b = color.getBlue();
+        int b = color.getBlue() + (60 - (distanceFrom * 16));
         /*
         Apply a reddish "torch" color, and subtract te distanceFrom * 16 value
         Higher values will give less of a "bright" radius, and also decrease the initial brightness
@@ -216,6 +216,10 @@ public class RenderPanel extends JPanel {
             g = 0;
         else if(g > 255)
             g = 255;
+        if(b < 0)
+            b = 64;
+        if(b > 255)
+            b = 255;
 
         color = new Color(r,g,b);
         return color;

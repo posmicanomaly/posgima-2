@@ -56,6 +56,7 @@ public class Game {
     public static final int STATE_LOOTED = 5;
     private static final int STATE_GAME_OVER = 2;
     private static final int STATE_LOOTING = 4;
+    private static final int STATE_CLOSE_DOOR_ATTEMPT = 6;
     /**
      * PLAYER_x
      * Flags set in movement
@@ -81,8 +82,9 @@ public class Game {
     private static final int XP_RATE = 30;
     private static final int REGEN_RATE = 50;
 
+
     // Reassign this later, based on amount of rooms
-    private static int MAX_MONSTERS = 0;
+   // private static int MAX_MONSTERS = 0;
 
     private Player player;
     private DungeonSystem dungeonSystem;
@@ -122,7 +124,7 @@ public class Game {
         SetupWindow.println("player " + player.getY() + " " + player.getX());
 
         // TODO: Check this, as its important for proper EXP distribution per level
-        MAX_MONSTERS = dungeon.getMonsters().size() * 2;
+        //MAX_MONSTERS = dungeon.getMonsters().size() * 2;
 
         turns = 0;
         characterPanel = new CharacterPanel(player);
@@ -166,6 +168,10 @@ public class Game {
              */
             case STATE_CANCEL:
                 player.setState(STATE_READY);
+                break;
+
+            case STATE_CLOSE_DOOR_ATTEMPT:
+                processStateToggleDoorKeys(e);
                 break;
             /*
             STATE_LOOTED is for after we've looted items from the Loot window.
@@ -224,6 +230,35 @@ public class Game {
         return getGameState();
     }
 
+    private void processStateToggleDoorKeys(KeyEvent e) {
+        int targetY = player.getY();
+        int targetX = player.getX();
+        switch (e.getKeyCode()) {
+            case KEY_NORTH:
+                targetY--;
+                break;
+            case KEY_SOUTH:
+                targetY++;
+                break;
+            case KEY_EAST:
+                targetX++;
+                break;
+            case KEY_WEST:
+                targetX--;
+                break;
+        }
+        if(dungeon.inRange(targetY, targetX)) {
+            if(dungeon.isDoor(targetY, targetX)) {
+                dungeon.toggleDoor(dungeon.getTileMap()[targetY][targetX]);
+                turnTickActionOccurred = true;
+                player.setState(STATE_READY);
+            } else {
+                WindowFrame.writeConsole("There's no door there.");
+            }
+        }
+        player.setState(STATE_READY);
+    }
+
     private void processItemLootingWithWindow() {
         lootWindow = new LootWindow(dungeon.getTileMap()[player.getY()][player.getX()], player);
         player.setState(STATE_LOOTING);
@@ -279,6 +314,8 @@ public class Game {
         boolean itemPickupRequest = false;
         boolean dungeonChangeRequest = false;
         boolean quaffRequest = false;
+        boolean toggleDoorRequest = false;
+
         switch (e.getKeyCode()) {
             /*
             Movement
@@ -315,7 +352,7 @@ public class Game {
              */
 
             // DEBUG set current level fully explored
-            case KeyEvent.VK_P:
+            case KeyEvent.VK_0:
                 dungeon.setFullyExplored();
                 WindowFrame.writeConsole("/success/map fully explored");
                 break;
@@ -329,6 +366,12 @@ public class Game {
             // Quaff potion
             case KeyEvent.VK_Q:
                 quaffRequest = true;
+                break;
+
+            // Close door
+            case KEY_TOGGLE_DOOR:
+                WindowFrame.writeConsole("Which direction to open/close door?");
+                toggleDoorRequest = true;
                 break;
 
             // Open character window
@@ -399,6 +442,8 @@ public class Game {
             } else {
                 WindowFrame.writeConsole("You have no potions");
             }
+        } else if(toggleDoorRequest) {
+            player.setState(STATE_CLOSE_DOOR_ATTEMPT);
         }
     }
 

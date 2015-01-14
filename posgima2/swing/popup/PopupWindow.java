@@ -11,9 +11,10 @@ public class PopupWindow extends JFrame {
 
     public PopupWindow(InfoWindow contentPanel) {
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(800, 600));
+        setPreferredSize(new Dimension(400, 300));
         //setMaximumSize(getPreferredSize());
         this.contentPanel = contentPanel;
+        setTitle(contentPanel.getPanelName());
         add(this.contentPanel);
         pack();
     }

@@ -16,6 +16,7 @@ import posgima2.item.weapon.Sword;
 import posgima2.world.Entity;
 import posgima2.world.monster.Goblin;
 import posgima2.world.monster.Monster;
+import posgima2.world.monster.Rat;
 
 import java.util.ArrayList;
 
@@ -73,7 +74,7 @@ public class Dungeon {
         SetupWindow.println("sprinkling items");
         sprinkleItems();
         SetupWindow.println("sprinkling monsters");
-        setMaxMonsterLimit(rooms.size());
+        setMaxMonsterLimit(rooms.size() * 2);
 
         sprinkleMonsters();
     }
@@ -215,49 +216,32 @@ public class Dungeon {
             tile = null;
         }
         if (tile != null) {
-            int m = (int) (Math.random() * 5);
-            char glyph = 'x';
-            String name = "x";
+            int m = (int) (Math.random() * 2);
+            Monster monster = null;
             switch (m) {
                 case 0:
-                    glyph = 'r';
-                    name = "large rat";
+                    monster = new Rat(getDifficulty());
                     break;
                 case 1:
-                    glyph = 'g';
-                    name = "goblin";
-                    break;
-                case 2:
-                    glyph = 'D';
-                    name = "dragon";
-                    break;
-                case 3:
-                    glyph = 'T';
-                    name = "troll";
-                    break;
-                case 4:
-                    glyph = 'b';
-                    name = "bat";
+                    monster = new Goblin(getDifficulty());
                     break;
             }
-            Monster monster = new Goblin(getDifficulty());
             monsters.add(monster);
             tile.addEntity(monster);
         }
     }
 
     private Monster createRandomMonster() {
-        int m = (int)(Math.random() * 5);
-        char glyph = 'x';
-        String name = "x";
-        switch(m) {
-            case 0: glyph = 'r'; name = "large rat"; break;
-            case 1: glyph = 'g'; name = "goblin"; break;
-            case 2: glyph = 'D'; name = "dragon"; break;
-            case 3: glyph = 'T'; name = "troll"; break;
-            case 4: glyph = 'b'; name = "bat"; break;
+        int m = (int) (Math.random() * 2);
+        Monster monster = null;
+        switch (m) {
+            case 0:
+                monster = new Rat(getDifficulty());
+                break;
+            case 1:
+                monster = new Goblin(getDifficulty());
+                break;
         }
-        Monster monster = new Goblin(getDifficulty());
         return monster;
     }
 
@@ -477,7 +461,12 @@ public class Dungeon {
         if(targetTile.getGlyph() == RenderPanel.DOOR_CLOSED) {
             targetTile.setGlyph(RenderPanel.DOOR_OPEN);
         } else if(targetTile.getGlyph() == RenderPanel.DOOR_OPEN) {
-            targetTile.setGlyph(RenderPanel.DOOR_CLOSED);
+            if(!hasMonster(targetTile.getY(), targetTile.getX()) && !targetTile.hasItems()) {
+                targetTile.setGlyph(RenderPanel.DOOR_CLOSED);
+            } else
+            {
+                WindowFrame.writeConsole("Something is blocking the door from closing.");
+            }
         } else {
             WindowFrame.writeConsole("/warning/toggleDoor() error");
         }
@@ -501,5 +490,15 @@ public class Dungeon {
 
     public int getDifficulty() {
         return difficulty;
+    }
+
+    public boolean isDoor(int targetY, int targetX) {
+        switch (tileMap[targetY][targetX].getGlyph()) {
+            case RenderPanel.DOOR_CLOSED:
+                return true;
+            case RenderPanel.DOOR_OPEN:
+                return true;
+        }
+        return false;
     }
 }

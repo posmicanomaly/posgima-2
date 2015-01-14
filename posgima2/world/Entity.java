@@ -385,4 +385,15 @@ public abstract class Entity {
     public Weapon getMainHand() {
         return mainHand;
     }
+
+    public boolean hasItemEquipped(Item i) {
+        if(i instanceof Armor) {
+            if(armSlot == i || headSlot == i || chestSlot == i || legSlot == i || handSlot == i)
+                return true;
+        } else if(i instanceof Weapon) {
+            if(mainHand == i || offHand == i)
+                return true;
+        }
+        return false;
+    }
 }

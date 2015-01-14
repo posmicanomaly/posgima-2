@@ -8,10 +8,15 @@ import java.awt.*;
  */
 public abstract class InfoWindow extends JPanel{
 
+    private String panelName;
+
     public InfoWindow(LayoutManager layout) {
         super(layout);
     }
 
     public abstract void update();
 
+    public String getPanelName() {
+        return panelName;
+    }
 }

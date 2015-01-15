@@ -46,6 +46,35 @@ public class RenderPanel extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        if(WindowFrame.GAME_IS_LOADING) {
+            titleRender(g);
+        } else if(WindowFrame.GAME_IS_RUNNING) {
+            gameRender(g);
+        }
+
+    }
+
+    private void titleRender(Graphics g) {
+        fontSize = getHeight() / 12;
+        yIncrement = fontSize - (fontSize / 4);
+        xIncrement = fontSize - (fontSize / 2);
+        g.setColor(Color.RED);
+        g.setFont(new Font("courier new", Font.BOLD, fontSize));
+        char[] title = "Posgima - 2".toCharArray();
+        String instructions = "Select new game from the game menu to start\n" +
+                "Move with arrow keys in cardinal directions\n" +
+                "Open loot menu when items are present with ,\n" +
+                "Quaff health potions with Q\n" +
+                "Open or close doors by using C, or walking into a closed door";
+        int y = getHeight() / 4;
+        int x = getWidth() / 2 - (title.length * fontSize / 2);
+        g.drawChars(title, 0, title.length, x, y);
+        y = getHeight() / 2;
+        x = fontSize;
+        //g.drawChars(instructions.toCharArray(),0, instructions.length(), x, y);
+    }
+
+    private void gameRender(Graphics g) {
         // Changed from getWidth() / 64 because it was causing the characters to overlap during certain resizes.
         fontSize = getHeight() / 24;
         yIncrement = fontSize - (fontSize / 4);

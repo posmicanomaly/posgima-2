@@ -2,7 +2,6 @@ package posgima2.world.monster;
 
 import posgima2.item.Item;
 import posgima2.item.container.Corpse;
-import posgima2.misc.Dice;
 import posgima2.swing.RenderPanel;
 import posgima2.world.Entity;
 import posgima2.world.dungeonSystem.dungeon.FieldOfView;
@@ -30,7 +29,7 @@ public abstract class Monster extends Entity {
         alive = true;
         this.level = level;
         age = 0;
-        ttk = 1;
+        expMod = 1;
     }
 
     public boolean[][] getVisibility() {

@@ -112,4 +112,9 @@ public class ConsolePanel extends JPanel{
             e.printStackTrace();
         }
     }
+
+    public void clearAll() {
+        document = new DefaultStyledDocument(context);
+        combatDoc = new DefaultStyledDocument(combatContext);
+    }
 }

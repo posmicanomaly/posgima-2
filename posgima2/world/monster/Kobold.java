@@ -2,11 +2,6 @@ package posgima2.world.monster;
 
 import posgima2.misc.Dice;
 
-
-import posgima2.item.armor.Plate;
-import posgima2.misc.Dice;
-import posgima2.swing.RenderPanel;
-
 /**
  * Created by Jesse Pospisil on 1/9/2015.
  */
@@ -23,7 +18,7 @@ public class Kobold extends Monster {
         agility = 1;
         dexterity = 1;
         constitution = 1;
-        ttk = 0.7;
+        expMod = 0.7;
 
         maxHP = 10;
         for(int i = 1; i < level; i++) {

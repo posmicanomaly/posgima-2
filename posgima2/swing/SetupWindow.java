@@ -21,10 +21,9 @@ public class SetupWindow extends JFrame {
         console = new JTextArea();
         consoleScroller = new JScrollPane(console);
         add(consoleScroller);
-        setPreferredSize(new Dimension(800, 600));
+        setPreferredSize(new Dimension(400, 300));
         setResizable(false);
         pack();
-        setVisible(true);
     }
 
     public static void println(String line) {
@@ -32,7 +31,11 @@ public class SetupWindow extends JFrame {
         console.setCaretPosition(console.getText().length());
     }
 
-    public static void setCurrentRoomsMade(int r) {
+    public void showWindow() {
+        setVisible(true);
+    }
 
+    public void hideWindow() {
+        setVisible(false);
     }
 }

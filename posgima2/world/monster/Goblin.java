@@ -1,8 +1,6 @@
 package posgima2.world.monster;
 
-import posgima2.item.armor.Plate;
 import posgima2.misc.Dice;
-import posgima2.swing.RenderPanel;
 
 /**
  * Created by Jesse Pospisil on 1/9/2015.
@@ -20,7 +18,7 @@ public class Goblin extends Monster {
         agility = 8;
         dexterity = 8;
         constitution = 8;
-        ttk = 0.7;
+        expMod = 1.0;
 
         maxHP = 8;
         for(int i = 1; i < level; i++) {

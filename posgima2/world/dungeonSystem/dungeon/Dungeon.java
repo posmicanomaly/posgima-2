@@ -55,15 +55,15 @@ public class Dungeon {
 
         SetupWindow.println("Creating and connecting rooms");
         createAndConnectRooms(roomAmount);
-        SetupWindow.println("total rooms: " + rooms.size());
+        //SetupWindow.println("total rooms: " + rooms.size());
 
-        SetupWindow.println("blasting rooms");
+        //SetupWindow.println("blasting rooms");
         blastExtraEntrances(rooms.size() / 4);
 
-        SetupWindow.println("finishing map");
+        //SetupWindow.println("finishing map");
         finishMap();
 
-        SetupWindow.println("creating tileMap");
+        //SetupWindow.println("creating tileMap");
         for (int y = 0; y < MAP_ROWS; y++) {
             for (int x = 0; x < MAP_COLS; x++) {
                 Tile tile = new Tile(charMap[y][x], y, x);
@@ -71,9 +71,9 @@ public class Dungeon {
             }
         }
 
-        SetupWindow.println("sprinkling items");
+        //SetupWindow.println("sprinkling items");
         sprinkleItems();
-        SetupWindow.println("sprinkling monsters");
+        //SetupWindow.println("sprinkling monsters");
         setMaxMonsterLimit(rooms.size() * 2);
 
         sprinkleMonsters();
@@ -284,7 +284,7 @@ public class Dungeon {
             startEntrance = start.getViableEntranceLocation();
             start.addEntrance(startEntrance, charMap);
         } else {
-            SetupWindow.println(start + " no unconnected rooms, cannot add new entrance, using existing one");
+            //SetupWindow.println(start + " no unconnected rooms, cannot add new entrance, using existing one");
             startEntrance = start.getEntrances().get((int)(Math.random() * start.getEntrances().size()));
         }
 
@@ -294,7 +294,7 @@ public class Dungeon {
             endEntrance = end.getViableEntranceLocation();
             end.addEntrance(endEntrance, charMap);
         } else {
-            SetupWindow.println(end + " no unconnected rooms, cannot add new entrance, using existing one");
+            //SetupWindow.println(end + " no unconnected rooms, cannot add new entrance, using existing one");
             endEntrance = end.getEntrances().get((int)(Math.random() * end.getEntrances().size()));
         }
         carvePath(startEntrance, endEntrance, fillglyph);

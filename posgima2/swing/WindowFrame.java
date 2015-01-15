@@ -13,97 +13,85 @@ import java.awt.event.*;
 public class WindowFrame extends JFrame implements KeyEventPostProcessor, WindowListener {
     static SetupWindow setupWindow;
 
-    static RenderPanel renderPanel;
-    public static ConsolePanel consolePanel;
-    static StatisticsPanel statisticsPanel;
-
+    public static GamePanel gamePanel;
+    public static TitlePanel titlePanel;
+    public static LoadingPanel loadingPanel;
     static Game game;
+    public static boolean GAME_IS_LOADING;
+    public static boolean GAME_IS_RUNNING;
+    private Dimension size;
+    
 
     public WindowFrame(String title, Dimension size) throws HeadlessException {
         super(title);
-        setupWindow = new SetupWindow();
+        this.size = size;
+        GAME_IS_LOADING = true;
 
-        int consoleHeight = 160;
-        int consoleWidth = (int) (size.getWidth() * .80);
+        initMenu();
 
-        int statisticsWidth = 160;
-        int statisticsHeight = (int) (size.getHeight() * .75);
-
-        int renderHeight = (int) (size.getHeight() * .75);
-        int renderWidth = (int) (size.getWidth() * .85);
-
-
-        //pane = new JPanel(new GridBagLayout());
-
-        //setExtendedState(MAXIMIZED_BOTH);
-
-
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
         getContentPane().setBackground(Color.black);
-        //getContentPane().add(pane);
-        renderPanel = new RenderPanel();
-        //renderPanel.setPreferredSize(new Dimension(renderWidth, renderHeight));
-        consolePanel = new ConsolePanel();
-        consolePanel.setPreferredSize(new Dimension(consoleWidth, consoleHeight));
-        statisticsPanel = new StatisticsPanel();
-        statisticsPanel.setPreferredSize(new Dimension(statisticsWidth, statisticsHeight));
+        loadingPanel = new LoadingPanel(size);
+        titlePanel = new TitlePanel(size);
 
-        GridBagConstraints gbc = new GridBagConstraints();
+        setContentPane(titlePanel);
+        initKeyboardFocusManager();
+        pack();
+        setResizable(false);
+        centerWindow();
+        setVisible(true);
+    }
 
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        add(statisticsPanel, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.BOTH;
-        //gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        add(renderPanel, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        add(consolePanel, gbc);
-
-        //pack();
+    private void initKeyboardFocusManager() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor(this);
         addWindowListener(this);
         setFocusable(true);
+    }
 
-
-
-        //setPreferredSize(size);
+    private void centerWindow() {
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-
-
-        pack();
-        setResizable(false);
         this.setLocation((dim.width / 2) - (getSize().width / 2), (dim.height / 2) - (this.getSize().height / 2));
+    }
+
+    private void initMenu() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu gameMenu = new JMenu("Game");
+        JMenuItem newGameMenuItem = new JMenuItem("New");
+        newGameMenuItem.setToolTipText("Start a new game");
+        newGameMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startGame();
+            }
+        });
+        gameMenu.add(newGameMenuItem);
+        menuBar.add(gameMenu);
+        setJMenuBar(menuBar);
+    }
+
+    public void setContentPane(JPanel panel) {
+        this.getContentPane().removeAll();
+        this.getContentPane().add(panel);
+    }
+
+    private void startGame() {
+        gamePanel = new GamePanel(size);
+        GAME_IS_LOADING = true;
+        setupWindow = new SetupWindow();
 
         game = new Game();
-        renderPanel.updateGameState(game.getGameState());
-        statisticsPanel.update(game.getGameState());
-
-        setVisible(true);
-
+        gamePanel.renderPanel.updateGameState(game.getGameState());
+        gamePanel.statisticsPanel.update(game.getGameState());
+        setupWindow.hideWindow();
+        GAME_IS_LOADING = false;
+        GAME_IS_RUNNING = true;
+        setContentPane(gamePanel);
+        pack();
+        update();
     }
 
     public static void update() {
-        //long time = System.currentTimeMillis();
-        renderPanel.update();
-
-        //setupWindow.println("update took " + (System.currentTimeMillis() - time));
+        gamePanel.renderPanel.update();
     }
 
 
@@ -143,12 +131,15 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
 
     @Override
     public boolean postProcessKeyEvent(KeyEvent e) {
+        if(GAME_IS_LOADING) {
+            return false;
+        }
         if(e.getID() == KeyEvent.KEY_PRESSED) {
             //WindowFrame.writeConsole("/warning/key_pressed: " + e.getKeyCode() + "\n");
             long time = System.currentTimeMillis();
             GameState nextState = game.Update(e);
-            statisticsPanel.update(nextState);
-            renderPanel.updateGameState(nextState);
+            gamePanel.statisticsPanel.update(nextState);
+            gamePanel.renderPanel.updateGameState(nextState);
             update();
             return true;
         } else if(e.getID() == KeyEvent.KEY_RELEASED) {
@@ -162,12 +153,12 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
      */
     public static void forceGameUpdate() {
         GameState nextState = game.Update(null);
-        statisticsPanel.update(nextState);
-        renderPanel.updateGameState(nextState);
+        gamePanel.statisticsPanel.update(nextState);
+        gamePanel.renderPanel.updateGameState(nextState);
         update();
     }
 
     public static void writeConsole(String string) {
-        consolePanel.insertText(string + "\n");
+        gamePanel.consolePanel.insertText(string + "\n");
     }
 }

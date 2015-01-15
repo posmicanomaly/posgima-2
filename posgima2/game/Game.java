@@ -114,11 +114,12 @@ public class Game {
 
         player = new Player('@');
         player.setName("AlphaTester");
-        WindowFrame.consolePanel.setPlayerName(player.toString());
+        WindowFrame.gamePanel.consolePanel.setPlayerName(player.toString());
 
         addPlayerStartingGear(player);
 
-        dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
+        //dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
+        player.moveToTileImmediately(dungeon.getTileMap()[center.getY()][center.getX()]);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
 
         SetupWindow.println("player " + player.getY() + " " + player.getX());
@@ -483,7 +484,7 @@ public class Game {
             Compute proper experience reward based on dungeon level difficulty
              */
             int level = dungeon.getDifficulty();
-            int exp = (level * (100 * (level * level))) / (dungeon.getMaxMonsterLimit());
+            int exp = (int) (((level * (100 * (level * level))) / (dungeon.getMaxMonsterLimit())) * monster.getExpMod());
 
             // If player is lower level than the intended difficulty, increase the reward
             if(player.getLevel() < dungeon.getDifficulty()) {

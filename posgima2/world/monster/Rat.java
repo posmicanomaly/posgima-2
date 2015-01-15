@@ -17,7 +17,7 @@ public class Rat extends Monster {
         agility = 4;
         dexterity = 4;
         constitution = 4;
-        ttk = 0.7;
+        expMod = 0.6;
 
         maxHP = 6;
         for(int i = 1; i < level; i++) {

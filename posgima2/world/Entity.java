@@ -26,9 +26,9 @@ public abstract class Entity {
     protected int baseHitDie;
     protected int attackDie;
     /*
-    ttk or time to kill, is a measure of base toughness in attack and hp
+    expMod or time to kill, is a measure of base toughness in attack and hp
      */
-    protected double ttk;
+    protected double expMod;
     /*
     Strength is primary melee attribute.
      */
@@ -353,8 +353,8 @@ public abstract class Entity {
 
     public abstract void die();
 
-    public double getTtk() {
-        return ttk;
+    public double getExpMod() {
+        return expMod;
     }
 
     public Potion getNextPotionTest() {

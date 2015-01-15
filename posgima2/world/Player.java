@@ -1,11 +1,7 @@
 package posgima2.world;
 
 import posgima2.game.Game;
-import posgima2.item.armor.Armor;
-import posgima2.item.armor.Plate;
-import posgima2.item.weapon.Sword;
 import posgima2.misc.Dice;
-import posgima2.swing.RenderPanel;
 import posgima2.swing.WindowFrame;
 
 /**
@@ -21,7 +17,7 @@ public class Player extends Entity{
         super(glyph);
         alive = true;
         level = 1;
-        ttk = 1;
+        expMod = 1;
         baseHitDie = Dice.D10;
         unarmedDie = Dice.D1;
         attackDie = unarmedDie;

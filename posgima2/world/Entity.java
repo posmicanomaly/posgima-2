@@ -58,6 +58,7 @@ public abstract class Entity {
 
     private Tile targetTile;
 
+
     public Entity(char glyph) {
         this.glyph = glyph;
         tile = null;
@@ -396,4 +397,6 @@ public abstract class Entity {
         }
         return false;
     }
+
+
 }

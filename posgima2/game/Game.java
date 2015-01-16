@@ -65,9 +65,12 @@ public class Game {
     private static final int PLAYER_COMBAT = 1;
     private static final int PLAYER_HIT_WALL = 2;
     private static final int PLAYER_HIT_CLOSED_DOOR = 3;
+    public static final int PLAYER_ATE_WELL = 4;
+    public static final int PLAYER_ATE_POISON = 5;
+    public static final int PLAYER_HAS_NO_FOOD = 6;
     //Errors set in movement
-    private static final int ERROR_PLAYER_MOVE = 4;
-    private static final int ERROR_OUT_OF_MAP_RANGE = 5;
+    private static final int ERROR_PLAYER_MOVE = -1;
+    private static final int ERROR_OUT_OF_MAP_RANGE = -2;
 
 
 
@@ -80,7 +83,11 @@ public class Game {
     private static final int TILE_HAS_DUNGEON_LINK = 1;
     private static final int TILE_HAS_NO_DUNGEON_LINK = 0;
     private static final int XP_RATE = 30;
-    private static final int REGEN_RATE = 50;
+    private static final int REGEN_RATE = 30;
+
+    private static final int HUNGER_HIT_MELEE = 4;
+    private static final int HUNGER_HIT_MOVE = 1;
+
 
 
     // Reassign this later, based on amount of rooms
@@ -132,15 +139,24 @@ public class Game {
         inventoryPanel = new InventoryPanel(player);
         inventoryPopup = new PopupWindow(inventoryPanel);
         characterPopup = new PopupWindow(characterPanel);
+
+        sendGreetingText();
+    }
+
+    private void sendGreetingText() {
+        WindowFrame.writeConsole("/success/Welcome to Posgima-2. An ancient dungeon lay before you, can you descend " +
+                "it's" +
+                " maddening levels without perishing?");
+        WindowFrame.writeConsole("/info/Press F1 for help.");
     }
 
     private void addPlayerStartingGear(Player player) {
-        player.addInventory(ItemGenerator.createWeapon(player.getLevel()), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_CHEST), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_ARM), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HAND), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_LEG), false);
-        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HEAD), false);
+        player.addInventory(ItemGenerator.createWeapon(player.getLevel()), true);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_CHEST), true);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_ARM), true);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HAND), true);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_LEG), true);
+        player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HEAD), true);
     }
 
     /**
@@ -277,7 +293,7 @@ public class Game {
      * Process regen, etc
      */
     private void endTurn() {
-        int playerRegenRate = REGEN_RATE - player.getConstitution();
+        int playerRegenRate = REGEN_RATE - player.getConstitution() - (player.getSatiation() / 10);
         if(playerRegenRate < 1) {
             playerRegenRate = 1;
         }
@@ -289,6 +305,11 @@ public class Game {
             if(m.getAge() % REGEN_RATE == 0) {
                 m.regen();
             }
+        }
+
+        if(player.getSatiation() == 0) {
+            player.applyDamage(1);
+            WindowFrame.writeConsole("You are starving to death!");
         }
     }
 
@@ -316,6 +337,7 @@ public class Game {
         boolean dungeonChangeRequest = false;
         boolean quaffRequest = false;
         boolean toggleDoorRequest = false;
+        boolean eatRequest = false;
 
         switch (e.getKeyCode()) {
             /*
@@ -391,13 +413,28 @@ public class Game {
                 } else {
                     inventoryPopup.showWindow();
                 }
+                break;
+
+            // Display help
+            case KEY_HELP:
+                sendHelpMessage();
+                break;
+
+            // Eat
+            case KEY_EAT:
+                eatRequest = true;
+                break;
         }
 
         if (moveRequest) {
             switch(processPlayerMoveRequest(nextY, nextX)) {
                 case PLAYER_MOVED:
+                    turnTickActionOccurred = true;
+                    player.modifySatiation(HUNGER_HIT_MOVE);
+                    break;
                 case PLAYER_COMBAT:
                     turnTickActionOccurred = true;
+                    player.modifySatiation(HUNGER_HIT_MELEE);
                     break;
                 case PLAYER_HIT_WALL:
                     WindowFrame.writeConsole("You bump into the wall. OUCH!");
@@ -445,7 +482,36 @@ public class Game {
             }
         } else if(toggleDoorRequest) {
             player.setState(STATE_CLOSE_DOOR_ATTEMPT);
+        } else if(eatRequest) {
+            switch(player.eat()) {
+                case PLAYER_ATE_WELL:
+                    WindowFrame.writeConsole("You ate the corpse. You feel less hungry");
+                    turnTickActionOccurred = true;
+                    break;
+                case PLAYER_ATE_POISON:
+                    WindowFrame.writeConsole("Eating the corpse made you sick!");
+                    turnTickActionOccurred = true;
+                    break;
+                case PLAYER_HAS_NO_FOOD:
+                    WindowFrame.writeConsole("You have nothing to eat!");
+                    break;
+            }
         }
+    }
+
+    private void sendHelpMessage() {
+        String helpMessage = "Key\tDescription\n";
+        helpMessage += "----------------------------\n";
+        helpMessage += "Arrows\tMove/attack\n";
+        helpMessage += "C\tOpen/close doors\n";
+        helpMessage += "Q\tQuaff health potion\n";
+        helpMessage += ",\tLoot items\n";
+        helpMessage += "P\tToggle Player window\n";
+        helpMessage += "I\tToggle Inventory window\n";
+        helpMessage += "\\\tUse stairs\n";
+        helpMessage += ".\tWait\n";
+        helpMessage += "E\tEat\n";
+        WindowFrame.writeConsole(helpMessage);
     }
 
     private int processDungeonChangeRequest() {

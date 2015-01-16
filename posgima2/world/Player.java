@@ -1,6 +1,8 @@
 package posgima2.world;
 
 import posgima2.game.Game;
+import posgima2.item.Item;
+import posgima2.item.container.Corpse;
 import posgima2.misc.Dice;
 import posgima2.swing.WindowFrame;
 
@@ -12,6 +14,7 @@ public class Player extends Entity{
     private final int unarmedDie;
     private int state;
     private boolean justLooted;
+    private int satiation;
 
     public Player(char glyph) {
         super(glyph);
@@ -25,6 +28,7 @@ public class Player extends Entity{
         rollAttributes();
         currentHP = maxHP;
         experience = 0;
+        satiation = 100;
 
         //addInventory(new Sword(RenderPanel.WEAPON, Dice.D4, 0, 0, 0, 0), true);
         //addInventory(new Plate(RenderPanel.ITEM, 5), true);
@@ -36,6 +40,43 @@ public class Player extends Entity{
     public void die() {
         //WindowFrame.writeConsole("Such a sad thing that your journey has ended here.");
     }
+
+    public int eat() {
+        if(hasCorpseInInventory()) {
+            Corpse food = getNextCorpseTest();
+            satiation += food.getSatiation();
+            if(satiation > 100){
+                satiation = 100;
+            }
+            inventory.remove(food);
+            if(satiation > 0) {
+                return Game.PLAYER_ATE_WELL;
+            } else if(satiation < 0) {
+                return Game.PLAYER_ATE_POISON;
+            }
+        }
+        return Game.PLAYER_HAS_NO_FOOD;
+    }
+
+    private Corpse getNextCorpseTest() {
+        for(Item i : inventory) {
+            if(i instanceof Corpse) {
+                return (Corpse) i;
+            }
+        }
+        return null;
+    }
+
+    private boolean hasCorpseInInventory() {
+        for(Item i : inventory) {
+            if(i instanceof Corpse) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
     private void rollAttributes() {
         strength = 10;
@@ -89,4 +130,14 @@ public class Player extends Entity{
         return justLooted;
     }
 
+    public int getSatiation() {
+        return satiation;
+    }
+
+    public void modifySatiation(int hungerHitMelee) {
+        satiation -= hungerHitMelee;
+        if(satiation < 0) {
+            satiation = 0;
+        }
+    }
 }

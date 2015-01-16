@@ -19,6 +19,8 @@ public class Rat extends Monster {
         constitution = 4;
         expMod = 0.6;
 
+        corpseSatiation = 10;
+
         maxHP = 6;
         for(int i = 1; i < level; i++) {
             armorClass += 2;

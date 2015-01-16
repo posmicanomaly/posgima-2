@@ -14,11 +14,13 @@ public class Goblin extends Monster {
         baseHitDie = Dice.D4;
         attackDie = baseHitDie;
         damageBonus = 0;
-        strength = 8;
-        agility = 8;
-        dexterity = 8;
-        constitution = 8;
+        strength = 7;
+        agility = 7;
+        dexterity = 7;
+        constitution = 7;
         expMod = 1.0;
+
+        corpseSatiation = 20;
 
         maxHP = 8;
         for(int i = 1; i < level; i++) {

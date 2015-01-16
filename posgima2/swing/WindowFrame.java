@@ -20,7 +20,7 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
     public static boolean GAME_IS_LOADING;
     public static boolean GAME_IS_RUNNING;
     private Dimension size;
-    
+
 
     public WindowFrame(String title, Dimension size) throws HeadlessException {
         super(title);

@@ -17,6 +17,7 @@ public abstract class Monster extends Entity {
     private boolean[][] visibility;
     private boolean aggroPlayer;
     private int aggroTurnStart;
+    protected int corpseSatiation;
 
     private LinkedList<Vector2i> moveQueue;
     protected int age;
@@ -30,6 +31,8 @@ public abstract class Monster extends Entity {
         this.level = level;
         age = 0;
         expMod = 1;
+        // default
+        corpseSatiation = 10;
     }
 
     public boolean[][] getVisibility() {
@@ -85,5 +88,9 @@ public abstract class Monster extends Entity {
 
     public void addAge(int i) {
         age += i;
+    }
+
+    public int getCorpseSatiation() {
+        return corpseSatiation;
     }
 }

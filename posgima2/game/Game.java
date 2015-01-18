@@ -58,7 +58,7 @@ public class Game {
     public static final int STATE_ITEM_PICKUP = 3;
     public static final int STATE_LOOTED = 5;
     private static final int STATE_GAME_OVER = 2;
-    private static final int STATE_LOOTING = 4;
+    public static final int STATE_LOOTING = 4;
     public static final int STATE_CLOSE_DOOR_ATTEMPT = 6;
     private static final int STATE_SHOOTING = 7;
     public static final int STATE_LOOKING = 8;
@@ -107,7 +107,7 @@ public class Game {
     public DungeonSystem dungeonSystem;
     public Dungeon dungeon;
 
-    private LootWindow lootWindow;
+    public LootWindow lootWindow;
     private CharacterPanel characterPanel;
     private InventoryPanel inventoryPanel;
     private PopupWindow inventoryPopup;
@@ -265,153 +265,6 @@ public class Game {
         return getGameState();
     }
 
-    private void processStateShootingKeys(KeyEvent e) {
-        int targetY = lookCursor.getY();
-        int targetX = lookCursor.getX();
-        switch(e.getKeyCode()) {
-            case KEY_NORTH:
-                targetY --;
-                break;
-            case KEY_SOUTH:
-                targetY ++;
-                break;
-            case KEY_EAST:
-                targetX ++;
-                break;
-            case KEY_WEST:
-                targetX --;
-                break;
-            case KEY_CANCEL:
-                player.setState(STATE_READY);
-                lookCursor = null;
-                return;
-            case KEY_SHOOT:
-                WindowFrame.writeConsole("/combat/You loose an arrow");
-                shootTest(FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(), targetY, targetX));
-                player.setState(STATE_READY);
-                lookCursor = null;
-                turnTickActionOccurred = true;
-                return;
-        }
-        if(dungeon.inRange(targetY, targetX)) {
-            lookCursor.setLocation(targetY, targetX);
-            Tile t = dungeon.getTileMap()[targetY][targetX];
-        }
-    }
-
-    private void processStateLookingKeys(KeyEvent e) {
-        int targetY = lookCursor.getY();
-        int targetX = lookCursor.getX();
-        switch(e.getKeyCode()) {
-            case KEY_NORTH:
-                targetY --;
-                break;
-            case KEY_SOUTH:
-                targetY ++;
-                break;
-            case KEY_EAST:
-                targetX ++;
-                break;
-            case KEY_WEST:
-                targetX --;
-                break;
-            case KEY_CANCEL:
-                player.setState(STATE_READY);
-                lookCursor = null;
-                return;
-        }
-        if(dungeon.inRange(targetY, targetX)) {
-            lookCursor.setLocation(targetY, targetX);
-            Tile t = dungeon.getTileMap()[targetY][targetX];
-            if(dungeon.getVisibleMap()[targetY][targetX]) {
-                if(t.hasEntity()) {
-                    WindowFrame.writeConsole(t.getEntity().toString());
-                } else if(t.hasItems()) {
-                    WindowFrame.writeConsole("Items");
-                } else {
-                    WindowFrame.writeConsole(String.valueOf(t.getGlyph()));
-                }
-            } else if(dungeon.getExploredMap()[targetY][targetX]) {
-                WindowFrame.writeConsole(String.valueOf(t.getGlyph()));
-            } else {
-                WindowFrame.writeConsole("Unexplored");
-            }
-        }
-    }
-
-    private void rangedAttack(Entity attacker, Entity defender) {
-        defender.applyDamage(3);
-        WindowFrame.writeConsole("/combat/" + attacker + " arrow struck " + defender + " for 3 damage!");
-        if(!defender.isAlive()) {
-            defender.die();
-            dungeon.getMonsters().remove(defender);
-        }
-    }
-    private void shootTest(ArrayList<Vector2i> line) {
-        int range = 5;
-        if(line.size() < range) {
-            range = line.size();
-        }
-        for(int i = 0; i < range; i++) {
-
-            Tile t = dungeon.getTileMap()[line.get(i).getY()][line.get(i).getX()];
-            if(t.hasEntity()) {
-                Entity e = t.getEntity();
-                rangedAttack(player, e);
-
-                t.addItem(new Arrow());
-                return;
-            }
-        }
-        /*
-        No entity was hit, so figure out where to drop the arrow. This makes sure it doesn't replace a wall or door
-         */
-        for(int i = range - 1; i >= 0; i--) {
-            Tile cur = dungeon.getTileMap()[line.get(i).getY()][line.get(i).getX()];
-            if(cur.getGlyph() == RenderPanel.WALL || cur.getGlyph() == RenderPanel.DOOR_CLOSED) {
-                continue;
-            }
-            cur.addItem(new Arrow());
-            WindowFrame.writeConsole("/combat/The arrow falls to the ground");
-            break;
-        }
-    }
-
-    private void processStateToggleDoorKeys(KeyEvent e) {
-        int targetY = player.getY();
-        int targetX = player.getX();
-        switch (e.getKeyCode()) {
-            case KEY_NORTH:
-                targetY--;
-                break;
-            case KEY_SOUTH:
-                targetY++;
-                break;
-            case KEY_EAST:
-                targetX++;
-                break;
-            case KEY_WEST:
-                targetX--;
-                break;
-        }
-        if(dungeon.inRange(targetY, targetX)) {
-            if(dungeon.isDoor(targetY, targetX)) {
-                dungeon.toggleDoor(dungeon.getTileMap()[targetY][targetX]);
-                turnTickActionOccurred = true;
-                player.setState(STATE_READY);
-            } else {
-                WindowFrame.writeConsole("There's no door there.");
-            }
-        }
-        player.setState(STATE_READY);
-    }
-
-    public void processItemLootingWithWindow() {
-        lootWindow = new LootWindow(dungeon.getTileMap()[player.getY()][player.getX()], player);
-        player.setState(STATE_LOOTING);
-    }
-
-
     private void resetAttackStates() {
         player.resetTurnTick();
         for(Monster m : dungeon.getMonsters()) {
@@ -441,130 +294,13 @@ public class Game {
             player.applyDamage(1);
             WindowFrame.writeConsole("You are starving to death!");
         }
-    }
 
-
-    private void processStateDoorClosedKeys(KeyEvent e) {
-        switch(e.getKeyCode()) {
-            case KEY_YES:
-                WindowFrame.writeConsole("You open the door.");
-                dungeon.toggleDoor(player.getTargetTile());
-                turnTickActionOccurred = true;
-                player.setState(STATE_READY);
-                break;
-            case KEY_NO:
-                // Chose not to open door
-                player.setState(STATE_READY);
-                break;
+        if(!player.isAlive()) {
+            player.die();
+            player.setState(Game.STATE_GAME_OVER);
+            WindowFrame.writeConsole("You died!");
         }
     }
-
-    private void processStateReadyKeys(KeyEvent e) {
-        int nextY = player.getY();
-        int nextX = player.getX();
-
-        RequestDispatcher rd = new RequestDispatcher(this);
-        rd.resetFlags();
-        switch (e.getKeyCode()) {
-            /*
-            Movement
-             */
-            case KEY_NORTH:
-                rd.moveRequest = true;
-                nextY--;
-                break;
-            case KEY_SOUTH:
-                rd.moveRequest = true;
-                nextY++;
-                break;
-            case KEY_WEST:
-                rd.moveRequest = true;
-                nextX--;
-                break;
-            case KEY_EAST:
-                rd.moveRequest = true;
-                nextX++;
-                break;
-
-            /*
-            Interaction
-             */
-            case KEY_PICKUP:
-                rd.itemPickupRequest = true;
-                break;
-            case KeyEvent.VK_BACK_SLASH:
-                rd.dungeonChangeRequest = true;
-                break;
-
-            /*
-            Other
-             */
-
-            // DEBUG set current level fully explored
-            case KeyEvent.VK_0:
-                dungeon.setFullyExplored();
-                WindowFrame.writeConsole("/success/map fully explored");
-                break;
-
-            // Idle, wait, stand still
-            case KeyEvent.VK_PERIOD:
-                //WindowFrame.writeConsole("idle");
-                turnTickActionOccurred = true;
-                break;
-
-            // Quaff potion
-            case KeyEvent.VK_Q:
-                rd.quaffRequest = true;
-                break;
-
-            // Close door
-            case KEY_TOGGLE_DOOR:
-                WindowFrame.writeConsole("Which direction to open/close door?");
-                rd.toggleDoorRequest = true;
-                break;
-
-            // Open character window
-            case KEY_CHARACTER:
-                if (characterPopup.isVisible()) {
-                    characterPopup.hideWindow();
-                } else {
-                    characterPopup.showWindow();
-                }
-                break;
-
-            // Open inventory window
-            case KEY_INVENTORY:
-                if(inventoryPopup.isVisible()) {
-                    inventoryPopup.hideWindow();
-                } else {
-                    inventoryPopup.showWindow();
-                }
-                break;
-
-            // Display help
-            case KEY_HELP:
-                sendHelpMessage();
-                break;
-
-            // Eat
-            case KEY_EAT:
-                rd.eatRequest = true;
-                break;
-
-            // Shoot
-            case KEY_SHOOT:
-                rd.shootRequest = true;
-                break;
-
-            case KeyEvent.VK_L:
-                rd.lookRequest = true;
-                break;
-        }
-        rd.setNextLocation(nextY, nextX);
-        rd.dispatch();
-    }
-
-
 
     private void sendHelpMessage() {
         String helpMessage = "Key\tDescription\n";
@@ -581,106 +317,8 @@ public class Game {
         WindowFrame.writeConsole(helpMessage);
     }
 
-    private int playerCombat(Monster monster) {
-        /*
-        perform melee combat round with player and monster, with defenderCanAttack set to true
-         */
-        Melee.meleeCombat(player, monster, true);
 
-        /*
-        Post combat check if monster is dead.
-         */
-        if (!monster.isAlive()) {
-            // Announce
-            WindowFrame.writeConsole("/combat//killed/You killed " + monster + ".");
 
-            /*
-            Compute proper experience reward based on dungeon level difficulty
-             */
-            int level = dungeon.getDifficulty();
-            int exp = (int) (((level * (100 * (level * level))) / (dungeon.getMaxMonsterLimit())) * monster.getExpMod());
-
-            // If player is lower level than the intended difficulty, increase the reward
-            if(player.getLevel() < dungeon.getDifficulty()) {
-                exp = (int)(exp * 1.5);
-            }
-            // Else reduce the reward
-            else if(player.getLevel() > dungeon.getDifficulty()) {
-                exp = exp / 4;
-            }
-
-            player.modifyExperience(exp);
-
-            // Announce
-            WindowFrame.writeConsole("/success/You gained " + exp + " points of experience.");
-
-            // Remove the dead monster from dungeon
-            dungeon.getMonsters().remove(monster);
-        }
-
-        /*
-        Check if player died
-         */
-        if(!player.isAlive()) {
-            WindowFrame.writeConsole("/warning/You died.");
-            player.setState(STATE_GAME_OVER);
-        }
-        return PLAYER_COMBAT;
-    }
-
-    public int processPlayerMoveRequest(int nextY, int nextX) {
-        /*
-        In range check
-         */
-        if (dungeon.inRange(nextY, nextX)) {
-            /*
-            Check if next tile is passable, and move if it is
-             */
-            if (dungeon.isPassable(nextX, nextY)) {
-                player.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
-                // Set flag for player having just moved
-                return PLAYER_MOVED;
-            }
-
-            /*
-            Check if next tile has a monster that is preventing tile from passing isPassable
-             */
-            else if (dungeon.hasMonster(nextY, nextX)) {
-                Monster monster = dungeon.getMonsterAt(nextY, nextX);
-                // Fight the monster, return the result which will be PLAYER_COMBAT
-                return playerCombat(monster);
-            }
-
-            /*
-            If it failed isPassable, and there's no monster, check if it's a wall or door
-             */
-            else {
-                switch(dungeon.getTileMap()[nextY][nextX].getGlyph()) {
-                    // Walked into a wall
-                    case RenderPanel.WALL:
-                        return PLAYER_HIT_WALL;
-                    // Walked into a closed door
-                    case RenderPanel.DOOR_CLOSED:
-                        // Set the "player" state as STATE_DOOR_CLOSED
-                        player.setState(STATE_DOOR_CLOSED);
-                        // Set the tile the door is on as the player's target
-                        player.setTargetTile(dungeon.getTileMap()[nextY][nextX]);
-                        // Set the "game" state as PLAYER_HIT_CLOSED_DOOR to fire off the proper menu and accept
-                        // correct keys
-                        return PLAYER_HIT_CLOSED_DOOR;
-                    // Error case
-                    default:
-                        return ERROR_PLAYER_MOVE;
-                }
-            }
-        }
-        /*
-        Trying to move beyond the map limits
-         */
-        else {
-            return ERROR_OUT_OF_MAP_RANGE;
-        }
-    }
 
     private boolean monsterCanSeePlayer(Monster monster) {
         return monster.getVisibility()[player.getY()][player.getX()];
@@ -919,5 +557,324 @@ public class Game {
         gameState.setTurns(turns);
         gameState.setLookCursor(lookCursor);
         return gameState;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+    /**
+     * Combat related
+     */
+
+    public int playerCombat(Monster monster) {
+        /*
+        perform melee combat round with player and monster, with defenderCanAttack set to true
+         */
+        Melee.meleeCombat(player, monster, true);
+
+        /*
+        Post combat check if monster is dead.
+         */
+        if (!monster.isAlive()) {
+            // Announce
+            WindowFrame.writeConsole("/combat//killed/You killed " + monster + ".");
+
+            /*
+            Compute proper experience reward based on dungeon level difficulty
+             */
+            int level = dungeon.getDifficulty();
+            int exp = (int) (((level * (100 * (level * level))) / (dungeon.getMaxMonsterLimit())) * monster.getExpMod());
+
+            // If player is lower level than the intended difficulty, increase the reward
+            if(player.getLevel() < dungeon.getDifficulty()) {
+                exp = (int)(exp * 1.5);
+            }
+            // Else reduce the reward
+            else if(player.getLevel() > dungeon.getDifficulty()) {
+                exp = exp / 4;
+            }
+
+            player.modifyExperience(exp);
+
+            // Announce
+            WindowFrame.writeConsole("/success/You gained " + exp + " points of experience.");
+
+            // Remove the dead monster from dungeon
+            dungeon.getMonsters().remove(monster);
+        }
+
+        /*
+        Check if player died
+         */
+        if(!player.isAlive()) {
+            WindowFrame.writeConsole("/warning/You died.");
+            player.setState(STATE_GAME_OVER);
+        }
+        return PLAYER_COMBAT;
+    }
+
+    private void rangedAttack(Entity attacker, Entity defender) {
+        defender.applyDamage(3);
+        WindowFrame.writeConsole("/combat/" + attacker + " arrow struck " + defender + " for 3 damage!");
+        if(!defender.isAlive()) {
+            defender.die();
+            dungeon.getMonsters().remove(defender);
+        }
+    }
+    private void shootTest(ArrayList<Vector2i> line) {
+        int range = 5;
+        if(line.size() < range) {
+            range = line.size();
+        }
+
+        for(int i = 0; i < range; i++) {
+
+            Tile t = dungeon.getTileMap()[line.get(i).getY()][line.get(i).getX()];
+            if(t.hasEntity()) {
+                Entity e = t.getEntity();
+                rangedAttack(player, e);
+
+                t.addItem(new Arrow());
+                return;
+            }
+        }
+        /*
+        No entity was hit, so figure out where to drop the arrow. This makes sure it doesn't replace a wall or door
+         */
+        for(int i = range - 1; i >= 0; i--) {
+            Tile cur = dungeon.getTileMap()[line.get(i).getY()][line.get(i).getX()];
+            if(cur.getGlyph() == RenderPanel.WALL || cur.getGlyph() == RenderPanel.DOOR_CLOSED) {
+                continue;
+            }
+            cur.addItem(new Arrow());
+            WindowFrame.writeConsole("/combat/The arrow falls to the ground");
+            break;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+    /**
+     * Key processes
+     */
+
+    private void processStateDoorClosedKeys(KeyEvent e) {
+        switch(e.getKeyCode()) {
+            case KEY_YES:
+                WindowFrame.writeConsole("You open the door.");
+                dungeon.toggleDoor(player.getTargetTile());
+                turnTickActionOccurred = true;
+                player.setState(STATE_READY);
+                break;
+            case KEY_NO:
+                // Chose not to open door
+                player.setState(STATE_READY);
+                break;
+        }
+    }
+
+    private void processStateReadyKeys(KeyEvent e) {
+        int nextY = player.getY();
+        int nextX = player.getX();
+
+        RequestDispatcher rd = new RequestDispatcher(this);
+        rd.resetFlags();
+        switch (e.getKeyCode()) {
+            /*
+            Movement
+             */
+            case KEY_NORTH:
+                rd.moveRequest = true;
+                nextY--;
+                break;
+            case KEY_SOUTH:
+                rd.moveRequest = true;
+                nextY++;
+                break;
+            case KEY_WEST:
+                rd.moveRequest = true;
+                nextX--;
+                break;
+            case KEY_EAST:
+                rd.moveRequest = true;
+                nextX++;
+                break;
+
+            /*
+            Interaction
+             */
+            case KEY_PICKUP:
+                rd.itemPickupRequest = true;
+                break;
+            case KeyEvent.VK_BACK_SLASH:
+                rd.dungeonChangeRequest = true;
+                break;
+
+            /*
+            Other
+             */
+
+            // DEBUG set current level fully explored
+            case KeyEvent.VK_0:
+                dungeon.setFullyExplored();
+                WindowFrame.writeConsole("/success/map fully explored");
+                break;
+
+            // Idle, wait, stand still
+            case KeyEvent.VK_PERIOD:
+                //WindowFrame.writeConsole("idle");
+                rd.idleRequest = true;
+                break;
+
+            // Quaff potion
+            case KeyEvent.VK_Q:
+                rd.quaffRequest = true;
+                break;
+
+            // Close door
+            case KEY_TOGGLE_DOOR:
+                WindowFrame.writeConsole("Which direction to open/close door?");
+                rd.toggleDoorRequest = true;
+                break;
+
+            // Open character window
+            case KEY_CHARACTER:
+                if (characterPopup.isVisible()) {
+                    characterPopup.hideWindow();
+                } else {
+                    characterPopup.showWindow();
+                }
+                break;
+
+            // Open inventory window
+            case KEY_INVENTORY:
+                if(inventoryPopup.isVisible()) {
+                    inventoryPopup.hideWindow();
+                } else {
+                    inventoryPopup.showWindow();
+                }
+                break;
+
+            // Display help
+            case KEY_HELP:
+                sendHelpMessage();
+                break;
+
+            // Eat
+            case KEY_EAT:
+                rd.eatRequest = true;
+                break;
+
+            // Shoot
+            case KEY_SHOOT:
+                rd.shootRequest = true;
+                break;
+
+            case KeyEvent.VK_L:
+                rd.lookRequest = true;
+                break;
+        }
+        rd.setNextLocation(nextY, nextX);
+        rd.dispatch();
+    }
+
+    private void processStateToggleDoorKeys(KeyEvent e) {
+        int targetY = player.getY();
+        int targetX = player.getX();
+        switch (e.getKeyCode()) {
+            case KEY_NORTH:
+                targetY--;
+                break;
+            case KEY_SOUTH:
+                targetY++;
+                break;
+            case KEY_EAST:
+                targetX++;
+                break;
+            case KEY_WEST:
+                targetX--;
+                break;
+        }
+        if(dungeon.inRange(targetY, targetX)) {
+            if(dungeon.isDoor(targetY, targetX)) {
+                dungeon.toggleDoor(dungeon.getTileMap()[targetY][targetX]);
+                turnTickActionOccurred = true;
+                player.setState(STATE_READY);
+            } else {
+                WindowFrame.writeConsole("There's no door there.");
+            }
+        }
+        player.setState(STATE_READY);
+    }
+
+    private void processStateShootingKeys(KeyEvent e) {
+        int targetY = lookCursor.getY();
+        int targetX = lookCursor.getX();
+        switch(e.getKeyCode()) {
+            case KEY_NORTH:
+                targetY --;
+                break;
+            case KEY_SOUTH:
+                targetY ++;
+                break;
+            case KEY_EAST:
+                targetX ++;
+                break;
+            case KEY_WEST:
+                targetX --;
+                break;
+            case KEY_CANCEL:
+                player.setState(STATE_READY);
+                lookCursor = null;
+                return;
+            case KEY_SHOOT:
+                WindowFrame.writeConsole("/combat/You loose an arrow");
+                shootTest(FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(), targetY, targetX));
+                player.setState(STATE_READY);
+                lookCursor = null;
+                turnTickActionOccurred = true;
+                return;
+        }
+        if(dungeon.inRange(targetY, targetX)) {
+            lookCursor.setLocation(targetY, targetX);
+            Tile t = dungeon.getTileMap()[targetY][targetX];
+        }
+    }
+
+    private void processStateLookingKeys(KeyEvent e) {
+        int targetY = lookCursor.getY();
+        int targetX = lookCursor.getX();
+        switch(e.getKeyCode()) {
+            case KEY_NORTH:
+                targetY --;
+                break;
+            case KEY_SOUTH:
+                targetY ++;
+                break;
+            case KEY_EAST:
+                targetX ++;
+                break;
+            case KEY_WEST:
+                targetX --;
+                break;
+            case KEY_CANCEL:
+                player.setState(STATE_READY);
+                lookCursor = null;
+                return;
+        }
+        if(dungeon.inRange(targetY, targetX)) {
+            lookCursor.setLocation(targetY, targetX);
+            Tile t = dungeon.getTileMap()[targetY][targetX];
+            if(dungeon.getVisibleMap()[targetY][targetX]) {
+                if(t.hasEntity()) {
+                    WindowFrame.writeConsole(t.getEntity().toString());
+                } else if(t.hasItems()) {
+                    WindowFrame.writeConsole("Items");
+                } else {
+                    WindowFrame.writeConsole(String.valueOf(t.getGlyph()));
+                }
+            } else if(dungeon.getExploredMap()[targetY][targetX]) {
+                WindowFrame.writeConsole(String.valueOf(t.getGlyph()));
+            } else {
+                WindowFrame.writeConsole("Unexplored");
+            }
+        }
     }
 }

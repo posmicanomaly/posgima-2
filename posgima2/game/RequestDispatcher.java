@@ -1,7 +1,9 @@
 package posgima2.game;
 
 import posgima2.game.requests.DungeonChange;
+import posgima2.game.requests.ItemLootingWindow;
 import posgima2.game.requests.ItemPickup;
+import posgima2.game.requests.PlayerMove;
 import posgima2.item.container.Corpse;
 import posgima2.item.potion.Potion;
 import posgima2.swing.WindowFrame;
@@ -22,6 +24,7 @@ public class RequestDispatcher {
     private Game game;
     private int nextY;
     private int nextX;
+    public boolean idleRequest;
 
     public RequestDispatcher(Game game) {
         this.game = game;
@@ -35,11 +38,12 @@ public class RequestDispatcher {
         eatRequest = false;
         shootRequest = false;
         lookRequest = false;
+        idleRequest = false;
     }
     public void dispatch() {
         boolean turnTickActionOccurred = false;
         Player player = game.player;
-        if (moveRequest) switch (game.processPlayerMoveRequest(nextY, nextX)) {
+        if (moveRequest) switch (PlayerMove.processPlayerMoveRequest(game, nextY, nextX)) {
             case Game.PLAYER_MOVED:
                 turnTickActionOccurred = true;
                 player.modifySatiation(Game.HUNGER_HIT_MOVE);
@@ -66,7 +70,7 @@ public class RequestDispatcher {
         else if(itemPickupRequest) {
             switch(ItemPickup.processPlayerItemPickupRequest(game)) {
                 case Game.TILE_HAS_ITEMS:
-                    game.processItemLootingWithWindow();
+                    ItemLootingWindow.processItemLootingWithWindow(game);
                     break;
                 case Game.TILE_HAS_NO_ITEMS:
                     WindowFrame.writeConsole("There's nothing to pickup.");
@@ -125,6 +129,8 @@ public class RequestDispatcher {
             WindowFrame.writeConsole("Use directional keys to look around");
             game.lookCursor = new LookCursor(player.getY(), player.getX());
             player.setState(Game.STATE_LOOKING);
+        } else if(idleRequest) {
+            turnTickActionOccurred = true;
         }
         game.turnTickActionOccurred = turnTickActionOccurred;
     }

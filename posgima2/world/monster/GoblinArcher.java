@@ -7,7 +7,7 @@ public class GoblinArcher extends Goblin{
     public GoblinArcher(int level) {
         super(level);
         glyph = 'a';
-        range = 5;
+        range = 3;
         ranged = true;
     }
 }

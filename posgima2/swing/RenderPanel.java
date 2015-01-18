@@ -1,6 +1,8 @@
 package posgima2.swing;
 
 import posgima2.game.GameState;
+import posgima2.game.LookCursor;
+import posgima2.misc.Vector2i;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.monster.Monster;
 import posgima2.world.Player;
@@ -145,26 +147,39 @@ public class RenderPanel extends JPanel {
         boolean[][] visMap = currentState.getDungeon().getVisibleMap();
         boolean[][] expMap = currentState.getDungeon().getExploredMap();
 
-        int y = fontSize;
+        int y = yIncrement;
         for(int i = rowStart; i < tMap.length; i++) {
-            int x = fontSize;
+            int x = xIncrement;
             for(int j = colStart; j < tMap[i].length; j++) {
                 /*
                 Player gets first priority
                  */
                 if(hasPlayer(i, j)) {
                     drawPlayer(y, x, g, p);
+                    if(hasLookCursor(i, j)) {
+                        drawLookCursor(y, x, g);
+                    }
                 }
+
+//                else if(hasLookCursor(i, j)) {
+//                    drawLookCursor(y, x, g);
+//                }
                 /*
 
                  */
                 else {
                     // set color based on a lookup switch for the glyph
-                    g.setColor(getGlyphColor(tMap[i][j].getGlyph()));
+                    if(hasLookCursor(i, j)) {
+                        drawLookCursor(y, x, g);
+                    } else {
+                        g.setColor(getGlyphColor(tMap[i][j].getGlyph()));
+                    }
                     // if this tile is visible to the player
                     if (visMap[i][j]) {
                         // apply a torch light effect
-                        g.setColor(addTorchLight(g.getColor(), getLargestDistanceDifference(p.getY(), p.getX(), i, j)));
+                        if(!hasLookCursor(i, j)) {
+                            g.setColor(addTorchLight(g.getColor(), getLargestDistanceDifference(p.getY(), p.getX(), i, j)));
+                        }
                         /*
                         Priority: Monster -> Items -> Empty Tile
                          */
@@ -196,6 +211,23 @@ public class RenderPanel extends JPanel {
             y += yIncrement;
         }
     }
+
+    private void drawLookCursor(int y, int x, Graphics g) {
+        g.setColor(Color.WHITE);
+        g.drawRect(x, y - yIncrement, xIncrement, yIncrement);
+    }
+
+    private boolean hasLookCursor(int i, int j) {
+        LookCursor l = currentState.getLookCursor();
+        if(l == null) {
+            return false;
+        }
+        if(l.getY() == i && l.getX() == j) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Gives the absolute highest difference of distance between y0,x0 and y1,x1

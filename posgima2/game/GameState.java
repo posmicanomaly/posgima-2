@@ -15,6 +15,7 @@ public class GameState {
     private int monstersInView;
     private int playerState;
     private int turns;
+    private LookCursor lookCursor;
 
     public void setMessage(String message) {
         this.message = message;
@@ -35,16 +36,6 @@ public class GameState {
         return dungeon.getMap();
     }
 
-    //public void setMap(char[][] map) {
-    //    this.map = map;
-    //}
-
-    public boolean[][] getVisibleMap() {
-        return dungeon.getVisibleMap();
-    }
-
-
-
     public void setDungeon(Dungeon dungeon) {
         this.dungeon = dungeon;
     }
@@ -57,23 +48,19 @@ public class GameState {
         return monstersInView;
     }
 
-    public void setMonstersInView(int monstersInView) {
-        this.monstersInView = monstersInView;
-    }
-
-    public int getPlayerState() {
-        return playerState;
-    }
-
-    public void setPlayerState(int newState) {
-        playerState = newState;
-    }
-
     public void setTurns(int turns) {
         this.turns = turns;
     }
 
     public int getTurns() {
         return turns;
+    }
+
+    public LookCursor getLookCursor() {
+        return lookCursor;
+    }
+
+    public void setLookCursor(LookCursor l) {
+        lookCursor = l;
     }
 }

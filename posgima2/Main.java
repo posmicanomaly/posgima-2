@@ -15,10 +15,10 @@ public class Main {
 //        while(true) {
 //            windowFrame.update();
 //            try {
-//                Thread.sleep(17);
+//                Thread.sleep(170);
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-//        }
+      //  }
     }
 }

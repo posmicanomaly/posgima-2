@@ -21,6 +21,8 @@ public abstract class Monster extends Entity {
 
     private LinkedList<Vector2i> moveQueue;
     protected int age;
+    protected boolean ranged;
+    protected int range;
 
     public Monster(char glyph, int level) {
         super(glyph);
@@ -92,5 +94,13 @@ public abstract class Monster extends Entity {
 
     public int getCorpseSatiation() {
         return corpseSatiation;
+    }
+
+    public boolean isRanged() {
+        return ranged;
+    }
+
+    public int getRange() {
+        return range;
     }
 }

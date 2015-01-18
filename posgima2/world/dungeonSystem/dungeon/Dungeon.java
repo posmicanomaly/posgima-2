@@ -15,6 +15,7 @@ import posgima2.swing.WindowFrame;
 import posgima2.item.weapon.Sword;
 import posgima2.world.Entity;
 import posgima2.world.monster.Goblin;
+import posgima2.world.monster.GoblinArcher;
 import posgima2.world.monster.Monster;
 import posgima2.world.monster.Rat;
 
@@ -39,6 +40,7 @@ public class Dungeon {
     private ArrayList<Monster> monsters;
     private int maxMonsterLimit;
     private int difficulty;
+    private ArrayList<Vector2i> arrowsInFlight;
 
     public Dungeon(int rows, int cols, int roomAmount, int difficulty) {
         this.MAP_ROWS = rows;
@@ -48,6 +50,7 @@ public class Dungeon {
         visibleMap = new boolean[rows][cols];
         exploredMap = new boolean[rows][cols];
         monsters = new ArrayList<Monster>();
+        arrowsInFlight = new ArrayList<>();
         this.difficulty = difficulty;
         fillMap(VOID);
 
@@ -239,7 +242,15 @@ public class Dungeon {
                 monster = new Rat(getDifficulty());
                 break;
             case 1:
-                monster = new Goblin(getDifficulty());
+                /*
+                25% chance to be a goblin archer
+                 */
+                int chance = (int)(Math.random() * 100);
+                if(chance < 25) {
+                    monster = new GoblinArcher(getDifficulty());
+                } else {
+                    monster = new Goblin(getDifficulty());
+                }
                 break;
         }
         return monster;
@@ -500,5 +511,9 @@ public class Dungeon {
                 return true;
         }
         return false;
+    }
+
+    public ArrayList<Vector2i> getArrowsInFlight() {
+        return arrowsInFlight;
     }
 }

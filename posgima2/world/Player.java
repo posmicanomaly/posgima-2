@@ -41,24 +41,31 @@ public class Player extends Entity{
         //WindowFrame.writeConsole("Such a sad thing that your journey has ended here.");
     }
 
-    public int eat() {
-        if(hasCorpseInInventory()) {
-            Corpse food = getNextCorpseTest();
+    public int eat(Corpse food) {
+        if(inInventory(food)) {
             satiation += food.getSatiation();
-            if(satiation > 100){
-                satiation = 100;
+            if (satiation > Game.MAX_SATIATION) {
+                satiation = Game.MAX_SATIATION;
             }
             inventory.remove(food);
-            if(satiation > 0) {
+            if (satiation > 0) {
                 return Game.PLAYER_ATE_WELL;
-            } else if(satiation < 0) {
+            } else if (satiation < 0) {
                 return Game.PLAYER_ATE_POISON;
             }
         }
         return Game.PLAYER_HAS_NO_FOOD;
     }
 
-    private Corpse getNextCorpseTest() {
+    private boolean inInventory(Item item) {
+        if(inventory.contains(item)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public Corpse getNextCorpseTest() {
         for(Item i : inventory) {
             if(i instanceof Corpse) {
                 return (Corpse) i;
@@ -67,7 +74,7 @@ public class Player extends Entity{
         return null;
     }
 
-    private boolean hasCorpseInInventory() {
+    public boolean hasCorpseInInventory() {
         for(Item i : inventory) {
             if(i instanceof Corpse) {
                 return true;

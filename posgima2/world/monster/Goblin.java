@@ -9,7 +9,6 @@ public class Goblin extends Monster {
 
     public Goblin(int level) {
         super('g', level);
-
         armorClass = 2;
         baseHitDie = Dice.D4;
         attackDie = baseHitDie;

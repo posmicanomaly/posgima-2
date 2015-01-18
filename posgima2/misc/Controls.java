@@ -19,4 +19,5 @@ public abstract class Controls {
     public static final int KEY_TOGGLE_DOOR = KeyEvent.VK_C;
     public static final int KEY_HELP = KeyEvent.VK_F1;
     public static final int KEY_EAT = KeyEvent.VK_E;
+    public static final int KEY_SHOOT = KeyEvent.VK_T;
 }

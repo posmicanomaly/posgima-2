@@ -19,7 +19,7 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
     static Game game;
     public static boolean GAME_IS_LOADING;
     public static boolean GAME_IS_RUNNING;
-    private Dimension size;
+    private static Dimension size;
 
 
     public WindowFrame(String title, Dimension size) throws HeadlessException {
@@ -38,19 +38,17 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         initKeyboardFocusManager();
         pack();
         setResizable(false);
-        centerWindow();
-        setVisible(true);
+        Util.centerWindow(this);
+        //setVisible(true);
+        setupWindow = new SetupWindow(this);
+        Util.centerWindow(setupWindow);
+        setupWindow.showWindow();
     }
 
     private void initKeyboardFocusManager() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor(this);
         addWindowListener(this);
         setFocusable(true);
-    }
-
-    private void centerWindow() {
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation((dim.width / 2) - (getSize().width / 2), (dim.height / 2) - (this.getSize().height / 2));
     }
 
     private void initMenu() {
@@ -61,7 +59,7 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         newGameMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                startGame();
+                preStartGame();
             }
         });
         gameMenu.add(newGameMenuItem);
@@ -74,12 +72,17 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         this.getContentPane().add(panel);
     }
 
-    private void startGame() {
+    public void preStartGame() {
+        setVisible(false);
+        setupWindow.showWindow();
+        //startGame();
+    }
+    public void startGame(String name) {
         gamePanel = new GamePanel(size);
         GAME_IS_LOADING = true;
-        setupWindow = new SetupWindow();
+        //setupWindow = new SetupWindow();
 
-        game = new Game();
+        game = new Game(name);
         gamePanel.renderPanel.updateGameState(game.getGameState());
         gamePanel.statisticsPanel.update(game.getGameState());
         setupWindow.hideWindow();
@@ -87,6 +90,7 @@ public class WindowFrame extends JFrame implements KeyEventPostProcessor, Window
         GAME_IS_RUNNING = true;
         setContentPane(gamePanel);
         pack();
+        setVisible(true);
         update();
     }
 

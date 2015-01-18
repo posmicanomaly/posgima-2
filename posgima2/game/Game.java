@@ -4,6 +4,7 @@ import posgima2.combat.Melee;
 import posgima2.item.armor.Armor;
 import posgima2.item.container.Corpse;
 import posgima2.item.potion.Potion;
+import posgima2.item.weapon.Arrow;
 import posgima2.misc.Vector2i;
 import posgima2.item.Item;
 import posgima2.pathfinding.AStar;
@@ -14,12 +15,14 @@ import posgima2.swing.popup.PopupWindow;
 import posgima2.world.*;
 import posgima2.world.dungeonSystem.DungeonSystem;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
+import posgima2.world.dungeonSystem.dungeon.FieldOfView;
 import posgima2.world.dungeonSystem.dungeon.Room;
 import posgima2.world.dungeonSystem.dungeon.Tile;
 import posgima2.world.monster.Monster;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import static posgima2.misc.Controls.*;
 
@@ -56,21 +59,26 @@ public class Game {
     public static final int STATE_LOOTED = 5;
     private static final int STATE_GAME_OVER = 2;
     private static final int STATE_LOOTING = 4;
-    private static final int STATE_CLOSE_DOOR_ATTEMPT = 6;
+    public static final int STATE_CLOSE_DOOR_ATTEMPT = 6;
+    private static final int STATE_SHOOTING = 7;
+    public static final int STATE_LOOKING = 8;
+
     /**
      * PLAYER_x
      * Flags set in movement
      */
-    private static final int PLAYER_MOVED = 0;
-    private static final int PLAYER_COMBAT = 1;
-    private static final int PLAYER_HIT_WALL = 2;
-    private static final int PLAYER_HIT_CLOSED_DOOR = 3;
+    public static final int PLAYER_MOVED = 0;
+    public static final int PLAYER_COMBAT = 1;
+    public static final int PLAYER_HIT_WALL = 2;
+    public static final int PLAYER_HIT_CLOSED_DOOR = 3;
     public static final int PLAYER_ATE_WELL = 4;
     public static final int PLAYER_ATE_POISON = 5;
     public static final int PLAYER_HAS_NO_FOOD = 6;
+    public static final int PLAYER_SHOOTING = 7;
+    public static final int PLAYER_NO_AMMO = 8;
     //Errors set in movement
-    private static final int ERROR_PLAYER_MOVE = -1;
-    private static final int ERROR_OUT_OF_MAP_RANGE = -2;
+    public static final int ERROR_PLAYER_MOVE = -1;
+    public static final int ERROR_OUT_OF_MAP_RANGE = -2;
 
 
 
@@ -78,24 +86,26 @@ public class Game {
      * TILE_x
      * Flags set in tile pickup
      */
-    private static final int TILE_HAS_ITEMS = 1;
-    private static final int TILE_HAS_NO_ITEMS = 0;
-    private static final int TILE_HAS_DUNGEON_LINK = 1;
-    private static final int TILE_HAS_NO_DUNGEON_LINK = 0;
+    public static final int TILE_HAS_ITEMS = 1;
+    public static final int TILE_HAS_NO_ITEMS = 0;
+    public static final int TILE_HAS_DUNGEON_LINK = 1;
+    public static final int TILE_HAS_NO_DUNGEON_LINK = 0;
     private static final int XP_RATE = 30;
     private static final int REGEN_RATE = 30;
 
-    private static final int HUNGER_HIT_MELEE = 4;
-    private static final int HUNGER_HIT_MOVE = 1;
+    public static final int MAX_SATIATION = 150;
+    public static final int HUNGER_HIT_MELEE = 2;
+    public static final int HUNGER_HIT_MOVE = 1;
 
 
 
     // Reassign this later, based on amount of rooms
    // private static int MAX_MONSTERS = 0;
 
-    private Player player;
-    private DungeonSystem dungeonSystem;
-    private Dungeon dungeon;
+    public Player player;
+    public LookCursor lookCursor;
+    public DungeonSystem dungeonSystem;
+    public Dungeon dungeon;
 
     private LootWindow lootWindow;
     private CharacterPanel characterPanel;
@@ -107,10 +117,10 @@ public class Game {
      * Set true if a major move was performed, like moving, or quaffing, opening a door
      * Do not set if a move was cancelled, didn't open door, didn't pick up items, etc.
      */
-    private boolean turnTickActionOccurred;
+    public boolean turnTickActionOccurred;
     private int turns;
 
-    public Game() {
+    public Game(String name) {
         SetupWindow.println("Setting up game");
 
         //initMap();
@@ -120,7 +130,7 @@ public class Game {
         Vector2i center = startingRoom.getCenter();
 
         player = new Player('@');
-        player.setName("AlphaTester");
+        player.setName(name);
         WindowFrame.gamePanel.consolePanel.setPlayerName(player.toString());
 
         addPlayerStartingGear(player);
@@ -209,6 +219,14 @@ public class Game {
                 processStateDoorClosedKeys(e);
                 break;
 
+            case STATE_SHOOTING:
+                processStateShootingKeys(e);
+                break;
+
+            case STATE_LOOKING:
+                processStateLookingKeys(e);
+                break;
+
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
             /*
             STATES below here are "blocking"
@@ -247,6 +265,118 @@ public class Game {
         return getGameState();
     }
 
+    private void processStateShootingKeys(KeyEvent e) {
+        int targetY = lookCursor.getY();
+        int targetX = lookCursor.getX();
+        switch(e.getKeyCode()) {
+            case KEY_NORTH:
+                targetY --;
+                break;
+            case KEY_SOUTH:
+                targetY ++;
+                break;
+            case KEY_EAST:
+                targetX ++;
+                break;
+            case KEY_WEST:
+                targetX --;
+                break;
+            case KEY_CANCEL:
+                player.setState(STATE_READY);
+                lookCursor = null;
+                return;
+            case KEY_SHOOT:
+                WindowFrame.writeConsole("/combat/You loose an arrow");
+                shootTest(FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(), targetY, targetX));
+                player.setState(STATE_READY);
+                lookCursor = null;
+                turnTickActionOccurred = true;
+                return;
+        }
+        if(dungeon.inRange(targetY, targetX)) {
+            lookCursor.setLocation(targetY, targetX);
+            Tile t = dungeon.getTileMap()[targetY][targetX];
+        }
+    }
+
+    private void processStateLookingKeys(KeyEvent e) {
+        int targetY = lookCursor.getY();
+        int targetX = lookCursor.getX();
+        switch(e.getKeyCode()) {
+            case KEY_NORTH:
+                targetY --;
+                break;
+            case KEY_SOUTH:
+                targetY ++;
+                break;
+            case KEY_EAST:
+                targetX ++;
+                break;
+            case KEY_WEST:
+                targetX --;
+                break;
+            case KEY_CANCEL:
+                player.setState(STATE_READY);
+                lookCursor = null;
+                return;
+        }
+        if(dungeon.inRange(targetY, targetX)) {
+            lookCursor.setLocation(targetY, targetX);
+            Tile t = dungeon.getTileMap()[targetY][targetX];
+            if(dungeon.getVisibleMap()[targetY][targetX]) {
+                if(t.hasEntity()) {
+                    WindowFrame.writeConsole(t.getEntity().toString());
+                } else if(t.hasItems()) {
+                    WindowFrame.writeConsole("Items");
+                } else {
+                    WindowFrame.writeConsole(String.valueOf(t.getGlyph()));
+                }
+            } else if(dungeon.getExploredMap()[targetY][targetX]) {
+                WindowFrame.writeConsole(String.valueOf(t.getGlyph()));
+            } else {
+                WindowFrame.writeConsole("Unexplored");
+            }
+        }
+    }
+
+    private void rangedAttack(Entity attacker, Entity defender) {
+        defender.applyDamage(3);
+        WindowFrame.writeConsole("/combat/" + attacker + " arrow struck " + defender + " for 3 damage!");
+        if(!defender.isAlive()) {
+            defender.die();
+            dungeon.getMonsters().remove(defender);
+        }
+    }
+    private void shootTest(ArrayList<Vector2i> line) {
+        int range = 5;
+        if(line.size() < range) {
+            range = line.size();
+        }
+        for(int i = 0; i < range; i++) {
+
+            Tile t = dungeon.getTileMap()[line.get(i).getY()][line.get(i).getX()];
+            if(t.hasEntity()) {
+                Entity e = t.getEntity();
+                rangedAttack(player, e);
+
+                t.addItem(new Arrow());
+                return;
+            }
+        }
+        /*
+        No entity was hit, so figure out where to drop the arrow. This makes sure it doesn't replace a wall or door
+         */
+        for(int i = range - 1; i >= 0; i--) {
+            Tile cur = dungeon.getTileMap()[line.get(i).getY()][line.get(i).getX()];
+            if(cur.getGlyph() == RenderPanel.WALL || cur.getGlyph() == RenderPanel.DOOR_CLOSED) {
+                continue;
+            }
+            cur.addItem(new Arrow());
+            WindowFrame.writeConsole("/combat/The arrow falls to the ground");
+            break;
+        }
+    }
+
     private void processStateToggleDoorKeys(KeyEvent e) {
         int targetY = player.getY();
         int targetX = player.getX();
@@ -276,7 +406,7 @@ public class Game {
         player.setState(STATE_READY);
     }
 
-    private void processItemLootingWithWindow() {
+    public void processItemLootingWithWindow() {
         lootWindow = new LootWindow(dungeon.getTileMap()[player.getY()][player.getX()], player);
         player.setState(STATE_LOOTING);
     }
@@ -332,31 +462,27 @@ public class Game {
     private void processStateReadyKeys(KeyEvent e) {
         int nextY = player.getY();
         int nextX = player.getX();
-        boolean moveRequest = false;
-        boolean itemPickupRequest = false;
-        boolean dungeonChangeRequest = false;
-        boolean quaffRequest = false;
-        boolean toggleDoorRequest = false;
-        boolean eatRequest = false;
 
+        RequestDispatcher rd = new RequestDispatcher(this);
+        rd.resetFlags();
         switch (e.getKeyCode()) {
             /*
             Movement
              */
             case KEY_NORTH:
-                moveRequest = true;
+                rd.moveRequest = true;
                 nextY--;
                 break;
             case KEY_SOUTH:
-                moveRequest = true;
+                rd.moveRequest = true;
                 nextY++;
                 break;
             case KEY_WEST:
-                moveRequest = true;
+                rd.moveRequest = true;
                 nextX--;
                 break;
             case KEY_EAST:
-                moveRequest = true;
+                rd.moveRequest = true;
                 nextX++;
                 break;
 
@@ -364,10 +490,10 @@ public class Game {
             Interaction
              */
             case KEY_PICKUP:
-                itemPickupRequest = true;
+                rd.itemPickupRequest = true;
                 break;
             case KeyEvent.VK_BACK_SLASH:
-                dungeonChangeRequest = true;
+                rd.dungeonChangeRequest = true;
                 break;
 
             /*
@@ -388,13 +514,13 @@ public class Game {
 
             // Quaff potion
             case KeyEvent.VK_Q:
-                quaffRequest = true;
+                rd.quaffRequest = true;
                 break;
 
             // Close door
             case KEY_TOGGLE_DOOR:
                 WindowFrame.writeConsole("Which direction to open/close door?");
-                toggleDoorRequest = true;
+                rd.toggleDoorRequest = true;
                 break;
 
             // Open character window
@@ -422,82 +548,23 @@ public class Game {
 
             // Eat
             case KEY_EAT:
-                eatRequest = true;
+                rd.eatRequest = true;
+                break;
+
+            // Shoot
+            case KEY_SHOOT:
+                rd.shootRequest = true;
+                break;
+
+            case KeyEvent.VK_L:
+                rd.lookRequest = true;
                 break;
         }
-
-        if (moveRequest) {
-            switch(processPlayerMoveRequest(nextY, nextX)) {
-                case PLAYER_MOVED:
-                    turnTickActionOccurred = true;
-                    player.modifySatiation(HUNGER_HIT_MOVE);
-                    break;
-                case PLAYER_COMBAT:
-                    turnTickActionOccurred = true;
-                    player.modifySatiation(HUNGER_HIT_MELEE);
-                    break;
-                case PLAYER_HIT_WALL:
-                    WindowFrame.writeConsole("You bump into the wall. OUCH!");
-                    break;
-                case PLAYER_HIT_CLOSED_DOOR:
-                    WindowFrame.writeConsole("Will you open the door? Y/n");
-                    break;
-                case ERROR_PLAYER_MOVE:
-                    WindowFrame.writeConsole("/warning/processMovePlayerRequest() error in <not passable><no " +
-                            "monster> switch(check door/wall)");
-                    break;
-                case ERROR_OUT_OF_MAP_RANGE:
-                    WindowFrame.writeConsole("The void beckons, but you resist its call.");
-                    break;
-
-            }
-        } else if(itemPickupRequest) {
-            switch(processPlayerItemPickupRequest()) {
-                case TILE_HAS_ITEMS:
-                    processItemLootingWithWindow();
-                    break;
-                case TILE_HAS_NO_ITEMS:
-                    WindowFrame.writeConsole("There's nothing to pickup.");
-                    break;
-            }
-        } else if(dungeonChangeRequest) {
-            switch(processDungeonChangeRequest()) {
-                case TILE_HAS_DUNGEON_LINK:
-                    WindowFrame.writeConsole("Changed dungeon");
-                    turnTickActionOccurred = true;
-                    break;
-                case TILE_HAS_NO_DUNGEON_LINK:
-                    WindowFrame.writeConsole("no dungeon link");
-                    break;
-            }
-        } else if(quaffRequest) {
-            Potion potion = player.getNextPotionTest();
-            if(potion != null) {
-                potion.applyEffects(player);
-                player.getInventory().remove(potion);
-                turnTickActionOccurred = true;
-                WindowFrame.writeConsole("You quaff the potion");
-            } else {
-                WindowFrame.writeConsole("You have no potions");
-            }
-        } else if(toggleDoorRequest) {
-            player.setState(STATE_CLOSE_DOOR_ATTEMPT);
-        } else if(eatRequest) {
-            switch(player.eat()) {
-                case PLAYER_ATE_WELL:
-                    WindowFrame.writeConsole("You ate the corpse. You feel less hungry");
-                    turnTickActionOccurred = true;
-                    break;
-                case PLAYER_ATE_POISON:
-                    WindowFrame.writeConsole("Eating the corpse made you sick!");
-                    turnTickActionOccurred = true;
-                    break;
-                case PLAYER_HAS_NO_FOOD:
-                    WindowFrame.writeConsole("You have nothing to eat!");
-                    break;
-            }
-        }
+        rd.setNextLocation(nextY, nextX);
+        rd.dispatch();
     }
+
+
 
     private void sendHelpMessage() {
         String helpMessage = "Key\tDescription\n";
@@ -512,25 +579,6 @@ public class Game {
         helpMessage += ".\tWait\n";
         helpMessage += "E\tEat\n";
         WindowFrame.writeConsole(helpMessage);
-    }
-
-    private int processDungeonChangeRequest() {
-        Tile pTile = dungeon.getTileMap()[player.getY()][player.getX()];
-        if(pTile.hasDungeonLink()) {
-            dungeon = dungeonSystem.getDungeon(pTile.getDungeonLink());
-            player.moveToTileImmediately(pTile.getTileLink());
-            return TILE_HAS_DUNGEON_LINK;
-        }
-        return TILE_HAS_NO_DUNGEON_LINK;
-    }
-
-    private int processPlayerItemPickupRequest() {
-        Tile tile = dungeon.getTileMap()[player.getY()][player.getX()];
-        if(tile.hasItems()) {
-            return TILE_HAS_ITEMS;
-        } else {
-            return TILE_HAS_NO_ITEMS;
-        }
     }
 
     private int playerCombat(Monster monster) {
@@ -580,7 +628,7 @@ public class Game {
         return PLAYER_COMBAT;
     }
 
-    private int processPlayerMoveRequest(int nextY, int nextX) {
+    public int processPlayerMoveRequest(int nextY, int nextX) {
         /*
         In range check
          */
@@ -785,6 +833,33 @@ public class Game {
              */
             m.getMoveQueue().clear();
         }
+        else if(monsterCanSeePlayer(m) && m.isRanged() && playerInRangeOfMonster(m)) {
+
+                boolean shouldShoot = true;
+                /*
+                Pre screen the path
+                 */
+                ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), m.getY(), m.getX(), player.getY
+                        (), player.getX());
+                for(Vector2i v : line) {
+                    if(dungeon.hasMonster(v.getY(), v.getX())) {
+                        shouldShoot = false;
+                    } else if(line.size() > m.getRange()) {
+                        shouldShoot = false;
+                    }
+                }
+                if(shouldShoot) {
+                    shootTest(line);
+                    // If player died during combat
+                    if(!player.isAlive()) {
+                        // Announce
+                        WindowFrame.writeConsole("/warning/You died.");
+                        // Set game state STATE_GAME_OVER
+                        player.setState(STATE_GAME_OVER);
+                    }
+                }
+
+        }
         /*
         If no player, check if its a passable tile.
          */
@@ -804,6 +879,15 @@ public class Game {
             WindowFrame.writeConsole(m + " couldn't move");
             m.getMoveQueue().clear();
         }
+    }
+
+    private boolean playerInRangeOfMonster(Monster m) {
+        ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), m.getY(), m.getX(), player.getY
+                (), player.getX());
+        if(line.size() > m.getRange()) {
+            return false;
+        }
+        return true;
     }
 
     private void monsterLootItems(Monster m, Tile t) {
@@ -833,6 +917,7 @@ public class Game {
         gameState.setPlayer(player);
         gameState.setDungeon(dungeon);
         gameState.setTurns(turns);
+        gameState.setLookCursor(lookCursor);
         return gameState;
     }
 }

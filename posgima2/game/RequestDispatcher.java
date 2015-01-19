@@ -97,7 +97,7 @@ public class RequestDispatcher {
                 WindowFrame.writeConsole("You have no potions");
             }
         } else if(toggleDoorRequest) {
-            player.setState(Player.STATE_CLOSE_DOOR_ATTEMPT);
+            player.setState(Player.STATE.CLOSE_DOOR_ATTEMPT);
         } else if(eatRequest) {
             if(player.hasCorpseInInventory()) {
                 Corpse food = player.getNextCorpseTest();
@@ -118,7 +118,7 @@ public class RequestDispatcher {
         } else if(shootRequest) {
             switch(processPlayerShootRequest()) {
                 case Game.PLAYER_SHOOTING:
-                    player.setState(Game.PLAYER_SHOOTING);
+                    player.setState(Player.STATE.SHOOTING);
                     WindowFrame.writeConsole("Use direction keys to target, T to shoot");
                     game.lookCursor = new LookCursor(player.getY(), player.getX());
                     break;
@@ -128,7 +128,7 @@ public class RequestDispatcher {
         } else if(lookRequest) {
             WindowFrame.writeConsole("Use directional keys to look around");
             game.lookCursor = new LookCursor(player.getY(), player.getX());
-            player.setState(Player.STATE_LOOKING);
+            player.setState(Player.STATE.LOOKING);
         } else if(idleRequest) {
             turnTickActionOccurred = true;
         }

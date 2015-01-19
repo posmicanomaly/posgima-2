@@ -16,18 +16,21 @@ public class Player extends Entity{
      * posgima2.world.Player states such as "ready", "door closed", "item pickup"
      * to determine which key options to accept, and control game flow.
      */
-    public static final int STATE_CANCEL = -1;
-    public static final int STATE_READY = 0;
-    public static final int STATE_DOOR_CLOSED = 1;
-    public static final int STATE_ITEM_PICKUP = 3;
-    public static final int STATE_LOOTED = 5;
-    public static final int STATE_GAME_OVER = 2;
-    public static final int STATE_LOOTING = 4;
-    public static final int STATE_CLOSE_DOOR_ATTEMPT = 6;
-    public static final int STATE_SHOOTING = 7;
-    public static final int STATE_LOOKING = 8;
+    public static enum STATE {
+        CANCEL, READY, DOOR_CLOSED, ITEM_PICKUP, LOOTED, GAME_OVER, LOOTING, CLOSE_DOOR_ATTEMPT, SHOOTING, LOOKING;
+    }
+//    public static final int STATE_CANCEL = -1;
+//    public static final int STATE_READY = 0;
+//    public static final int STATE_DOOR_CLOSED = 1;
+//    public static final int STATE_ITEM_PICKUP = 3;
+//    public static final int STATE_LOOTED = 5;
+//    public static final int STATE_GAME_OVER = 2;
+//    public static final int STATE_LOOTING = 4;
+//    public static final int STATE_CLOSE_DOOR_ATTEMPT = 6;
+//    public static final int STATE_SHOOTING = 7;
+//    public static final int STATE_LOOKING = 8;
     private final int unarmedDie;
-    private int state;
+    private STATE state;
     private boolean justLooted;
     private int satiation;
 
@@ -48,7 +51,7 @@ public class Player extends Entity{
         //addInventory(new Sword(RenderPanel.WEAPON, Dice.D4, 0, 0, 0, 0), true);
         //addInventory(new Plate(RenderPanel.ITEM, 5), true);
 
-        state = STATE_READY;
+        state = STATE.READY;
     }
 
     @Override
@@ -136,11 +139,11 @@ public class Player extends Entity{
         maxHP += Dice.roll(baseHitDie) + constitution;
     }
 
-    public int getState() {
+    public STATE getState() {
         return state;
     }
 
-    public void setState(int state) {
+    public void setState(STATE state) {
         this.state = state;
     }
 

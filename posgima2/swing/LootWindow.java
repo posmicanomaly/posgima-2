@@ -88,13 +88,13 @@ public class LootWindow extends JFrame implements WindowListener{
     }
 
     private void playCanceledWindow(Player player) {
-        player.setState(Player.STATE_CANCEL);
+        player.setState(Player.STATE.CANCEL);
         WindowFrame.forceGameUpdate();
         closeWindow();
     }
 
     private void performLoot() {
-        player.setState(Player.STATE_LOOTED);
+        player.setState(Player.STATE.LOOTED);
         ArrayList<Item> itemsLooting = new ArrayList<Item>();
         for(int i = 0; i < lootTable.getRowCount(); i++) {
             if(lootTable.isRowSelected(i)) {

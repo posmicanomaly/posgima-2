@@ -43,7 +43,7 @@ public class PlayerMove {
                     // Walked into a closed door
                     case RenderPanel.DOOR_CLOSED:
                         // Set the "player" state as STATE_DOOR_CLOSED
-                        game.player.setState(Player.STATE_DOOR_CLOSED);
+                        game.player.setState(Player.STATE.DOOR_CLOSED);
                         // Set the tile the door is on as the player's target
                         game.player.setTargetTile(game.dungeon.getTileMap()[nextY][nextX]);
                         // Set the "game" state as PLAYER_HIT_CLOSED_DOOR to fire off the proper menu and accept

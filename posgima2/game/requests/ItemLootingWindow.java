@@ -11,6 +11,6 @@ public class ItemLootingWindow {
     public static void processItemLootingWithWindow(Game game) {
         game.lootWindow = new LootWindow(game.dungeon.getTileMap()[game.player.getY()][game.player.getX()], game
                 .player);
-        game.player.setState(Player.STATE_LOOTING);
+        game.player.setState(Player.STATE.LOOTING);
     }
 }

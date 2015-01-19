@@ -7,12 +7,12 @@ import posgima2.world.dungeonSystem.dungeon.Tile;
  * Created by Jesse Pospisil on 1/18/2015.
  */
 public class ItemPickup {
-    public static int processPlayerItemPickupRequest(Game game) {
+    public static Game.TileState processPlayerItemPickupRequest(Game game) {
         Tile tile = game.dungeon.getTileMap()[game.player.getY()][game.player.getX()];
         if(tile.hasItems()) {
-            return Game.TILE_HAS_ITEMS;
+            return Game.TileState.HAS_ITEMS;
         } else {
-            return Game.TILE_HAS_NO_ITEMS;
+            return Game.TileState.HAS_NO_ITEMS;
         }
     }
 }

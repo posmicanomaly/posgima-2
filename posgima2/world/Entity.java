@@ -93,23 +93,7 @@ public abstract class Entity {
         return chestSlot;
     }
 
-    public boolean move(int dir) {
-        switch(dir) {
-            case Game.UP:
-                y--;
-                break;
-            case Game.DOWN:
-                y++;
-                break;
-            case Game.LEFT:
-                x--;
-                break;
-            case Game.RIGHT:
-                x++;
-                break;
-        }
-        return true;
-    }
+
 
 
 

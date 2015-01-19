@@ -1,5 +1,6 @@
 package posgima2.swing;
 
+import posgima2.game.Game;
 import posgima2.game.GameState;
 import posgima2.world.Player;
 
@@ -54,7 +55,7 @@ public class StatisticsPanel extends JPanel{
         result.append("AC: ").append((p.getTotalArmorClass())).append("\n");
         result.append("+DMG: ").append(p.getDamageBonus()).append("\n");
         result.append("EXP: ").append(p.getExperience()).append("\n");
-        result.append("SAT: ").append(p.getSatiation()).append(" / 100\n");
+        result.append("SAT: ").append(p.getSatiation()).append(" / ").append(Game.MAX_SATIATION).append("\n");
         result.append(p.getTile().getGlyph()).append("\n");
         if(p.getTile().hasItems()) {
             if(p.getTile().getItems().size() > 1) {

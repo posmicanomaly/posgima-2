@@ -69,20 +69,20 @@ public class RequestDispatcher {
         }
         else if(itemPickupRequest) {
             switch(ItemPickup.processPlayerItemPickupRequest(game)) {
-                case Game.TILE_HAS_ITEMS:
+                case HAS_ITEMS:
                     ItemLootingWindow.processItemLootingWithWindow(game);
                     break;
-                case Game.TILE_HAS_NO_ITEMS:
+                case HAS_NO_ITEMS:
                     WindowFrame.writeConsole("There's nothing to pickup.");
                     break;
             }
         } else if(dungeonChangeRequest) {
             switch(DungeonChange.processDungeonChangeRequest(game)) {
-                case Game.TILE_HAS_DUNGEON_LINK:
+                case HAS_DUNGEON_LINK:
                     WindowFrame.writeConsole("Changed dungeon");
                     turnTickActionOccurred = true;
                     break;
-                case Game.TILE_HAS_NO_DUNGEON_LINK:
+                case HAS_NO_DUNGEON_LINK:
                     WindowFrame.writeConsole("no dungeon link");
                     break;
             }

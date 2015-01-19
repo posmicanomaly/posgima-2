@@ -17,18 +17,9 @@ public class Player extends Entity{
      * to determine which key options to accept, and control game flow.
      */
     public static enum STATE {
-        CANCEL, READY, DOOR_CLOSED, ITEM_PICKUP, LOOTED, GAME_OVER, LOOTING, CLOSE_DOOR_ATTEMPT, SHOOTING, LOOKING;
+        CANCEL, READY, DOOR_CLOSED, ITEM_PICKUP, LOOTED, GAME_OVER, LOOTING, CLOSE_DOOR_ATTEMPT, SHOOTING, LOOKING
     }
-//    public static final int STATE_CANCEL = -1;
-//    public static final int STATE_READY = 0;
-//    public static final int STATE_DOOR_CLOSED = 1;
-//    public static final int STATE_ITEM_PICKUP = 3;
-//    public static final int STATE_LOOTED = 5;
-//    public static final int STATE_GAME_OVER = 2;
-//    public static final int STATE_LOOTING = 4;
-//    public static final int STATE_CLOSE_DOOR_ATTEMPT = 6;
-//    public static final int STATE_SHOOTING = 7;
-//    public static final int STATE_LOOKING = 8;
+
     private final int unarmedDie;
     private STATE state;
     private boolean justLooted;
@@ -46,7 +37,7 @@ public class Player extends Entity{
         rollAttributes();
         currentHP = maxHP;
         experience = 0;
-        satiation = 100;
+        satiation = Game.MAX_SATIATION;
 
         //addInventory(new Sword(RenderPanel.WEAPON, Dice.D4, 0, 0, 0, 0), true);
         //addInventory(new Plate(RenderPanel.ITEM, 5), true);
@@ -64,13 +55,16 @@ public class Player extends Entity{
             satiation += food.getSatiation();
             if (satiation > Game.MAX_SATIATION) {
                 satiation = Game.MAX_SATIATION;
+            } else if(satiation < 0) {
+                satiation = 0;
             }
-            inventory.remove(food);
-            if (satiation > 0) {
+
+            if (food.getSatiation() > 0) {
                 return Game.PLAYER_ATE_WELL;
-            } else if (satiation < 0) {
+            } else if (food.getSatiation() < 0) {
                 return Game.PLAYER_ATE_POISON;
             }
+            inventory.remove(food);
         }
         return Game.PLAYER_HAS_NO_FOOD;
     }

@@ -19,7 +19,7 @@ public class Goblin extends Monster {
         constitution = 7;
         expMod = 1.0;
 
-        corpseSatiation = 20;
+        corpseSatiation = 70;
 
         maxHP = 8;
         for(int i = 1; i < level; i++) {

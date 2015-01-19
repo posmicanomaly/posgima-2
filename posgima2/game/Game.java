@@ -41,10 +41,9 @@ public class Game {
     /**
      * Cardinal directions
      */
-    public static final int UP = 0;
-    public static final int DOWN = 1;
-    public static final int LEFT = 2;
-    public static final int RIGHT = 3;
+    public static enum Direction {
+        UP, DOWN, LEFT, RIGHT
+    }
 
     /**
      * PLAYER_x
@@ -69,10 +68,13 @@ public class Game {
      * TILE_x
      * Flags set in tile pickup
      */
-    public static final int TILE_HAS_ITEMS = 1;
-    public static final int TILE_HAS_NO_ITEMS = 0;
-    public static final int TILE_HAS_DUNGEON_LINK = 1;
-    public static final int TILE_HAS_NO_DUNGEON_LINK = 0;
+    public static enum TileState {
+        HAS_ITEMS, HAS_NO_ITEMS, HAS_DUNGEON_LINK, HAS_NO_DUNGEON_LINK
+    }
+//    public static final int TILE_HAS_ITEMS = 1;
+//    public static final int TILE_HAS_NO_ITEMS = 0;
+//    public static final int TILE_HAS_DUNGEON_LINK = 1;
+//    public static final int TILE_HAS_NO_DUNGEON_LINK = 0;
     private static final int XP_RATE = 30;
     private static final int REGEN_RATE = 30;
 
@@ -560,25 +562,7 @@ public class Game {
             // Announce
             WindowFrame.writeConsole("/combat//killed/You killed " + monster + ".");
 
-            /*
-            Compute proper experience reward based on dungeon level difficulty
-             */
-            int level = dungeon.getDifficulty();
-            int exp = (int) (((level * (100 * (level * level))) / (dungeon.getMaxMonsterLimit())) * monster.getExpMod());
-
-            // If player is lower level than the intended difficulty, increase the reward
-            if(player.getLevel() < dungeon.getDifficulty()) {
-                exp = (int)(exp * 1.5);
-            }
-            // Else reduce the reward
-            else if(player.getLevel() > dungeon.getDifficulty()) {
-                exp = exp / 4;
-            }
-
-            player.modifyExperience(exp);
-
-            // Announce
-            WindowFrame.writeConsole("/success/You gained " + exp + " points of experience.");
+            addExperience(monster);
 
             // Remove the dead monster from dungeon
             dungeon.getMonsters().remove(monster);
@@ -594,11 +578,38 @@ public class Game {
         return PLAYER_COMBAT;
     }
 
+    /**
+     * Adds experience to player based on monster source
+     * @param monster
+     */
+    private void addExperience(Monster monster) {
+        /*
+            Compute proper experience reward based on dungeon level difficulty
+             */
+        int level = dungeon.getDifficulty();
+        int exp = (int) (((level * (100 * (level * level))) / (dungeon.getMaxMonsterLimit())) * monster.getExpMod());
+
+        // If player is lower level than the intended difficulty, increase the reward
+        if(player.getLevel() < dungeon.getDifficulty()) {
+            exp = (int)(exp * 1.5);
+        }
+        // Else reduce the reward
+        else if(player.getLevel() > dungeon.getDifficulty()) {
+            exp = exp / 4;
+        }
+
+        player.modifyExperience(exp);
+
+        // Announce
+        WindowFrame.writeConsole("/success/You gained " + exp + " points of experience.");
+    }
+
     private void rangedAttack(Entity attacker, Entity defender) {
         defender.applyDamage(3);
         WindowFrame.writeConsole("/combat/" + attacker + " arrow struck " + defender + " for 3 damage!");
         if(!defender.isAlive()) {
             defender.die();
+            addExperience((Monster) defender);
             dungeon.getMonsters().remove(defender);
         }
     }

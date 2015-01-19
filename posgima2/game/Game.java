@@ -3,7 +3,6 @@ package posgima2.game;
 import posgima2.combat.Melee;
 import posgima2.item.armor.Armor;
 import posgima2.item.container.Corpse;
-import posgima2.item.potion.Potion;
 import posgima2.item.weapon.Arrow;
 import posgima2.misc.Vector2i;
 import posgima2.item.Item;
@@ -22,7 +21,6 @@ import posgima2.world.monster.Monster;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import static posgima2.misc.Controls.*;
 
@@ -47,21 +45,6 @@ public class Game {
     public static final int DOWN = 1;
     public static final int LEFT = 2;
     public static final int RIGHT = 3;
-    /**
-     * STATE_x
-     * posgima2.world.Player states such as "ready", "door closed", "item pickup"
-     * to determine which key options to accept, and control game flow.
-     */
-    public static final int STATE_CANCEL = -1;
-    public static final int STATE_READY = 0;
-    public static final int STATE_DOOR_CLOSED = 1;
-    public static final int STATE_ITEM_PICKUP = 3;
-    public static final int STATE_LOOTED = 5;
-    private static final int STATE_GAME_OVER = 2;
-    public static final int STATE_LOOTING = 4;
-    public static final int STATE_CLOSE_DOOR_ATTEMPT = 6;
-    private static final int STATE_SHOOTING = 7;
-    public static final int STATE_LOOKING = 8;
 
     /**
      * PLAYER_x
@@ -186,18 +169,18 @@ public class Game {
             /*
             The main player STATE. The player is ready for anything(mostly), so process the most keys
              */
-            case STATE_READY:
+            case Player.STATE_READY:
                 processStateReadyKeys(e);
                 break;
             /*
             Use STATE_CANCEL when returning from another window, because forceGameUpdate passes a null KeyEvent, and
             so STATE_READY would try and read that key event and crash.
              */
-            case STATE_CANCEL:
-                player.setState(STATE_READY);
+            case Player.STATE_CANCEL:
+                player.setState(Player.STATE_READY);
                 break;
 
-            case STATE_CLOSE_DOOR_ATTEMPT:
+            case Player.STATE_CLOSE_DOOR_ATTEMPT:
                 processStateToggleDoorKeys(e);
                 break;
             /*
@@ -206,24 +189,24 @@ public class Game {
             Currently, looting one or more items only takes up a single turn, the player grabs items very quickly
             apparently.
              */
-            case STATE_LOOTED:
+            case Player.STATE_LOOTED:
                 turnTickActionOccurred = true;
-                player.setState(STATE_READY);
+                player.setState(Player.STATE_READY);
                 break;
             /*
             STATE_DOOR_CLOSED is set when the player bumps into a door. A should already have been sent at this point
              before setting this state, and so the next key pressed(Y/n), will be passed into
              processStateDoorClosedKeys().
              */
-            case STATE_DOOR_CLOSED:
+            case Player.STATE_DOOR_CLOSED:
                 processStateDoorClosedKeys(e);
                 break;
 
-            case STATE_SHOOTING:
+            case Player.STATE_SHOOTING:
                 processStateShootingKeys(e);
                 break;
 
-            case STATE_LOOKING:
+            case Player.STATE_LOOKING:
                 processStateLookingKeys(e);
                 break;
 
@@ -235,9 +218,9 @@ public class Game {
             other actions while looting. Similar to how we use specific processKey methods for various other states
             to prevent illegal actions.
              */
-            case STATE_LOOTING:
+            case Player.STATE_LOOTING:
                 break;
-            case STATE_GAME_OVER:
+            case Player.STATE_GAME_OVER:
                 break;
         }
         /*
@@ -297,7 +280,7 @@ public class Game {
 
         if(!player.isAlive()) {
             player.die();
-            player.setState(Game.STATE_GAME_OVER);
+            player.setState(Player.STATE_GAME_OVER);
             WindowFrame.writeConsole("You died!");
         }
     }
@@ -464,7 +447,7 @@ public class Game {
                 // Announce
                 WindowFrame.writeConsole("/warning/You died.");
                 // Set game state STATE_GAME_OVER
-                player.setState(STATE_GAME_OVER);
+                player.setState(Player.STATE_GAME_OVER);
             }
             /*
             Clear the move queue now, so we don't teleport to the next spot.
@@ -493,7 +476,7 @@ public class Game {
                         // Announce
                         WindowFrame.writeConsole("/warning/You died.");
                         // Set game state STATE_GAME_OVER
-                        player.setState(STATE_GAME_OVER);
+                        player.setState(Player.STATE_GAME_OVER);
                     }
                 }
 
@@ -606,7 +589,7 @@ public class Game {
          */
         if(!player.isAlive()) {
             WindowFrame.writeConsole("/warning/You died.");
-            player.setState(STATE_GAME_OVER);
+            player.setState(Player.STATE_GAME_OVER);
         }
         return PLAYER_COMBAT;
     }
@@ -661,11 +644,11 @@ public class Game {
                 WindowFrame.writeConsole("You open the door.");
                 dungeon.toggleDoor(player.getTargetTile());
                 turnTickActionOccurred = true;
-                player.setState(STATE_READY);
+                player.setState(Player.STATE_READY);
                 break;
             case KEY_NO:
                 // Chose not to open door
-                player.setState(STATE_READY);
+                player.setState(Player.STATE_READY);
                 break;
         }
     }
@@ -796,12 +779,12 @@ public class Game {
             if(dungeon.isDoor(targetY, targetX)) {
                 dungeon.toggleDoor(dungeon.getTileMap()[targetY][targetX]);
                 turnTickActionOccurred = true;
-                player.setState(STATE_READY);
+                player.setState(Player.STATE_READY);
             } else {
                 WindowFrame.writeConsole("There's no door there.");
             }
         }
-        player.setState(STATE_READY);
+        player.setState(Player.STATE_READY);
     }
 
     private void processStateShootingKeys(KeyEvent e) {
@@ -821,13 +804,13 @@ public class Game {
                 targetX --;
                 break;
             case KEY_CANCEL:
-                player.setState(STATE_READY);
+                player.setState(Player.STATE_READY);
                 lookCursor = null;
                 return;
             case KEY_SHOOT:
                 WindowFrame.writeConsole("/combat/You loose an arrow");
                 shootTest(FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(), targetY, targetX));
-                player.setState(STATE_READY);
+                player.setState(Player.STATE_READY);
                 lookCursor = null;
                 turnTickActionOccurred = true;
                 return;
@@ -855,7 +838,7 @@ public class Game {
                 targetX --;
                 break;
             case KEY_CANCEL:
-                player.setState(STATE_READY);
+                player.setState(Player.STATE_READY);
                 lookCursor = null;
                 return;
         }

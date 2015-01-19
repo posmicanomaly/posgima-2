@@ -1,6 +1,5 @@
 package posgima2.swing;
 
-import posgima2.game.Game;
 import posgima2.item.Item;
 import posgima2.world.Player;
 import posgima2.world.dungeonSystem.dungeon.Tile;
@@ -89,13 +88,13 @@ public class LootWindow extends JFrame implements WindowListener{
     }
 
     private void playCanceledWindow(Player player) {
-        player.setState(Game.STATE_CANCEL);
+        player.setState(Player.STATE_CANCEL);
         WindowFrame.forceGameUpdate();
         closeWindow();
     }
 
     private void performLoot() {
-        player.setState(Game.STATE_LOOTED);
+        player.setState(Player.STATE_LOOTED);
         ArrayList<Item> itemsLooting = new ArrayList<Item>();
         for(int i = 0; i < lootTable.getRowCount(); i++) {
             if(lootTable.isRowSelected(i)) {

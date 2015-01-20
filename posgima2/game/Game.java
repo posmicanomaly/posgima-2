@@ -91,6 +91,7 @@ public class Game {
     public LookCursor lookCursor;
     public DungeonSystem dungeonSystem;
     public Dungeon dungeon;
+    public ArrayList<Monster> monstersInView;
 
     public LootWindow lootWindow;
     private CharacterPanel characterPanel;
@@ -121,6 +122,16 @@ public class Game {
         addPlayerStartingGear(player);
 
         //dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
+        Tile startingTile = dungeon.getTileMap()[center.getY()][center.getX()];
+
+        /*
+        If starting tile has an entity on it already, move it somewhere else so our player will fit.
+         */
+        if(startingTile.hasEntity()) {
+            Entity e = startingTile.getEntity();
+            e.moveToTileImmediately(dungeon.getRandomTileOf(RenderPanel.FLOOR));
+        }
+
         player.moveToTileImmediately(dungeon.getTileMap()[center.getY()][center.getX()]);
         dungeon.recalculateVisibility(new Vector2i(player.getY(), player.getX()));
 
@@ -248,6 +259,18 @@ public class Game {
         characterPopup.update();
 
         return getGameState();
+    }
+
+    private ArrayList<Monster> getMonstersInView() {
+        ArrayList<Monster> inView = new ArrayList<>();
+        ArrayList<Vector2i> fov = FieldOfView.bresenhamFov(dungeon.getTileMap(), player.getY(), player.getX(), 0);
+        for(Vector2i v : fov) {
+            if(dungeon.hasMonster(v.getY(), v.getX())) {
+                if(!inView.contains(dungeon.getMonsterAt(v.getY(), v.getX())))
+                    inView.add(dungeon.getMonsterAt(v.getY(), v.getX()));
+            }
+        }
+        return inView;
     }
 
     private void resetAttackStates() {
@@ -537,6 +560,7 @@ public class Game {
 
     public GameState getGameState() {
         GameState gameState = new GameState();
+        gameState.setMonstersInView(getMonstersInView());
         gameState.setPlayer(player);
         gameState.setDungeon(dungeon);
         gameState.setTurns(turns);

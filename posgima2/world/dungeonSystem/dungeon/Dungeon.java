@@ -57,7 +57,12 @@ public class Dungeon {
         rooms = new ArrayList<Room>();
 
         SetupWindow.println("Creating and connecting rooms");
-        createAndConnectRooms(roomAmount);
+        //createAndConnectRooms(roomAmount);
+        while(!createRooms(roomAmount)) {
+            System.out.println("room creation failed");
+        }
+        System.out.println("room reation success");
+        connectRooms();
         //SetupWindow.println("total rooms: " + rooms.size());
 
         //SetupWindow.println("blasting rooms");
@@ -82,20 +87,29 @@ public class Dungeon {
         sprinkleMonsters();
     }
 
-    private void createAndConnectRooms(int amount) {
-        Room room;
-            do {
-                room = createRandomRoom();
-                if(room != null)
-                    rooms.add(room);
-            } while(rooms.size() < amount);
-
+    private void connectRooms() {
         for(int i = 1; i < rooms.size(); i++) {
             Room prev = rooms.get(i - 1);
             Room cur = rooms.get(i);
 
             carvePath(prev, cur, TEMP_CORRIDOR);
         }
+    }
+
+    private boolean createRooms(int amount) {
+        int maxTimeout = amount * 25;
+        int currentTries = 0;
+        Room room;
+        do {
+            room = createRandomRoom();
+            if (room != null)
+                rooms.add(room);
+            else
+                currentTries++;
+            if (currentTries > maxTimeout)
+                break;
+        } while (rooms.size() < amount);
+        return rooms.size() == amount;
     }
 
     public boolean isPassable(int x, int y) {
@@ -133,7 +147,7 @@ public class Dungeon {
         return false;
     }
 
-    private Tile getRandomTileOf(char glyph) {
+    public Tile getRandomTileOf(char glyph) {
         int y = 0;
         int x = 0;
         do {

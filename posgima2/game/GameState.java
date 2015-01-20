@@ -2,6 +2,9 @@ package posgima2.game;
 
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.Player;
+import posgima2.world.monster.Monster;
+
+import java.util.ArrayList;
 
 /**
  * Created by Jesse Pospisil on 12/27/2014.
@@ -12,7 +15,7 @@ public class GameState {
     //private char[][] map;
     //private boolean[][] visibleMap;
     private Dungeon dungeon;
-    private int monstersInView;
+    private ArrayList<Monster> monstersInView;
     private int playerState;
     private int turns;
     private LookCursor lookCursor;
@@ -44,7 +47,7 @@ public class GameState {
         return dungeon;
     }
 
-    public int monstersInView() {
+    public ArrayList<Monster> getMonstersInView() {
         return monstersInView;
     }
 
@@ -62,5 +65,9 @@ public class GameState {
 
     public void setLookCursor(LookCursor l) {
         lookCursor = l;
+    }
+
+    public void setMonstersInView(ArrayList<Monster> monstersInView) {
+        this.monstersInView = monstersInView;
     }
 }

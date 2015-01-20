@@ -9,5 +9,6 @@ public class GoblinArcher extends Goblin{
         glyph = 'a';
         range = 3;
         ranged = true;
+        name = "a goblin archer";
     }
 }

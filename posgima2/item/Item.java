@@ -29,4 +29,11 @@ public abstract class Item {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String toString() {
+        if(name == null) {
+            return String.valueOf(hashCode());
+        }
+        return name;
+    }
 }

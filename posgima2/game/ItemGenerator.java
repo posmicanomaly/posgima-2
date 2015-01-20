@@ -30,7 +30,9 @@ public abstract class ItemGenerator {
     }
 
     public static Potion createPotion(int level) {
-        return new HealthPotion(-(Math.abs(level * 5)));
+        Potion potion = new HealthPotion(-(Math.abs(level * 5)));
+        potion.setName("Health Potion L" + level);
+        return potion;
     }
 
     public static Armor createArmor(int level, int slot) {

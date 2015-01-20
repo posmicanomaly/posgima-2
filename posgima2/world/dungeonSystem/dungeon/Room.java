@@ -5,6 +5,7 @@ import posgima2.misc.Vector2i;
 import posgima2.item.Item;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;
+import posgima2.world.Entity;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -347,4 +348,6 @@ public class Room {
     public ArrayList<Vector2i> getEntrances() {
         return entrances;
     }
+
+
 }

@@ -59,12 +59,13 @@ public class Player extends Entity{
                 satiation = 0;
             }
 
+            inventory.remove(food);
+
             if (food.getSatiation() > 0) {
                 return Game.PLAYER_ATE_WELL;
             } else if (food.getSatiation() < 0) {
                 return Game.PLAYER_ATE_POISON;
             }
-            inventory.remove(food);
         }
         return Game.PLAYER_HAS_NO_FOOD;
     }

@@ -3,6 +3,7 @@ package posgima2.swing;
 import posgima2.game.Game;
 import posgima2.game.GameState;
 import posgima2.world.Player;
+import posgima2.world.monster.Monster;
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,9 +68,12 @@ public class StatisticsPanel extends JPanel{
             result.append("\n");
         }
         result.append("\n");
-        result.append("turn: ").append(gameState.getTurns()).append("\n");
-        if(gameState.monstersInView() > 0) {
-            result.append(gameState.monstersInView() + " monsters in view").append("\n");
+        result.append("turn: ").append(gameState.getTurns()).append("\nIn View");
+        result.append(" (").append(gameState.getMonstersInView().size()).append(")\n");
+        if(gameState.getMonstersInView().size() > 0) {
+            for(Monster m : gameState.getMonstersInView()) {
+                result.append(m).append("\n");
+            }
         } else {
             result.append("\n");
         }

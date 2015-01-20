@@ -412,30 +412,28 @@ public class Game {
             If there are no moves in the monster's queue
             Pick a random direction and go
              */
+
             if(m.getMoveQueue().size() == 0) {
-                int direction = (int) (Math.random() * 4);
-                int nextY = m.getY();
-                int nextX = m.getX();
-                switch (direction) {
-                    case 0:
-                        nextY--;
+                /*
+                Should monster set a new state?
+                 */
+                int chance = (int)(Math.random() * 100);
+                if(chance < 10) {
+                   // System.out.print(m + " changed from " + m.getCurrentState());
+                    m.setState(m.chooseRandomState());
+                   // System.out.println(" to " + m.getCurrentState());
+                }
+                switch(m.getCurrentState()) {
+                    case idle:
                         break;
-                    case 1:
-                        nextY++;
+                    case wander:
+                        doMonsterWander(m);
                         break;
-                    case 2:
-                        nextX--;
-                        break;
-                    case 3:
-                        nextX++;
+                    case patrol:
+                        doMonsterPatrol(m);
                         break;
                 }
-                if (dungeon.isPassable(nextX, nextY)) {
-                    // Monsters can't open doors (yet)
-                    if(dungeon.getTileMap()[nextY][nextX].getGlyph() != RenderPanel.DOOR_CLOSED)
-                        m.getMoveQueue().add(new Vector2i(nextY, nextX));
-                       // m.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
-                }
+
             }
             /*
             Otherwise, process next move in queue
@@ -453,6 +451,97 @@ public class Game {
         }
     }
 
+    private void doMonsterPatrol(Monster m) {
+        AStar astar = new AStar(dungeon);
+        ArrayList<Vector2i> path = astar.getPath(m.getTile().getLocation(), dungeon.getRandomTileOf(RenderPanel.FLOOR)
+                        .getLocation(),
+                false,
+                true);
+        m.getMoveQueue().clear();
+
+        if(path != null) {
+            // i = size - 2 because we throw away the first move, because its the current location.
+            for (int i = path.size() - 2; i >= 0; i--) {
+                // System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
+                m.getMoveQueue().add(path.get(i));
+            }
+           // System.out.println(m + " set a new path");
+        }
+    }
+
+    private void doMonsterWander(Monster m) {
+        int direction = (int) (Math.random() * 4);
+        int nextY = m.getY();
+        int nextX = m.getX();
+        switch (direction) {
+            case 0:
+                nextY--;
+                break;
+            case 1:
+                nextY++;
+                break;
+            case 2:
+                nextX--;
+                break;
+            case 3:
+                nextX++;
+                break;
+        }
+        if (dungeon.isPassable(nextX, nextY)) {
+            // Monsters can't open doors (yet)
+            if(dungeon.getTileMap()[nextY][nextX].getGlyph() != RenderPanel.DOOR_CLOSED)
+                m.getMoveQueue().add(new Vector2i(nextY, nextX));
+            // m.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
+        }
+        //System.out.println(m + " is wandering");
+    }
+
+    private void monsterMeleeFightPlayer(Monster m) {
+        // If player is alive
+        if(player.isAlive()) {
+            // Start melee combat round with player, with defenderCanAttack set to false so player cannot fight back
+            Melee.meleeCombat(m, player, false);
+        }
+
+        // If player died during combat
+        if(!player.isAlive()) {
+            // Announce
+            WindowFrame.writeConsole("/warning/You died.");
+            // Set game state STATE_GAME_OVER
+            player.setState(Player.STATE.GAME_OVER);
+        }
+            /*
+            Clear the move queue now, so we don't teleport to the next spot.
+             */
+        m.getMoveQueue().clear();
+    }
+
+    private void monsterRangedFightPlayer(Monster m) {
+        boolean shouldShoot = true;
+                /*
+                Pre screen the path
+                 */
+        ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), m.getY(), m.getX(), player.getY
+                (), player.getX());
+        for(Vector2i v : line) {
+            if(dungeon.hasMonster(v.getY(), v.getX())) {
+                shouldShoot = false;
+            } else if(line.size() > m.getRange()) {
+                shouldShoot = false;
+            }
+        }
+        if(shouldShoot) {
+            shootTest(line);
+            // If player died during combat
+            if(!player.isAlive()) {
+                // Announce
+                WindowFrame.writeConsole("/warning/You died.");
+                // Set game state STATE_GAME_OVER
+                player.setState(Player.STATE.GAME_OVER);
+            }
+        }
+    }
+
     private void processMonsterMoveQueue(Monster m) {
         // Get the next location in monster's moveQueue
         Vector2i next = m.getMoveQueue().remove();
@@ -461,50 +550,10 @@ public class Game {
         If location has a player
          */
         if(hasPlayer(next.getY(), next.getX())) {
-            // If player is alive
-            if(player.isAlive()) {
-                // Start melee combat round with player, with defenderCanAttack set to false so player cannot fight back
-                Melee.meleeCombat(m, player, false);
-            }
-
-            // If player died during combat
-            if(!player.isAlive()) {
-                // Announce
-                WindowFrame.writeConsole("/warning/You died.");
-                // Set game state STATE_GAME_OVER
-                player.setState(Player.STATE.GAME_OVER);
-            }
-            /*
-            Clear the move queue now, so we don't teleport to the next spot.
-             */
-            m.getMoveQueue().clear();
+            monsterMeleeFightPlayer(m);
         }
         else if(monsterCanSeePlayer(m) && m.isRanged() && playerInRangeOfMonster(m)) {
-
-                boolean shouldShoot = true;
-                /*
-                Pre screen the path
-                 */
-                ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), m.getY(), m.getX(), player.getY
-                        (), player.getX());
-                for(Vector2i v : line) {
-                    if(dungeon.hasMonster(v.getY(), v.getX())) {
-                        shouldShoot = false;
-                    } else if(line.size() > m.getRange()) {
-                        shouldShoot = false;
-                    }
-                }
-                if(shouldShoot) {
-                    shootTest(line);
-                    // If player died during combat
-                    if(!player.isAlive()) {
-                        // Announce
-                        WindowFrame.writeConsole("/warning/You died.");
-                        // Set game state STATE_GAME_OVER
-                        player.setState(Player.STATE.GAME_OVER);
-                    }
-                }
-
+            monsterRangedFightPlayer(m);
         }
         /*
         If no player, check if its a passable tile.
@@ -520,11 +569,33 @@ public class Game {
                 monsterLootItems(m, m.getTile());
             }
         }
+        /*
+        NEW: Is is a door? Monsters should be able to open doors, so patrols aren't meaningless
+         */
+        else if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() == RenderPanel.DOOR_CLOSED) {
+            dungeon.toggleDoor(dungeon.getTileMap()[next.getY()][next.getX()]);
+            if(playerCanSeeMonster(m)) {
+                WindowFrame.writeConsole(m + " opened the door");
+            }
+            /*
+            Readd this back to our move queue, next turn we will have monster walk through it.
+             */
+            m.getMoveQueue().addFirst(next);
+        }
         else {
             // tile not passable, calculate a new route for next time
-            WindowFrame.writeConsole(m + " couldn't move");
+            if(playerCanSeeMonster(m)) {
+                WindowFrame.writeConsole(m + " couldn't move");
+            }
             m.getMoveQueue().clear();
         }
+    }
+
+    private boolean playerCanSeeMonster(Monster m) {
+        if(dungeon.getVisibleMap()[m.getY()][m.getX()]) {
+            return true;
+        }
+        return false;
     }
 
     private boolean playerInRangeOfMonster(Monster m) {
@@ -633,8 +704,10 @@ public class Game {
         WindowFrame.writeConsole("/combat/" + attacker + " arrow struck " + defender + " for 3 damage!");
         if(!defender.isAlive()) {
             defender.die();
-            addExperience((Monster) defender);
-            dungeon.getMonsters().remove(defender);
+            if(defender instanceof Monster) {
+                addExperience((Monster) defender);
+                dungeon.getMonsters().remove(defender);
+            }
         }
     }
     private void shootTest(ArrayList<Vector2i> line) {

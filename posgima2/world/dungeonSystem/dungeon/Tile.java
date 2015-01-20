@@ -1,6 +1,7 @@
 package posgima2.world.dungeonSystem.dungeon;
 
 import posgima2.item.Item;
+import posgima2.misc.Vector2i;
 import posgima2.world.Entity;
 
 import java.util.ArrayList;
@@ -106,5 +107,9 @@ public class Tile {
 
     public Tile getTileLink() {
         return tileLink;
+    }
+
+    public Vector2i getLocation() {
+        return new Vector2i(y, x);
     }
 }

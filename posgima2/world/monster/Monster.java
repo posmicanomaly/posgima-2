@@ -19,6 +19,16 @@ public abstract class Monster extends Entity {
     private int aggroTurnStart;
     protected int corpseSatiation;
 
+    public State chooseRandomState() {
+        int choice = (int)(Math.random() * State.values().length);
+        return State.values()[choice];
+    }
+
+    public enum State {
+        idle, wander, patrol
+    }
+
+    private State currentState;
     private LinkedList<Vector2i> moveQueue;
     protected int age;
     protected boolean ranged;
@@ -35,6 +45,16 @@ public abstract class Monster extends Entity {
         expMod = 1;
         // default
         corpseSatiation = 10;
+
+        currentState = State.wander;
+    }
+
+    public State getCurrentState() {
+        return currentState;
+    }
+
+    public void setState(State state) {
+        currentState = state;
     }
 
     public boolean[][] getVisibility() {

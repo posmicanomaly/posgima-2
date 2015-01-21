@@ -119,9 +119,10 @@ public class RequestDispatcher {
             switch(processPlayerShootRequest()) {
                 case Game.PLAYER_SHOOTING:
                     player.setState(Player.STATE.SHOOTING);
-                    WindowFrame.writeConsole("Use TAB to switch between targes, directional keys to manually target, " +
+                    WindowFrame.writeConsole("Use TAB to switch between targets, directional keys to manually target," +
+                            " " +
                             "T to shoot, Z to cancel");
-                    game.targetCursor = new TargetCursor(player.getY(), player.getX());
+                    game.targetCursor = new TargetCursor(player.getY(), player.getX(), 5);
                     if(game.monstersInView.size() > 0) {
                         game.setTargetCursorNextVisibleMonster();
                     }

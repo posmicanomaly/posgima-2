@@ -942,7 +942,7 @@ public class Game {
             targetY = targetCursor.getY();
             targetX = targetCursor.getX();
         }
-        if(dungeon.inRange(targetY, targetX)) {
+        else if(dungeon.inRange(targetY, targetX)) {
             targetCursor.setLocation(targetY, targetX);
             Tile target = dungeon.getTileMap()[targetY][targetX];
             ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(),
@@ -981,8 +981,12 @@ public class Game {
         if(selectedMonster == monstersInView.size()) {
             selectedMonster = 0;
         }
-
-        targetCursor.setLocation(monstersInView.get(selectedMonster).getY(), monstersInView.get(selectedMonster).getX());
+        Tile monsterTile = monstersInView.get(selectedMonster).getTile();
+        targetCursor.setLocation(monsterTile.getY(), monsterTile.getX());
+        Tile target = dungeon.getTileMap()[monsterTile.getY()][monsterTile.getX()];
+        ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(),
+                target.getY(), target.getX());
+        targetCursor.setLineOfSight(line);
     }
 
     private void processStateLookingKeys(KeyEvent e) {

@@ -178,7 +178,7 @@ public class RenderPanel extends JPanel {
                     }
                     if(targetCursorNotNull()) {
                         if(hasTargetLineOfSight(i, j)) {
-                            drawTargetLineOfSightBlock(y, x, g);
+                            drawTargetLineOfSightBlock(y, x, new Vector2i(i, j), g);
                         }
                     }
                     g.setColor(getGlyphColor(tMap[i][j].getGlyph()));
@@ -265,8 +265,15 @@ public class RenderPanel extends JPanel {
         return false;
     }
 
-    private void drawTargetLineOfSightBlock(int y, int x, Graphics g) {
-        g.setColor(new Color(255, 0, 0, 100));
+    private void drawTargetLineOfSightBlock(int y, int x, Vector2i rowCol, Graphics g) {
+        TargetCursor t = currentState.getTargetCursor();
+        int distanceFromPlayer = getLargestDistanceDifference(rowCol.getY(), rowCol.getX(), currentState.getPlayer()
+                .getY(), currentState.getPlayer().getX());
+        if(distanceFromPlayer > t.getMaxRange()) {
+            g.setColor(new Color(255, 0, 0, 100));
+        } else {
+            g.setColor(new Color(0, 255, 0, 100));
+        }
         g.fillRect(x, y - yIncrement, xIncrement, yIncrement);
     }
 

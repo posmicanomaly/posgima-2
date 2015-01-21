@@ -2,6 +2,7 @@ package posgima2.swing;
 
 import posgima2.game.GameState;
 import posgima2.game.LookCursor;
+import posgima2.game.TargetCursor;
 import posgima2.misc.Vector2i;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.monster.Monster;
@@ -159,11 +160,11 @@ public class RenderPanel extends JPanel {
                     if(hasLookCursor(i, j)) {
                         drawLookCursor(y, x, g);
                     }
+                    if(hasTargetCursor(i, j)) {
+                        drawTargetCursor(y, x, g);
+                    }
                 }
 
-//                else if(hasLookCursor(i, j)) {
-//                    drawLookCursor(y, x, g);
-//                }
                 /*
 
                  */
@@ -171,9 +172,16 @@ public class RenderPanel extends JPanel {
                     // set color based on a lookup switch for the glyph
                     if(hasLookCursor(i, j)) {
                         drawLookCursor(y, x, g);
-                    } else {
-                        g.setColor(getGlyphColor(tMap[i][j].getGlyph()));
                     }
+                    if (hasTargetCursor(i, j)) {
+                        drawTargetCursor(y, x, g);
+                    }
+                    if(targetCursorNotNull()) {
+                        if(hasTargetLineOfSight(i, j)) {
+                            drawTargetLineOfSightBlock(y, x, g);
+                        }
+                    }
+                    g.setColor(getGlyphColor(tMap[i][j].getGlyph()));
                     // if this tile is visible to the player
                     if (visMap[i][j]) {
                         // apply a torch light effect
@@ -217,6 +225,11 @@ public class RenderPanel extends JPanel {
         g.drawRect(x, y - yIncrement, xIncrement, yIncrement);
     }
 
+    private void drawTargetCursor(int y, int x, Graphics g) {
+        g.setColor(Color.RED);
+        g.drawRect(x, y - yIncrement, xIncrement, yIncrement);
+    }
+
     private boolean hasLookCursor(int i, int j) {
         LookCursor l = currentState.getLookCursor();
         if(l == null) {
@@ -226,6 +239,35 @@ public class RenderPanel extends JPanel {
             return true;
         }
         return false;
+    }
+
+    private boolean hasTargetCursor(int row, int col) {
+        TargetCursor t = currentState.getTargetCursor();
+        if(t == null) {
+            return false;
+        }
+        if(t.getY() == row && t.getX() == col) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean targetCursorNotNull() {
+        return currentState.getTargetCursor() != null;
+    }
+
+    private boolean hasTargetLineOfSight(int row, int col) {
+        for(Vector2i v : currentState.getTargetCursor().getLineOfSight()) {
+            if(v.getY() == row && v.getX() == col) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void drawTargetLineOfSightBlock(int y, int x, Graphics g) {
+        g.setColor(new Color(255, 0, 0, 100));
+        g.fillRect(x, y - yIncrement, xIncrement, yIncrement);
     }
 
 

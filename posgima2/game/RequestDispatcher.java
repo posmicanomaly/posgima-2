@@ -119,8 +119,12 @@ public class RequestDispatcher {
             switch(processPlayerShootRequest()) {
                 case Game.PLAYER_SHOOTING:
                     player.setState(Player.STATE.SHOOTING);
-                    WindowFrame.writeConsole("Use direction keys to target, T to shoot");
-                    game.lookCursor = new LookCursor(player.getY(), player.getX());
+                    WindowFrame.writeConsole("Use TAB to switch between targes, directional keys to manually target, " +
+                            "T to shoot, Z to cancel");
+                    game.targetCursor = new TargetCursor(player.getY(), player.getX());
+                    if(game.monstersInView.size() > 0) {
+                        game.setTargetCursorNextVisibleMonster();
+                    }
                     break;
                 case Game.PLAYER_NO_AMMO:
                     WindowFrame.writeConsole("No ammo");

@@ -19,6 +19,7 @@ public class GameState {
     private int playerState;
     private int turns;
     private LookCursor lookCursor;
+    private TargetCursor targetCursor;
 
     public void setMessage(String message) {
         this.message = message;
@@ -69,5 +70,13 @@ public class GameState {
 
     public void setMonstersInView(ArrayList<Monster> monstersInView) {
         this.monstersInView = monstersInView;
+    }
+
+    public void setTargetCursor(TargetCursor targetCursor) {
+        this.targetCursor = targetCursor;
+    }
+
+    public TargetCursor getTargetCursor() {
+        return targetCursor;
     }
 }

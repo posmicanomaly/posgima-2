@@ -37,6 +37,7 @@ public class Game {
      */
     public static final int TEST_MAP_HEIGHT = 20;
     public static final int TEST_MAP_WIDTH = 60;
+    public TargetCursor targetCursor;
 
     /**
      * Cardinal directions
@@ -176,7 +177,7 @@ public class Game {
      * @return
      */
     public GameState Update(KeyEvent e) {
-
+        monstersInView = getMonstersInView();
         turnTickActionOccurred = false;
         switch (player.getState()) {
             /*
@@ -531,7 +532,7 @@ public class Game {
             }
         }
         if(shouldShoot) {
-            shootTest(line);
+            shootTest(line, m.getTile());
             // If player died during combat
             if(!player.isAlive()) {
                 // Announce
@@ -636,6 +637,7 @@ public class Game {
         gameState.setDungeon(dungeon);
         gameState.setTurns(turns);
         gameState.setLookCursor(lookCursor);
+        gameState.setTargetCursor(targetCursor);
         return gameState;
     }
 
@@ -710,7 +712,7 @@ public class Game {
             }
         }
     }
-    private void shootTest(ArrayList<Vector2i> line) {
+    private void shootTest(ArrayList<Vector2i> line, Tile source) {
         int range = 5;
         if(line.size() < range) {
             range = line.size();
@@ -738,6 +740,13 @@ public class Game {
             cur.addItem(new Arrow());
             WindowFrame.writeConsole("/combat/The arrow falls to the ground");
             break;
+        }
+        /*
+        Probably shot it into a wall
+         */
+        if(range - 1 == 0) {
+            source.addItem(new Arrow());
+            WindowFrame.writeConsole("/combat/The arrow falls at your feet");
         }
     }
 
@@ -896,8 +905,9 @@ public class Game {
     }
 
     private void processStateShootingKeys(KeyEvent e) {
-        int targetY = lookCursor.getY();
-        int targetX = lookCursor.getX();
+        boolean tabTarget = false;
+        int targetY = targetCursor.getY();
+        int targetX = targetCursor.getX();
         switch(e.getKeyCode()) {
             case KEY_NORTH:
                 targetY --;
@@ -911,22 +921,68 @@ public class Game {
             case KEY_WEST:
                 targetX --;
                 break;
+            case KeyEvent.VK_TAB:
+                setTargetCursorNextVisibleMonster();
+                tabTarget = true;
+                break;
             case KEY_CANCEL:
                 player.setState(Player.STATE.READY);
-                lookCursor = null;
+                targetCursor = null;
                 return;
             case KEY_SHOOT:
                 WindowFrame.writeConsole("/combat/You loose an arrow");
-                shootTest(FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(), targetY, targetX));
+                shootTest(FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(), targetY, targetX),
+                        player.getTile());
                 player.setState(Player.STATE.READY);
-                lookCursor = null;
+                targetCursor = null;
                 turnTickActionOccurred = true;
                 return;
         }
-        if(dungeon.inRange(targetY, targetX)) {
-            lookCursor.setLocation(targetY, targetX);
-            Tile t = dungeon.getTileMap()[targetY][targetX];
+        if(tabTarget) {
+            targetY = targetCursor.getY();
+            targetX = targetCursor.getX();
         }
+        if(dungeon.inRange(targetY, targetX)) {
+            targetCursor.setLocation(targetY, targetX);
+            Tile target = dungeon.getTileMap()[targetY][targetX];
+            ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(),
+                    target.getY(), target.getX());
+            targetCursor.setLineOfSight(line);
+        }
+    }
+
+    public void setTargetCursorNextVisibleMonster() {
+        /*
+        Empty view, return
+         */
+        if(monstersInView.size() == 0) {
+            return;
+        }
+        /*
+        Start at -1 because this gets incremented(next). If there is nothing already targeted, it will target the
+        first monster in view.
+         */
+        int selectedMonster = -1;
+
+        /*
+        Check if a monster is already targeted
+         */
+        for(int i = 0; i < monstersInView.size(); i++) {
+            Monster m = monstersInView.get(i);
+            if(targetCursor.getY() == m.getY() && targetCursor.getX() == m.getX()) {
+                selectedMonster = i;
+            }
+        }
+
+        /*
+        Select next monster, and wrap around if needed.
+         */
+        selectedMonster++;
+        if(selectedMonster == monstersInView.size()) {
+            selectedMonster = 0;
+        }
+
+        targetCursor.setLocation(monstersInView.get(selectedMonster).getY(), monstersInView.get(selectedMonster).getX());
     }
 
     private void processStateLookingKeys(KeyEvent e) {

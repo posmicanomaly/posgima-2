@@ -4,8 +4,8 @@ package posgima2.game;
  * Created by Jesse Pospisil on 1/18/2015.
  */
 public class LookCursor {
-    private int x;
-    private int y;
+    protected int x;
+    protected int y;
     public LookCursor(int y, int x) {
         this.y = y;
         this.x = x;

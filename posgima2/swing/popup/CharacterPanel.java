@@ -1,6 +1,6 @@
 package posgima2.swing.popup;
 
-import posgima2.world.Player;
+import posgima2.world.entity.player.Player;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

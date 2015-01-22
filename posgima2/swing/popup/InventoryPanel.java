@@ -3,7 +3,7 @@ package posgima2.swing.popup;
 import posgima2.item.Item;
 import posgima2.item.armor.Armor;
 import posgima2.item.weapon.Weapon;
-import posgima2.world.Player;
+import posgima2.world.entity.player.Player;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

@@ -3,7 +3,7 @@ package posgima2.combat;
 import posgima2.misc.Dice;
 import posgima2.swing.WindowFrame;
 import posgima2.world.Entity;
-import posgima2.world.Player;
+import posgima2.world.entity.player.Player;
 import posgima2.world.SkillCaps;
 
 /**

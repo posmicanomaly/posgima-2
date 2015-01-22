@@ -10,6 +10,8 @@ import posgima2.item.weapon.Weapon;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.WindowFrame;
 import posgima2.world.dungeonSystem.dungeon.Tile;
+import posgima2.world.entity.trait.Invincible;
+import posgima2.world.entity.trait.Trait;
 
 import java.util.ArrayList;
 
@@ -59,6 +61,8 @@ public abstract class Entity {
     protected Weapon mainHand;
     protected Weapon offHand;
 
+    protected ArrayList<Trait> traits;
+
     private Tile targetTile;
 
 
@@ -78,6 +82,8 @@ public abstract class Entity {
 
         mainHand = new NullWeapon(RenderPanel.WEAPON);
         offHand = new NullWeapon(RenderPanel.WEAPON);
+
+        traits = new ArrayList<>();
     }
 
 
@@ -159,7 +165,11 @@ public abstract class Entity {
     public void applyDamage(int damage) {
         currentHP -= damage;
         if(currentHP < 1) {
-            alive = false;
+            if(isInvincible()) {
+                currentHP = maxHP;
+            } else {
+                alive = false;
+            }
         }
     }
 
@@ -369,5 +379,19 @@ public abstract class Entity {
 
     public void modifyMeleeSkill(int i) {
         meleeSkill += i;
+    }
+
+    public boolean isInvincible() {
+        for(Trait t : traits) {
+            if(t instanceof Invincible)
+                return true;
+        }
+        return false;
+    }
+
+    public void addTrait(Trait trait) {
+        if(!traits.contains(trait)) {
+            traits.add(trait);
+        }
     }
 }

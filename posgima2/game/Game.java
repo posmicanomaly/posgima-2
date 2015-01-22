@@ -15,13 +15,14 @@ import posgima2.swing.popup.CharacterPanel;
 import posgima2.swing.popup.InventoryPanel;
 import posgima2.swing.popup.PopupWindow;
 import posgima2.world.Entity;
-import posgima2.world.Player;
+import posgima2.world.entity.player.Player;
 import posgima2.world.dungeonSystem.DungeonSystem;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.dungeonSystem.dungeon.FieldOfView;
 import posgima2.world.dungeonSystem.dungeon.Room;
 import posgima2.world.dungeonSystem.dungeon.Tile;
-import posgima2.world.monster.Monster;
+import posgima2.world.entity.monster.Monster;
+import posgima2.world.entity.trait.Invincible;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -125,6 +126,7 @@ public class Game {
         WindowFrame.gamePanel.consolePanel.setPlayerName(player.toString());
 
         addPlayerStartingGear(player);
+        player.addTrait(new Invincible());
 
         //dungeon.getTileMap()[center.getY()][center.getX()].addEntity(player);
         Tile startingTile = dungeon.getTileMap()[center.getY()][center.getX()];

@@ -7,7 +7,7 @@ import posgima2.game.requests.PlayerMove;
 import posgima2.item.container.Corpse;
 import posgima2.item.potion.Potion;
 import posgima2.swing.WindowFrame;
-import posgima2.world.Player;
+import posgima2.world.entity.player.Player;
 
 /**
  * Created by Jesse Pospisil on 1/18/2015.

@@ -1,4 +1,4 @@
-package posgima2.world.monster;
+package posgima2.world.entity.monster;
 
 import posgima2.item.Item;
 import posgima2.item.container.Corpse;
@@ -7,6 +7,7 @@ import posgima2.world.Entity;
 import posgima2.world.dungeonSystem.dungeon.FieldOfView;
 import posgima2.misc.Vector2i;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
+import posgima2.world.entity.BaseStats;
 
 import java.util.LinkedList;
 

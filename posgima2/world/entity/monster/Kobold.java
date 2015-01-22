@@ -1,17 +1,20 @@
-package posgima2.world.monster;
+package posgima2.world.entity.monster;
 
 import posgima2.misc.Dice;
 
 /**
  * Created by Jesse Pospisil on 1/9/2015.
  */
-public class Goblin extends Monster{
+public class Kobold extends Monster {
 
-    public Goblin(int level) {
-        super('g', level);
+    public Kobold(int level) {
+        super('k', level);
+
         initStats();
         setStatsBasedOnLevel();
-        name = "a goblin";
+
+        name = "a kobold";
+        //addInventory(new Plate(RenderPanel.ITEM, 3), true);
     }
 
     @Override

@@ -1,16 +1,18 @@
-package posgima2.world;
+package posgima2.world.entity.player;
 
 import posgima2.game.Game;
 import posgima2.item.Item;
 import posgima2.item.container.Corpse;
 import posgima2.misc.Dice;
 import posgima2.swing.WindowFrame;
-import posgima2.world.monster.BaseStats;
+import posgima2.world.Entity;
+import posgima2.world.entity.BaseStats;
+import posgima2.world.entity.trait.Trait;
 
 /**
  * Created by Jesse Pospisil on 12/27/2014.
  */
-public class Player extends Entity{
+public class Player extends Entity {
 
     public void setGameOverFlag(GameOver reason) {
         gameOverReason = reason;
@@ -22,7 +24,7 @@ public class Player extends Entity{
 
     /**
      * STATE_x
-     * posgima2.world.Player states such as "ready", "door closed", "item pickup"
+     * posgima2.world.entity.player.Player states such as "ready", "door closed", "item pickup"
      * to determine which key options to accept, and control game flow.
      */
     public static enum STATE {
@@ -62,6 +64,7 @@ public class Player extends Entity{
     public void die() {
         //WindowFrame.writeConsole("Such a sad thing that your journey has ended here.");
     }
+    
 
     public int eat(Corpse food) {
         if(inInventory(food)) {

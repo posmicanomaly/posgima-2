@@ -1,25 +1,23 @@
-package posgima2.world.monster;
+package posgima2.world.entity.monster;
 
 import posgima2.misc.Dice;
 
 /**
- * Created by Jesse Pospisil on 1/9/2015.
+ * Created by Jesse Pospisil on 1/14/2015.
  */
-public class Kobold extends Monster {
-
-    public Kobold(int level) {
-        super('k', level);
+public class Rat extends Monster {
+    public Rat(int level) {
+        super('r', level);
 
         initStats();
         setStatsBasedOnLevel();
-
-        name = "a kobold";
+        name = "a rat";
         //addInventory(new Plate(RenderPanel.ITEM, 3), true);
     }
 
     @Override
     public void setStatsBasedOnLevel() {
-        maxHP = 8;
+        maxHP = 6;
         for(int i = 1; i < level; i++) {
             armorClass += 2;
             strength += 2;
@@ -36,17 +34,17 @@ public class Kobold extends Monster {
 
     @Override
     protected void initStats() {
-        armorClass = 2;
-        minHitDamage = 2;
-        maxHitDamage = 6;
+        armorClass = 1;
+        minHitDamage = 1;
+        maxHitDamage = 4;
         damageBonus = 0;
 
-        strength -= 3;
-        agility -= 3;
-        dexterity -= 3;
-        constitution -= 3;
+        strength -= 6;
+        agility -= 6;
+        dexterity -= 6;
+        constitution -= 6;
 
-        expMod = 1.0;
-        corpseSatiation = 70;
+        expMod = 0.6;
+        corpseSatiation = 40;
     }
 }

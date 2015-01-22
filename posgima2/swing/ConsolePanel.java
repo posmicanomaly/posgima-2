@@ -107,6 +107,12 @@ public class ConsolePanel extends JPanel{
     private void insertTextToDocument(Document doc, String text, Color color, Style style) {
         try {
             StyleConstants.setForeground(style, color);
+            int offset = 0;
+            if(doc.getLength() > 2000) {
+                String oldText = doc.getText(0, doc.getLength());
+                int difference = doc.getLength() - 2000;
+                doc.insertString(0, oldText.substring(difference, oldText.length()), style);
+            }
             doc.insertString(doc.getLength(), text, style);
         } catch (BadLocationException e) {
             e.printStackTrace();

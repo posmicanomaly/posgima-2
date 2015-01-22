@@ -1,23 +1,19 @@
 package posgima2.world.dungeonSystem.dungeon;
 
 import posgima2.game.ItemGenerator;
-import posgima2.item.Item;
 import posgima2.item.armor.Armor;
-import posgima2.item.armor.Plate;
 import posgima2.item.potion.Potion;
 import posgima2.item.weapon.Weapon;
-import posgima2.misc.Dice;
 import posgima2.misc.Vector2i;
 import posgima2.pathfinding.AStar;
 import posgima2.swing.RenderPanel;
 import posgima2.swing.SetupWindow;
 import posgima2.swing.WindowFrame;
-import posgima2.item.weapon.Sword;
 import posgima2.world.Entity;
-import posgima2.world.monster.Goblin;
-import posgima2.world.monster.GoblinArcher;
-import posgima2.world.monster.Monster;
-import posgima2.world.monster.Rat;
+import posgima2.world.entity.monster.Goblin;
+import posgima2.world.entity.monster.GoblinArcher;
+import posgima2.world.entity.monster.Monster;
+import posgima2.world.entity.monster.Rat;
 
 import java.util.ArrayList;
 

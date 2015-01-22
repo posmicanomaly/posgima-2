@@ -2,7 +2,7 @@ package posgima2.game.requests;
 
 import posgima2.game.Game;
 import posgima2.swing.LootWindow;
-import posgima2.world.Player;
+import posgima2.world.entity.player.Player;
 
 /**
  * Created by Jesse Pospisil on 1/18/2015.

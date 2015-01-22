@@ -5,12 +5,10 @@ import posgima2.game.ItemGenerator;
 import posgima2.item.Item;
 import posgima2.item.armor.Armor;
 import posgima2.item.armor.Plate;
-import posgima2.item.weapon.Sword;
-import posgima2.misc.Dice;
-import posgima2.world.Player;
-import posgima2.world.monster.Goblin;
-import posgima2.world.monster.Kobold;
-import posgima2.world.monster.Monster;
+import posgima2.world.entity.player.Player;
+import posgima2.world.entity.monster.Goblin;
+import posgima2.world.entity.monster.Kobold;
+import posgima2.world.entity.monster.Monster;
 
 import java.util.ArrayList;
 

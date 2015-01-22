@@ -5,8 +5,8 @@ import posgima2.game.LookCursor;
 import posgima2.game.TargetCursor;
 import posgima2.misc.Vector2i;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
-import posgima2.world.monster.Monster;
-import posgima2.world.Player;
+import posgima2.world.entity.monster.Monster;
+import posgima2.world.entity.player.Player;
 import posgima2.world.dungeonSystem.dungeon.Tile;
 
 import javax.swing.*;
@@ -121,7 +121,7 @@ public class RenderPanel extends JPanel {
     }
 
 //    private void drawMonsters(int rowStart, int rowEnd, int colStart, int colEnd, Graphics g) {
-//        for(posgima2.world.monster.Monster m : currentState.getDungeon().getMonsters()) {
+//        for(posgima2.world.entity.monster.Monster m : currentState.getDungeon().getMonsters()) {
 //            g.setColor(getGlyphColor(m.getGlyph()));
 //            g.drawChars(new char[]{m.getGlyph()}, 0, 1, m.getX() * fontSize, m.getY() * fontSize);
 //        }

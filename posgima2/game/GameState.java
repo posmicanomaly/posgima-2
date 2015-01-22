@@ -1,8 +1,8 @@
 package posgima2.game;
 
-import posgima2.world.Player;
+import posgima2.world.entity.player.Player;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
-import posgima2.world.monster.Monster;
+import posgima2.world.entity.monster.Monster;
 
 import java.util.ArrayList;
 

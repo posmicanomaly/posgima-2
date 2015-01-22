@@ -2,8 +2,8 @@ package posgima2.swing;
 
 import posgima2.game.Game;
 import posgima2.game.GameState;
-import posgima2.world.Player;
-import posgima2.world.monster.Monster;
+import posgima2.world.entity.player.Player;
+import posgima2.world.entity.monster.Monster;
 
 import javax.swing.*;
 import java.awt.*;

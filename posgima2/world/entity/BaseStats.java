@@ -1,4 +1,4 @@
-package posgima2.world.monster;
+package posgima2.world.entity;
 
 /**
  * Created by Jesse Pospisil on 1/22/2015.

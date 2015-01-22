@@ -1,8 +1,7 @@
 package posgima2.item.container;
 
 import posgima2.item.Item;
-import posgima2.world.Entity;
-import posgima2.world.monster.Monster;
+import posgima2.world.entity.monster.Monster;
 
 import java.util.ArrayList;
 

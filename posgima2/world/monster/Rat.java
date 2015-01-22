@@ -10,8 +10,8 @@ public class Rat extends Monster {
         super('r', level);
 
         armorClass = 1;
-        baseHitDie = Dice.D4;
-        attackDie = baseHitDie;
+        minHitDamage = 1;
+        maxHitDamage = 4;
         damageBonus = 0;
         strength = 4;
         agility = 4;
@@ -28,7 +28,7 @@ public class Rat extends Monster {
             agility += 2;
             dexterity += 2;
             constitution += 2;
-            maxHP += Dice.roll(baseHitDie) + constitution;
+            maxHP += Dice.roll(4) + constitution;
         }
         currentHP = maxHP;
 

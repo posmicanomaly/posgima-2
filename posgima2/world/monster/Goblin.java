@@ -10,8 +10,8 @@ public class Goblin extends Monster {
     public Goblin(int level) {
         super('g', level);
         armorClass = 2;
-        baseHitDie = Dice.D4;
-        attackDie = baseHitDie;
+        minHitDamage = 2;
+        maxHitDamage = 6;
         damageBonus = 0;
         strength = 7;
         agility = 7;
@@ -28,7 +28,7 @@ public class Goblin extends Monster {
             agility += 2;
             dexterity += 2;
             constitution += 2;
-            maxHP += Dice.roll(baseHitDie) + constitution;
+            maxHP += Dice.roll(4) + constitution;
         }
         currentHP = maxHP;
 

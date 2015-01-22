@@ -11,8 +11,8 @@ public class Kobold extends Monster {
         super('k', level);
 
         armorClass = 1;
-        baseHitDie = Dice.D4;
-        attackDie = baseHitDie;
+        minHitDamage = 2;
+        maxHitDamage = 6;
         damageBonus = 0;
         strength = 1;
         agility = 1;
@@ -22,7 +22,7 @@ public class Kobold extends Monster {
 
         maxHP = 10;
         for(int i = 1; i < level; i++) {
-            maxHP += Dice.roll(baseHitDie) + constitution;
+            maxHP += Dice.roll(4) + constitution;
             strength += 1;
             agility += 1;
             dexterity += 1;

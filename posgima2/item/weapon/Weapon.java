@@ -12,9 +12,11 @@ public abstract class Weapon extends Item {
     protected int strength;
     protected int agility;
     protected int dexterity;
-    protected int hitDie;
     protected int damageBonus;
     protected int slot;
+    protected int minHitDamage;
+    protected int maxHitDamage;
+
 
     public Weapon(char glyph) {
         super(glyph);
@@ -22,7 +24,7 @@ public abstract class Weapon extends Item {
 
     public String toString() {
         String result = name + ": ";
-        result += "1d" + hitDie +  " ";
+        result += minHitDamage + "-" + maxHitDamage;
         if(damageBonus > 0) {
             result += "+" + damageBonus;
         }
@@ -30,11 +32,20 @@ public abstract class Weapon extends Item {
         return result;
     }
 
-    public int getHitDie() {
-        return hitDie;
-    }
 
     public int getDamageBonus() {
         return damageBonus;
+    }
+
+    public int getAverageDamage() {
+        return (minHitDamage + maxHitDamage) / 2;
+    }
+
+    public int getMinHitDamage() {
+        return minHitDamage;
+    }
+
+    public int getMaxHitDamage() {
+        return maxHitDamage;
     }
 }

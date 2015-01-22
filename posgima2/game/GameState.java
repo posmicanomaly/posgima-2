@@ -1,7 +1,7 @@
 package posgima2.game;
 
-import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.Player;
+import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.monster.Monster;
 
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ public class GameState {
     public void setMessage(String message) {
         this.message = message;
     }
+
     public String getMessage() {
         return message;
     }

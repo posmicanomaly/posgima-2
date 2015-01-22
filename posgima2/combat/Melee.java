@@ -40,9 +40,10 @@ public abstract class Melee {
 
             int str = attacker.getStrength();
             int dmgbonus = attacker.getDamageBonus();
-            int hitDie = attacker.getAttackDie();
+            int minHitDamage = attacker.getMinHitDamage();
+            int maxHitDamage = attacker.getMaxHitDamage();
 
-            int damageRoll = Dice.roll(hitDie) + (str / 2) + dmgbonus;
+            int damageRoll = (int) ((Math.random() * (maxHitDamage - minHitDamage)) + minHitDamage + (str / 2) + dmgbonus);
             int defenseRoll = (int)(Math.random() * defender.getTotalArmorClass()) + 1;
             int actualDamage = damageRoll - defenseRoll;
             /*

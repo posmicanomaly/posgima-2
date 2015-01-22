@@ -108,7 +108,7 @@ public class PlayerVsMonster {
         Plate hand = new Plate(1, Armor.SLOT_HAND);
         Plate leg = new Plate(1, Armor.SLOT_LEG);
 
-        Sword mainH = new Sword(Dice.D4, 0, 0, 0, 0);
+        //Sword mainH = new Sword(Dice.D4, 0, 0, 0, 0);
         //m.addInventory(chest, true);
         //m.addInventory(head, true);
         //m.addInventory(arm, true);

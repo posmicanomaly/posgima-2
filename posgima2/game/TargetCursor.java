@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class TargetCursor extends LookCursor {
     private ArrayList<Vector2i> lineOfSight;
     private int maxRange;
+
     public TargetCursor(int y, int x, int maxRange) {
         super(y, x);
         this.maxRange = maxRange;

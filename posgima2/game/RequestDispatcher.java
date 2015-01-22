@@ -29,6 +29,7 @@ public class RequestDispatcher {
     public RequestDispatcher(Game game) {
         this.game = game;
     }
+
     public void resetFlags() {
         moveRequest = false;
         itemPickupRequest = false;
@@ -40,6 +41,7 @@ public class RequestDispatcher {
         lookRequest = false;
         idleRequest = false;
     }
+
     public void dispatch() {
         boolean turnTickActionOccurred = false;
         Player player = game.player;
@@ -67,8 +69,8 @@ public class RequestDispatcher {
                 break;
 
         }
-        else if(itemPickupRequest) {
-            switch(ItemPickup.processPlayerItemPickupRequest(game)) {
+        else if (itemPickupRequest) {
+            switch (ItemPickup.processPlayerItemPickupRequest(game)) {
                 case HAS_ITEMS:
                     ItemLootingWindow.processItemLootingWithWindow(game);
                     break;
@@ -76,8 +78,8 @@ public class RequestDispatcher {
                     WindowFrame.writeConsole("There's nothing to pickup.");
                     break;
             }
-        } else if(dungeonChangeRequest) {
-            switch(DungeonChange.processDungeonChangeRequest(game)) {
+        } else if (dungeonChangeRequest) {
+            switch (DungeonChange.processDungeonChangeRequest(game)) {
                 case HAS_DUNGEON_LINK:
                     WindowFrame.writeConsole("Changed dungeon");
                     turnTickActionOccurred = true;
@@ -86,9 +88,9 @@ public class RequestDispatcher {
                     WindowFrame.writeConsole("no dungeon link");
                     break;
             }
-        } else if(quaffRequest) {
+        } else if (quaffRequest) {
             Potion potion = player.getNextPotionTest();
-            if(potion != null) {
+            if (potion != null) {
                 potion.applyEffects(player);
                 player.getInventory().remove(potion);
                 turnTickActionOccurred = true;
@@ -96,12 +98,12 @@ public class RequestDispatcher {
             } else {
                 WindowFrame.writeConsole("You have no potions");
             }
-        } else if(toggleDoorRequest) {
+        } else if (toggleDoorRequest) {
             player.setState(Player.STATE.CLOSE_DOOR_ATTEMPT);
-        } else if(eatRequest) {
-            if(player.hasCorpseInInventory()) {
+        } else if (eatRequest) {
+            if (player.hasCorpseInInventory()) {
                 Corpse food = player.getNextCorpseTest();
-                switch(player.eat(food)) {
+                switch (player.eat(food)) {
                     case Game.PLAYER_ATE_WELL:
                         WindowFrame.writeConsole("You ate " + food + ". You feel less hungry");
                         turnTickActionOccurred = true;
@@ -115,26 +117,26 @@ public class RequestDispatcher {
                         break;
                 }
             }
-        } else if(shootRequest) {
-            switch(processPlayerShootRequest()) {
+        } else if (shootRequest) {
+            switch (processPlayerShootRequest()) {
                 case Game.PLAYER_SHOOTING:
                     player.setState(Player.STATE.SHOOTING);
                     WindowFrame.writeConsole("Use TAB to switch between targets, directional keys to manually target," +
                             " " +
                             "T to shoot, Z to cancel");
                     game.targetCursor = new TargetCursor(player.getY(), player.getX(), 5);
-                    if(game.monstersInView.size() > 0) {
+                    if (game.monstersInView.size() > 0) {
                         game.setTargetCursorNextVisibleMonster();
                     }
                     break;
                 case Game.PLAYER_NO_AMMO:
                     WindowFrame.writeConsole("No ammo");
             }
-        } else if(lookRequest) {
+        } else if (lookRequest) {
             WindowFrame.writeConsole("Use directional keys to look around");
             game.lookCursor = new LookCursor(player.getY(), player.getX());
             player.setState(Player.STATE.LOOKING);
-        } else if(idleRequest) {
+        } else if (idleRequest) {
             turnTickActionOccurred = true;
         }
         game.turnTickActionOccurred = turnTickActionOccurred;
@@ -142,7 +144,7 @@ public class RequestDispatcher {
 
     private int processPlayerShootRequest() {
         boolean hasAmmo = true;
-        if(hasAmmo) {
+        if (hasAmmo) {
             return Game.PLAYER_SHOOTING;
         }
         return Game.PLAYER_NO_AMMO;

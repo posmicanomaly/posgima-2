@@ -23,8 +23,8 @@ public abstract class Entity {
     protected int x;
     protected int currentHP;
     protected int maxHP;
-    protected int baseHitDie;
-    protected int attackDie;
+    protected int minHitDamage;
+    protected int maxHitDamage;
     /*
     expMod or time to kill, is a measure of base toughness in attack and hp
      */
@@ -77,13 +77,9 @@ public abstract class Entity {
         offHand = new NullWeapon(RenderPanel.WEAPON);
     }
 
-    public int getBaseHitDie() {
-        return baseHitDie;
-    }
 
-    public int getAttackDie() {
-        return attackDie;
-    }
+
+
 
     public int getDamageBonus() {
         return damageBonus;
@@ -164,35 +160,6 @@ public abstract class Entity {
         }
     }
 
-//    public void meleeAttack(Entity attacker, Entity target, boolean defenderCanAttack) {
-//        /*
-//        First check if attacker can attack
-//         */
-//        if (attacker.canAttack()) {
-//            if (target.canAttack() && defenderCanAttack) {
-//                int goesFirst = (int) (Math.random() * 2);
-//                switch (goesFirst) {
-//                    case 0:
-//                        Melee.attemptMeleeAttack(attacker, target);
-//                        if (target.isAlive()) {
-//                            Melee.attemptMeleeAttack(target, attacker);
-//                        }
-//                        break;
-//                    case 1:
-//                        Melee.attemptMeleeAttack(target, attacker);
-//                        if (isAlive()) {
-//                            Melee.attemptMeleeAttack(attacker, target);
-//                        }
-//                        break;
-//                }
-//
-//            } else {
-//                Melee.attemptMeleeAttack();
-//            }
-//        } else {
-//            //posgima2.swing.WindowFrame.writeConsole("/info/" + this + " could not attack.");
-//        }
-//    }
 
     public boolean canAttack() {
         return !attackedThisTurn && isAlive();
@@ -266,16 +233,18 @@ public abstract class Entity {
                 WindowFrame.writeConsole("picked up weapon");
             }
             Weapon w = (Weapon)i;
-            if(w.getHitDie() > attackDie) {
-                attackDie = w.getHitDie();
+            if(w.getMaxHitDamage() > maxHitDamage) {
+                minHitDamage = w.getMinHitDamage();
+                maxHitDamage = w.getMaxHitDamage();
                 mainHand = w;
                 damageBonus = w.getDamageBonus();
                 if(!silent) {
                     WindowFrame.writeConsole("You equipped the " + w);
                 }
-            } else if(w.getHitDie() == attackDie) {
+            } else if(w.getMaxHitDamage() == maxHitDamage) {
                 if(damageBonus < w.getDamageBonus()) {
-                    attackDie = w.getHitDie();
+                    minHitDamage = w.getMinHitDamage();
+                    maxHitDamage = w.getMaxHitDamage();
                     mainHand = w;
                     damageBonus = w.getDamageBonus();
                     if(!silent) {
@@ -383,4 +352,11 @@ public abstract class Entity {
     }
 
 
+    public int getMinHitDamage() {
+        return minHitDamage;
+    }
+
+    public int getMaxHitDamage() {
+        return maxHitDamage;
+    }
 }

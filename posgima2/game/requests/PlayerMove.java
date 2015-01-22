@@ -36,7 +36,7 @@ public class PlayerMove {
             If it failed isPassable, and there's no monster, check if it's a wall or door
              */
             else {
-                switch(game.dungeon.getTileMap()[nextY][nextX].getGlyph()) {
+                switch (game.dungeon.getTileMap()[nextY][nextX].getGlyph()) {
                     // Walked into a wall
                     case RenderPanel.WALL:
                         return Game.PLAYER_HIT_WALL;

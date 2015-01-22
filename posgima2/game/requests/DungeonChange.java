@@ -9,7 +9,7 @@ import posgima2.world.dungeonSystem.dungeon.Tile;
 public abstract class DungeonChange {
     public static Game.TileState processDungeonChangeRequest(Game game) {
         Tile pTile = game.dungeon.getTileMap()[game.player.getY()][game.player.getX()];
-        if(pTile.hasDungeonLink()) {
+        if (pTile.hasDungeonLink()) {
             game.dungeon = game.dungeonSystem.getDungeon(pTile.getDungeonLink());
             game.player.moveToTileImmediately(pTile.getTileLink());
             return Game.TileState.HAS_DUNGEON_LINK;

@@ -8,10 +8,11 @@ import posgima2.swing.RenderPanel;
  */
 public class Sword extends Weapon {
 
-    public Sword(int hitDie, int damageBonus, int strength, int dexterity, int agility) {
+    public Sword(int minHitDamage, int maxHitDamage, int damageBonus, int strength, int dexterity, int agility) {
         super(RenderPanel.WEAPON);
         type = Item.WEAPON;
-        this.hitDie = hitDie;
+        this.minHitDamage = minHitDamage;
+        this.maxHitDamage = maxHitDamage;
         this.damageBonus= damageBonus;
         this.strength = strength;
         this.dexterity = dexterity;

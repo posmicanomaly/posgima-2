@@ -11,6 +11,14 @@ import posgima2.swing.WindowFrame;
  */
 public class Player extends Entity{
 
+    public void setGameOverFlag(GameOver reason) {
+        gameOverReason = reason;
+    }
+
+    public GameOver getGameOverFlag() {
+        return gameOverReason;
+    }
+
     /**
      * STATE_x
      * posgima2.world.Player states such as "ready", "door closed", "item pickup"
@@ -20,19 +28,21 @@ public class Player extends Entity{
         CANCEL, READY, DOOR_CLOSED, ITEM_PICKUP, LOOTED, GAME_OVER, LOOTING, CLOSE_DOOR_ATTEMPT, SHOOTING, LOOKING
     }
 
-    private final int unarmedDie;
+    public static enum GameOver {
+        monster, starvation, arrow
+    }
     private STATE state;
     private boolean justLooted;
     private int satiation;
+    private GameOver gameOverReason;
 
     public Player(char glyph) {
         super(glyph);
         alive = true;
         level = 1;
         expMod = 1;
-        baseHitDie = Dice.D10;
-        unarmedDie = Dice.D1;
-        attackDie = unarmedDie;
+        minHitDamage = 1;
+        maxHitDamage = 1;
         armorClass = 1;
         rollAttributes();
         currentHP = maxHP;
@@ -131,7 +141,7 @@ public class Player extends Entity{
         constitution += 2;
         agility += 2;
         dexterity += 2;
-        maxHP += Dice.roll(baseHitDie) + constitution;
+        maxHP += Dice.roll(10) + constitution;
     }
 
     public STATE getState() {

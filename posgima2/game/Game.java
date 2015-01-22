@@ -1,17 +1,21 @@
 package posgima2.game;
 
 import posgima2.combat.Melee;
+import posgima2.item.Item;
 import posgima2.item.armor.Armor;
 import posgima2.item.container.Corpse;
 import posgima2.item.weapon.Arrow;
 import posgima2.misc.Vector2i;
-import posgima2.item.Item;
 import posgima2.pathfinding.AStar;
-import posgima2.swing.*;
+import posgima2.swing.LootWindow;
+import posgima2.swing.RenderPanel;
+import posgima2.swing.SetupWindow;
+import posgima2.swing.WindowFrame;
 import posgima2.swing.popup.CharacterPanel;
 import posgima2.swing.popup.InventoryPanel;
 import posgima2.swing.popup.PopupWindow;
-import posgima2.world.*;
+import posgima2.world.Entity;
+import posgima2.world.Player;
 import posgima2.world.dungeonSystem.DungeonSystem;
 import posgima2.world.dungeonSystem.dungeon.Dungeon;
 import posgima2.world.dungeonSystem.dungeon.FieldOfView;
@@ -64,7 +68,6 @@ public class Game {
     public static final int ERROR_OUT_OF_MAP_RANGE = -2;
 
 
-
     /**
      * TILE_x
      * Flags set in tile pickup
@@ -72,7 +75,8 @@ public class Game {
     public static enum TileState {
         HAS_ITEMS, HAS_NO_ITEMS, HAS_DUNGEON_LINK, HAS_NO_DUNGEON_LINK
     }
-//    public static final int TILE_HAS_ITEMS = 1;
+
+    //    public static final int TILE_HAS_ITEMS = 1;
 //    public static final int TILE_HAS_NO_ITEMS = 0;
 //    public static final int TILE_HAS_DUNGEON_LINK = 1;
 //    public static final int TILE_HAS_NO_DUNGEON_LINK = 0;
@@ -84,15 +88,15 @@ public class Game {
     public static final int HUNGER_HIT_MOVE = 1;
 
 
-
     // Reassign this later, based on amount of rooms
-   // private static int MAX_MONSTERS = 0;
+    // private static int MAX_MONSTERS = 0;
 
     public Player player;
     public LookCursor lookCursor;
     public DungeonSystem dungeonSystem;
     public Dungeon dungeon;
     public ArrayList<Monster> monstersInView;
+    private boolean gameOverShown = false;
 
     public LootWindow lootWindow;
     private CharacterPanel characterPanel;
@@ -128,7 +132,7 @@ public class Game {
         /*
         If starting tile has an entity on it already, move it somewhere else so our player will fit.
          */
-        if(startingTile.hasEntity()) {
+        if (startingTile.hasEntity()) {
             Entity e = startingTile.getEntity();
             e.moveToTileImmediately(dungeon.getRandomTileOf(RenderPanel.FLOOR));
         }
@@ -170,9 +174,10 @@ public class Game {
      * process regen, ailments, etc for all entities
      * get and process desired action based on key input
      * if action expended the turn
-     *          - process monsters
-     *          - recalc player visibility
-     *          - reset attack states
+     * - process monsters
+     * - recalc player visibility
+     * - reset attack states
+     *
      * @param e
      * @return
      */
@@ -235,6 +240,11 @@ public class Game {
             case LOOTING:
                 break;
             case GAME_OVER:
+                if (!gameOverShown) {
+                    WindowFrame.writeConsole("GAME_OVER");
+                    WindowFrame.writeConsole(writeGameOverMessage());
+                    gameOverShown = true;
+                }
                 break;
         }
         /*
@@ -262,12 +272,24 @@ public class Game {
         return getGameState();
     }
 
+    private String writeGameOverMessage() {
+        switch (player.getGameOverFlag()) {
+            case monster:
+                return "You were killed by a monster";
+            case starvation:
+                return "You starved to death";
+            case arrow:
+                return "An arrow killed you";
+        }
+        return "No flag set";
+    }
+
     private ArrayList<Monster> getMonstersInView() {
         ArrayList<Monster> inView = new ArrayList<>();
         ArrayList<Vector2i> fov = FieldOfView.bresenhamFov(dungeon.getTileMap(), player.getY(), player.getX(), 0);
-        for(Vector2i v : fov) {
-            if(dungeon.hasMonster(v.getY(), v.getX())) {
-                if(!inView.contains(dungeon.getMonsterAt(v.getY(), v.getX())))
+        for (Vector2i v : fov) {
+            if (dungeon.hasMonster(v.getY(), v.getX())) {
+                if (!inView.contains(dungeon.getMonsterAt(v.getY(), v.getX())))
                     inView.add(dungeon.getMonsterAt(v.getY(), v.getX()));
             }
         }
@@ -276,7 +298,7 @@ public class Game {
 
     private void resetAttackStates() {
         player.resetTurnTick();
-        for(Monster m : dungeon.getMonsters()) {
+        for (Monster m : dungeon.getMonsters()) {
             m.resetTurnTick();
         }
     }
@@ -285,29 +307,38 @@ public class Game {
      * Process regen, etc
      */
     private void endTurn() {
+        if (!player.isAlive()) {
+            return;
+        }
+        /*
+        Regen
+         */
         int playerRegenRate = REGEN_RATE - player.getConstitution() - (player.getSatiation() / 10);
-        if(playerRegenRate < 1) {
+        if (playerRegenRate < 1) {
             playerRegenRate = 1;
         }
-        if(turns > 1 && turns % playerRegenRate == 0) {
+        if (turns > 1 && turns % playerRegenRate == 0) {
             player.regen();
         }
-        for(Monster m : dungeon.getMonsters()) {
+        for (Monster m : dungeon.getMonsters()) {
             m.addAge(1);
-            if(m.getAge() % REGEN_RATE == 0) {
+            if (m.getAge() % REGEN_RATE == 0) {
                 m.regen();
             }
         }
-
-        if(player.getSatiation() == 0) {
+        /*
+        Satiation hits
+         */
+        if (player.getSatiation() == 0) {
             player.applyDamage(1);
             WindowFrame.writeConsole("You are starving to death!");
         }
 
-        if(!player.isAlive()) {
+        if (!player.isAlive()) {
             player.die();
+            player.setGameOverFlag(Player.GameOver.starvation);
             player.setState(Player.STATE.GAME_OVER);
-            WindowFrame.writeConsole("You died!");
+            //WindowFrame.writeConsole("You died!");
         }
     }
 
@@ -327,8 +358,6 @@ public class Game {
     }
 
 
-
-
     private boolean monsterCanSeePlayer(Monster monster) {
         return monster.getVisibility()[player.getY()][player.getX()];
     }
@@ -339,7 +368,7 @@ public class Game {
                 (player.getY(), player.getX()), false, true);
         m.getMoveQueue().clear();
 
-        if(shortestPath != null) {
+        if (shortestPath != null) {
             // i = size - 2 because we throw away the first move, because its the current location.
             for (int i = shortestPath.size() - 2; i >= 0; i--) {
                 // System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
@@ -350,19 +379,19 @@ public class Game {
     }
 
     private void processMonsters() {
-        for(Monster m : dungeon.getMonsters()) {
-            if(!m.isAlive()) {
+        for (Monster m : dungeon.getMonsters()) {
+            if (!m.isAlive()) {
                 continue;
             }
             m.calculateVisibility(dungeon);
             /*
             If monster can see player
              */
-            if(monsterCanSeePlayer(m)) {
+            if (monsterCanSeePlayer(m)) {
                 /*
                 If monster is already aggro on player
                  */
-                if(m.isAggroPlayer()) {
+                if (m.isAggroPlayer()) {
                     /*
                     Every 3rd turn that this Monster has been aggro on the player
                     perform a fresh path calculation.
@@ -373,14 +402,14 @@ public class Game {
                     /*
                     If the turn is multiple of 3
                      */
-                    if((turns - m.getAggroTurnStart()) % 3 == 0) {
+                    if ((turns - m.getAggroTurnStart()) % 3 == 0) {
                         setMonsterPathToPlayer(m);
                         //WindowFrame.writeConsole(m + " fresh calc");
                     }
                     /*
                     If the move queue is empty
                      */
-                    if(m.getMoveQueue().size() == 0) {
+                    if (m.getMoveQueue().size() == 0) {
                         setMonsterPathToPlayer(m);
                         //WindowFrame.writeConsole(m + " moveQueue empty, sees you, aggro on you already. Recalc");
                     }
@@ -388,7 +417,7 @@ public class Game {
                 /*
                 If monster is not aggro on player
                  */
-                else if(!m.isAggroPlayer()){
+                else if (!m.isAggroPlayer()) {
                     m.setAggro(true, turns);
                     setMonsterPathToPlayer(m);
                     WindowFrame.writeConsole(m + " aggro on you");
@@ -402,7 +431,7 @@ public class Game {
                 /*
                 But they are aggro, and they have no more moves left in their queue
                  */
-                if(m.isAggroPlayer() && m.getMoveQueue().size() == 0) {
+                if (m.isAggroPlayer() && m.getMoveQueue().size() == 0) {
                     // Drop aggro
                     m.setAggro(false, turns);
                     //WindowFrame.writeConsole(m + " dropped aggro");
@@ -414,17 +443,17 @@ public class Game {
             Pick a random direction and go
              */
 
-            if(m.getMoveQueue().size() == 0) {
+            if (m.getMoveQueue().size() == 0) {
                 /*
                 Should monster set a new state?
                  */
-                int chance = (int)(Math.random() * 100);
-                if(chance < 10) {
-                   // System.out.print(m + " changed from " + m.getCurrentState());
+                int chance = (int) (Math.random() * 100);
+                if (chance < 10) {
+                    // System.out.print(m + " changed from " + m.getCurrentState());
                     m.setState(m.chooseRandomState());
-                   // System.out.println(" to " + m.getCurrentState());
+                    // System.out.println(" to " + m.getCurrentState());
                 }
-                switch(m.getCurrentState()) {
+                switch (m.getCurrentState()) {
                     case idle:
                         break;
                     case wander:
@@ -439,7 +468,7 @@ public class Game {
             /*
             Otherwise, process next move in queue
              */
-            if(m.getMoveQueue().size() > 0) {
+            if (m.getMoveQueue().size() > 0) {
                 processMonsterMoveQueue(m);
             }
             //}
@@ -447,7 +476,7 @@ public class Game {
         /*
         Spawn a new monster if we're below the max limit.
          */
-        if(dungeon.getMonsters().size() < dungeon.getMaxMonsterLimit()) {
+        if (dungeon.getMonsters().size() < dungeon.getMaxMonsterLimit()) {
             dungeon.spawnRandomMonster(dungeon.getExploredMap());
         }
     }
@@ -460,13 +489,13 @@ public class Game {
                 true);
         m.getMoveQueue().clear();
 
-        if(path != null) {
+        if (path != null) {
             // i = size - 2 because we throw away the first move, because its the current location.
             for (int i = path.size() - 2; i >= 0; i--) {
                 // System.out.print("[" + shortestPath.get(i).getY() + "," + shortestPath.get(i).getX() + "] ");
                 m.getMoveQueue().add(path.get(i));
             }
-           // System.out.println(m + " set a new path");
+            // System.out.println(m + " set a new path");
         }
     }
 
@@ -490,7 +519,7 @@ public class Game {
         }
         if (dungeon.isPassable(nextX, nextY)) {
             // Monsters can't open doors (yet)
-            if(dungeon.getTileMap()[nextY][nextX].getGlyph() != RenderPanel.DOOR_CLOSED)
+            if (dungeon.getTileMap()[nextY][nextX].getGlyph() != RenderPanel.DOOR_CLOSED)
                 m.getMoveQueue().add(new Vector2i(nextY, nextX));
             // m.moveToTileImmediately(dungeon.getTileMap()[nextY][nextX]);
         }
@@ -499,15 +528,15 @@ public class Game {
 
     private void monsterMeleeFightPlayer(Monster m) {
         // If player is alive
-        if(player.isAlive()) {
+        if (player.isAlive()) {
             // Start melee combat round with player, with defenderCanAttack set to false so player cannot fight back
             Melee.meleeCombat(m, player, false);
         }
 
         // If player died during combat
-        if(!player.isAlive()) {
+        if (!player.isAlive()) {
             // Announce
-            WindowFrame.writeConsole("/warning/You died.");
+            player.setGameOverFlag(Player.GameOver.monster);
             // Set game state STATE_GAME_OVER
             player.setState(Player.STATE.GAME_OVER);
         }
@@ -524,19 +553,19 @@ public class Game {
                  */
         ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), m.getY(), m.getX(), player.getY
                 (), player.getX());
-        for(Vector2i v : line) {
-            if(dungeon.hasMonster(v.getY(), v.getX())) {
+        for (Vector2i v : line) {
+            if (dungeon.hasMonster(v.getY(), v.getX())) {
                 shouldShoot = false;
-            } else if(line.size() > m.getRange()) {
+            } else if (line.size() > m.getRange()) {
                 shouldShoot = false;
             }
         }
-        if(shouldShoot) {
+        if (shouldShoot) {
             shootTest(line, m.getTile());
             // If player died during combat
-            if(!player.isAlive()) {
+            if (!player.isAlive()) {
                 // Announce
-                WindowFrame.writeConsole("/warning/You died.");
+                player.setGameOverFlag(Player.GameOver.arrow);
                 // Set game state STATE_GAME_OVER
                 player.setState(Player.STATE.GAME_OVER);
             }
@@ -550,42 +579,40 @@ public class Game {
         /*
         If location has a player
          */
-        if(hasPlayer(next.getY(), next.getX())) {
+        if (hasPlayer(next.getY(), next.getX())) {
             monsterMeleeFightPlayer(m);
-        }
-        else if(monsterCanSeePlayer(m) && m.isRanged() && playerInRangeOfMonster(m)) {
+        } else if (monsterCanSeePlayer(m) && m.isRanged() && playerInRangeOfMonster(m)) {
             monsterRangedFightPlayer(m);
         }
         /*
         If no player, check if its a passable tile.
          */
-        else if(dungeon.isPassable(next.getX(), next.getY())) {
+        else if (dungeon.isPassable(next.getX(), next.getY())) {
             /*
             Hack:
             As long as its not a closed door
              */
             //if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() != RenderPanel.DOOR_CLOSED)
             m.moveToTileImmediately(dungeon.getTileMap()[next.getY()][next.getX()]);
-            if(m.getTile().hasItems()) {
+            if (m.getTile().hasItems()) {
                 monsterLootItems(m, m.getTile());
             }
         }
         /*
         NEW: Is is a door? Monsters should be able to open doors, so patrols aren't meaningless
          */
-        else if(dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() == RenderPanel.DOOR_CLOSED) {
+        else if (dungeon.getTileMap()[next.getY()][next.getX()].getGlyph() == RenderPanel.DOOR_CLOSED) {
             dungeon.toggleDoor(dungeon.getTileMap()[next.getY()][next.getX()]);
-            if(playerCanSeeMonster(m)) {
+            if (playerCanSeeMonster(m)) {
                 WindowFrame.writeConsole(m + " opened the door");
             }
             /*
             Readd this back to our move queue, next turn we will have monster walk through it.
              */
             m.getMoveQueue().addFirst(next);
-        }
-        else {
+        } else {
             // tile not passable, calculate a new route for next time
-            if(playerCanSeeMonster(m)) {
+            if (playerCanSeeMonster(m)) {
                 WindowFrame.writeConsole(m + " couldn't move");
             }
             m.getMoveQueue().clear();
@@ -593,7 +620,7 @@ public class Game {
     }
 
     private boolean playerCanSeeMonster(Monster m) {
-        if(dungeon.getVisibleMap()[m.getY()][m.getX()]) {
+        if (dungeon.getVisibleMap()[m.getY()][m.getX()]) {
             return true;
         }
         return false;
@@ -602,7 +629,7 @@ public class Game {
     private boolean playerInRangeOfMonster(Monster m) {
         ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), m.getY(), m.getX(), player.getY
                 (), player.getX());
-        if(line.size() > m.getRange()) {
+        if (line.size() > m.getRange()) {
             return false;
         }
         return true;
@@ -610,13 +637,13 @@ public class Game {
 
     private void monsterLootItems(Monster m, Tile t) {
         ArrayList<Item> itemsToLoot = new ArrayList<>();
-        for(Item i : t.getItems()) {
-            if(i instanceof Corpse) {
+        for (Item i : t.getItems()) {
+            if (i instanceof Corpse) {
                 continue;
             }
             itemsToLoot.add(i);
         }
-        for(Item i : itemsToLoot) {
+        for (Item i : itemsToLoot) {
             m.addInventory(i, true);
             t.getItems().remove(i);
         }
@@ -642,6 +669,7 @@ public class Game {
     }
 
     //-----------------------------------------------------------------------------------------------------------------
+
     /**
      * Combat related
      */
@@ -668,8 +696,8 @@ public class Game {
         /*
         Check if player died
          */
-        if(!player.isAlive()) {
-            WindowFrame.writeConsole("/warning/You died.");
+        if (!player.isAlive()) {
+            player.setGameOverFlag(Player.GameOver.monster);
             player.setState(Player.STATE.GAME_OVER);
         }
         return PLAYER_COMBAT;
@@ -677,6 +705,7 @@ public class Game {
 
     /**
      * Adds experience to player based on monster source
+     *
      * @param monster
      */
     private void addExperience(Monster monster) {
@@ -687,11 +716,11 @@ public class Game {
         int exp = (int) (((level * (100 * (level * level))) / (dungeon.getMaxMonsterLimit())) * monster.getExpMod());
 
         // If player is lower level than the intended difficulty, increase the reward
-        if(player.getLevel() < dungeon.getDifficulty()) {
-            exp = (int)(exp * 1.5);
+        if (player.getLevel() < dungeon.getDifficulty()) {
+            exp = (int) (exp * 1.5);
         }
         // Else reduce the reward
-        else if(player.getLevel() > dungeon.getDifficulty()) {
+        else if (player.getLevel() > dungeon.getDifficulty()) {
             exp = exp / 4;
         }
 
@@ -704,24 +733,25 @@ public class Game {
     private void rangedAttack(Entity attacker, Entity defender) {
         defender.applyDamage(3);
         WindowFrame.writeConsole("/combat/" + attacker + " arrow struck " + defender + " for 3 damage!");
-        if(!defender.isAlive()) {
+        if (!defender.isAlive()) {
             defender.die();
-            if(defender instanceof Monster) {
+            if (defender instanceof Monster) {
                 addExperience((Monster) defender);
                 dungeon.getMonsters().remove(defender);
             }
         }
     }
+
     private void shootTest(ArrayList<Vector2i> line, Tile source) {
         int range = 5;
-        if(line.size() < range) {
+        if (line.size() < range) {
             range = line.size();
         }
 
-        for(int i = 0; i < range; i++) {
+        for (int i = 0; i < range; i++) {
 
             Tile t = dungeon.getTileMap()[line.get(i).getY()][line.get(i).getX()];
-            if(t.hasEntity()) {
+            if (t.hasEntity()) {
                 Entity e = t.getEntity();
                 rangedAttack(player, e);
 
@@ -732,9 +762,9 @@ public class Game {
         /*
         No entity was hit, so figure out where to drop the arrow. This makes sure it doesn't replace a wall or door
          */
-        for(int i = range - 1; i >= 0; i--) {
+        for (int i = range - 1; i >= 0; i--) {
             Tile cur = dungeon.getTileMap()[line.get(i).getY()][line.get(i).getX()];
-            if(cur.getGlyph() == RenderPanel.WALL || cur.getGlyph() == RenderPanel.DOOR_CLOSED) {
+            if (cur.getGlyph() == RenderPanel.WALL || cur.getGlyph() == RenderPanel.DOOR_CLOSED) {
                 continue;
             }
             cur.addItem(new Arrow());
@@ -744,19 +774,20 @@ public class Game {
         /*
         Probably shot it into a wall
          */
-        if(range - 1 == 0) {
+        if (range - 1 == 0) {
             source.addItem(new Arrow());
             WindowFrame.writeConsole("/combat/The arrow falls at your feet");
         }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
+
     /**
      * Key processes
      */
 
     private void processStateDoorClosedKeys(KeyEvent e) {
-        switch(e.getKeyCode()) {
+        switch (e.getKeyCode()) {
             case KEY_YES:
                 WindowFrame.writeConsole("You open the door.");
                 dungeon.toggleDoor(player.getTargetTile());
@@ -845,7 +876,7 @@ public class Game {
 
             // Open inventory window
             case KEY_INVENTORY:
-                if(inventoryPopup.isVisible()) {
+                if (inventoryPopup.isVisible()) {
                     inventoryPopup.hideWindow();
                 } else {
                     inventoryPopup.showWindow();
@@ -892,8 +923,8 @@ public class Game {
                 targetX--;
                 break;
         }
-        if(dungeon.inRange(targetY, targetX)) {
-            if(dungeon.isDoor(targetY, targetX)) {
+        if (dungeon.inRange(targetY, targetX)) {
+            if (dungeon.isDoor(targetY, targetX)) {
                 dungeon.toggleDoor(dungeon.getTileMap()[targetY][targetX]);
                 turnTickActionOccurred = true;
                 player.setState(Player.STATE.READY);
@@ -908,18 +939,18 @@ public class Game {
         boolean tabTarget = false;
         int targetY = targetCursor.getY();
         int targetX = targetCursor.getX();
-        switch(e.getKeyCode()) {
+        switch (e.getKeyCode()) {
             case KEY_NORTH:
-                targetY --;
+                targetY--;
                 break;
             case KEY_SOUTH:
-                targetY ++;
+                targetY++;
                 break;
             case KEY_EAST:
-                targetX ++;
+                targetX++;
                 break;
             case KEY_WEST:
-                targetX --;
+                targetX--;
                 break;
             case KeyEvent.VK_TAB:
                 setTargetCursorNextVisibleMonster();
@@ -938,11 +969,10 @@ public class Game {
                 turnTickActionOccurred = true;
                 return;
         }
-        if(tabTarget) {
+        if (tabTarget) {
             targetY = targetCursor.getY();
             targetX = targetCursor.getX();
-        }
-        else if(dungeon.inRange(targetY, targetX)) {
+        } else if (dungeon.inRange(targetY, targetX)) {
             targetCursor.setLocation(targetY, targetX);
             Tile target = dungeon.getTileMap()[targetY][targetX];
             ArrayList<Vector2i> line = FieldOfView.findLine(dungeon.getTileMap(), player.getY(), player.getX(),
@@ -955,7 +985,7 @@ public class Game {
         /*
         Empty view, return
          */
-        if(monstersInView.size() == 0) {
+        if (monstersInView.size() == 0) {
             return;
         }
         /*
@@ -967,9 +997,9 @@ public class Game {
         /*
         Check if a monster is already targeted
          */
-        for(int i = 0; i < monstersInView.size(); i++) {
+        for (int i = 0; i < monstersInView.size(); i++) {
             Monster m = monstersInView.get(i);
-            if(targetCursor.getY() == m.getY() && targetCursor.getX() == m.getX()) {
+            if (targetCursor.getY() == m.getY() && targetCursor.getX() == m.getX()) {
                 selectedMonster = i;
             }
         }
@@ -978,7 +1008,7 @@ public class Game {
         Select next monster, and wrap around if needed.
          */
         selectedMonster++;
-        if(selectedMonster == monstersInView.size()) {
+        if (selectedMonster == monstersInView.size()) {
             selectedMonster = 0;
         }
         Tile monsterTile = monstersInView.get(selectedMonster).getTile();
@@ -992,36 +1022,36 @@ public class Game {
     private void processStateLookingKeys(KeyEvent e) {
         int targetY = lookCursor.getY();
         int targetX = lookCursor.getX();
-        switch(e.getKeyCode()) {
+        switch (e.getKeyCode()) {
             case KEY_NORTH:
-                targetY --;
+                targetY--;
                 break;
             case KEY_SOUTH:
-                targetY ++;
+                targetY++;
                 break;
             case KEY_EAST:
-                targetX ++;
+                targetX++;
                 break;
             case KEY_WEST:
-                targetX --;
+                targetX--;
                 break;
             case KEY_CANCEL:
                 player.setState(Player.STATE.READY);
                 lookCursor = null;
                 return;
         }
-        if(dungeon.inRange(targetY, targetX)) {
+        if (dungeon.inRange(targetY, targetX)) {
             lookCursor.setLocation(targetY, targetX);
             Tile t = dungeon.getTileMap()[targetY][targetX];
-            if(dungeon.getVisibleMap()[targetY][targetX]) {
-                if(t.hasEntity()) {
+            if (dungeon.getVisibleMap()[targetY][targetX]) {
+                if (t.hasEntity()) {
                     WindowFrame.writeConsole(t.getEntity().toString());
-                } else if(t.hasItems()) {
+                } else if (t.hasItems()) {
                     WindowFrame.writeConsole("Items");
                 } else {
                     WindowFrame.writeConsole(String.valueOf(t.getGlyph()));
                 }
-            } else if(dungeon.getExploredMap()[targetY][targetX]) {
+            } else if (dungeon.getExploredMap()[targetY][targetX]) {
                 WindowFrame.writeConsole(String.valueOf(t.getGlyph()));
             } else {
                 WindowFrame.writeConsole("Unexplored");

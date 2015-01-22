@@ -6,6 +6,7 @@ package posgima2.game;
 public class LookCursor {
     protected int x;
     protected int y;
+
     public LookCursor(int y, int x) {
         this.y = y;
         this.x = x;

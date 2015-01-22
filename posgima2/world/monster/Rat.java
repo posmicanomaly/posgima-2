@@ -9,18 +9,14 @@ public class Rat extends Monster {
     public Rat(int level) {
         super('r', level);
 
-        armorClass = 1;
-        minHitDamage = 1;
-        maxHitDamage = 4;
-        damageBonus = 0;
-        strength = 4;
-        agility = 4;
-        dexterity = 4;
-        constitution = 4;
-        expMod = 0.6;
+        initStats();
+        setStatsBasedOnLevel();
+        name = "a rat";
+        //addInventory(new Plate(RenderPanel.ITEM, 3), true);
+    }
 
-        corpseSatiation = 40;
-
+    @Override
+    public void setStatsBasedOnLevel() {
         maxHP = 6;
         for(int i = 1; i < level; i++) {
             armorClass += 2;
@@ -31,8 +27,21 @@ public class Rat extends Monster {
             maxHP += Dice.roll(4) + constitution;
         }
         currentHP = maxHP;
+    }
 
-        name = "a rat";
-        //addInventory(new Plate(RenderPanel.ITEM, 3), true);
+    @Override
+    protected void initStats() {
+        armorClass = 1;
+        minHitDamage = 1;
+        maxHitDamage = 4;
+        damageBonus = 0;
+
+        strength -= 6;
+        agility -= 6;
+        dexterity -= 6;
+        constitution -= 6;
+
+        expMod = 0.6;
+        corpseSatiation = 40;
     }
 }

@@ -5,22 +5,17 @@ import posgima2.misc.Dice;
 /**
  * Created by Jesse Pospisil on 1/9/2015.
  */
-public class Goblin extends Monster {
+public class Goblin extends Monster{
 
     public Goblin(int level) {
         super('g', level);
-        armorClass = 2;
-        minHitDamage = 2;
-        maxHitDamage = 6;
-        damageBonus = 0;
-        strength = 7;
-        agility = 7;
-        dexterity = 7;
-        constitution = 7;
-        expMod = 1.0;
+        initStats();
+        setStatsBasedOnLevel();
+        name = "a goblin";
+    }
 
-        corpseSatiation = 70;
-
+    @Override
+    public void setStatsBasedOnLevel() {
         maxHP = 8;
         for(int i = 1; i < level; i++) {
             armorClass += 2;
@@ -31,8 +26,21 @@ public class Goblin extends Monster {
             maxHP += Dice.roll(4) + constitution;
         }
         currentHP = maxHP;
+    }
 
-        name = "a goblin";
-        //addInventory(new Plate(RenderPanel.ITEM, 3), true);
+    @Override
+    protected void initStats() {
+        armorClass = 2;
+        minHitDamage = 2;
+        maxHitDamage = 6;
+        damageBonus = 0;
+
+        strength -= 3;
+        agility -= 3;
+        dexterity -= 3;
+        constitution -= 3;
+
+        expMod = 1.0;
+        corpseSatiation = 70;
     }
 }

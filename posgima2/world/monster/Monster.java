@@ -46,8 +46,19 @@ public abstract class Monster extends Entity {
         // default
         corpseSatiation = 10;
 
+        /*
+        Set base stats
+         */
+        strength = BaseStats.STRENGTH;
+        agility = BaseStats.AGILITY;
+        dexterity = BaseStats.DEXTERITY;
+        constitution = BaseStats.CONSTITUTION;
+
         currentState = State.wander;
     }
+
+    protected abstract void initStats();
+    protected abstract void setStatsBasedOnLevel();
 
     public State getCurrentState() {
         return currentState;

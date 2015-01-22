@@ -5,6 +5,7 @@ import posgima2.item.Item;
 import posgima2.item.container.Corpse;
 import posgima2.misc.Dice;
 import posgima2.swing.WindowFrame;
+import posgima2.world.monster.BaseStats;
 
 /**
  * Created by Jesse Pospisil on 12/27/2014.
@@ -109,10 +110,10 @@ public class Player extends Entity{
 
 
     private void rollAttributes() {
-        strength = 10;
-        agility = 10;
-        dexterity = 10;
-        constitution = 10;
+        strength = BaseStats.STRENGTH;
+        agility = BaseStats.AGILITY;
+        dexterity = BaseStats.DEXTERITY;
+        constitution = BaseStats.CONSTITUTION;
         maxHP = 16;
     }
 

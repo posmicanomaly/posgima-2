@@ -134,6 +134,11 @@ public class Game {
          */
         if (startingTile.hasEntity()) {
             Entity e = startingTile.getEntity();
+            Tile randomTile;
+            do {
+                randomTile = dungeon.getRandomTileOf(RenderPanel.FLOOR);
+            } while(randomTile.hasEntity());
+
             e.moveToTileImmediately(dungeon.getRandomTileOf(RenderPanel.FLOOR));
         }
 

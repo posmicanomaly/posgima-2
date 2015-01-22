@@ -54,9 +54,19 @@ public class DungeonSystem {
         for (int i = 1; i < dungeons.size(); i++) {
             Dungeon prev = dungeons.get(i - 1);
             Dungeon cur = dungeons.get(i);
-            Room prevRoom = prev.getRandomRoom();
+
+            Room prevRoom;
+            Tile prevTile;
+            /*
+            Get a valid random room that doesn't already have stairs in the center. Otherwise they would get
+            overwritten by STAIRS_DOWN and we wouldn't be able to get back
+             */
+            do{
+                prevRoom = prev.getRandomRoom();
+                prevTile = prev.getTileMap()[prevRoom.getCenter().getY()][prevRoom.getCenter().getX()];
+            } while(prevTile.getGlyph() == RenderPanel.STAIRS_UP);
+
             Room curRoom = cur.getRandomRoom();
-            Tile prevTile = prev.getTileMap()[prevRoom.getCenter().getY()][prevRoom.getCenter().getX()];
             Tile curTile = cur.getTileMap()[curRoom.getCenter().getY()][curRoom.getCenter().getX()];
 
             prevTile.setGlyph(RenderPanel.STAIRS_DOWN);

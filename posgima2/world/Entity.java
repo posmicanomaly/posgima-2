@@ -40,6 +40,9 @@ public abstract class Entity {
     protected int dexterity;
     protected int constitution;
     protected int damageBonus;
+
+    protected int meleeSkill;
+
     protected boolean alive;
     protected boolean attackedThisTurn;
     protected ArrayList<Item> inventory;
@@ -358,5 +361,13 @@ public abstract class Entity {
 
     public int getMaxHitDamage() {
         return maxHitDamage;
+    }
+
+    public int getMeleeSkill() {
+        return meleeSkill;
+    }
+
+    public void modifyMeleeSkill(int i) {
+        meleeSkill += i;
     }
 }

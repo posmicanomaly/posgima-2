@@ -37,6 +37,7 @@ public class StatisticsPanel extends JPanel{
     public void update(GameState gameState) {
         Player player = gameState.getPlayer();
         StringBuilder sb = new StringBuilder(16 * 6);
+        sb.append("Dungeon Level ").append(gameState.getDungeon().getDifficulty()).append("\n");
         sb.append(player).append("\n");
         sb.append("Level ").append(player.getLevel()).append("\n");
         sb.append("Barbarian").append("\n\n");
@@ -57,6 +58,7 @@ public class StatisticsPanel extends JPanel{
         result.append("+DMG: ").append(p.getDamageBonus()).append("\n");
         result.append("EXP: ").append(p.getExperience()).append("\n");
         result.append("SAT: ").append(p.getSatiation()).append(" / ").append(Game.MAX_SATIATION).append("\n");
+        result.append("MH: ").append(p.getDexterity() + p.getMeleeSkill()).append("%\n");
         result.append(p.getTile().getGlyph()).append("\n");
         if(p.getTile().hasItems()) {
             if(p.getTile().getItems().size() > 1) {

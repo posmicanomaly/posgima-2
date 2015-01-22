@@ -50,6 +50,8 @@ public class Player extends Entity{
         experience = 0;
         satiation = Game.MAX_SATIATION;
 
+        meleeSkill = 0;
+
         //addInventory(new Sword(RenderPanel.WEAPON, Dice.D4, 0, 0, 0, 0), true);
         //addInventory(new Plate(RenderPanel.ITEM, 5), true);
 

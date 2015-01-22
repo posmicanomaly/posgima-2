@@ -168,6 +168,9 @@ public class Game {
         player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HAND), true);
         player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_LEG), true);
         player.addInventory(ItemGenerator.createArmor(player.getLevel(), Armor.SLOT_HEAD), true);
+        for(int i = 0; i < 25; i++) {
+            player.addInventory(ItemGenerator.createPotion(100), true);
+        }
     }
 
     /**

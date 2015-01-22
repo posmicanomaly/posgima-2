@@ -25,6 +25,9 @@ public class Rat extends Monster {
             dexterity += 2;
             constitution += 2;
             maxHP += Dice.roll(4) + constitution;
+
+            minHitDamage += i * 2;
+            maxHitDamage = minHitDamage * 2;
         }
         currentHP = maxHP;
     }
